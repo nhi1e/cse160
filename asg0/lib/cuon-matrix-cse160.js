@@ -137,11 +137,11 @@ class Vector3 {
 		let m = Math.sqrt(
 			this.elements[0] * this.elements[0] + this.elements[1] * this.elements[1]
 		);
-		console.log(m);
+		// console.log(m);
 		if (!isNaN(this.elements[2])) {
-			console.log(this.elements[2]);
+			// console.log(this.elements[2]);
 			m = Math.sqrt(m * m + this.elements[2] * this.elements[2]);
-			console.log("z provided");
+			// console.log("z provided");
 		}
 		return m;
 	}

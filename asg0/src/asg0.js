@@ -100,19 +100,19 @@ function handleDrawOperationEvent() {
 	switch (operation) {
 		case "add":
 			result1 = v1.add(v2);
-			console.log(result1);
+			// console.log(result1);
 			drawVector(result1, "green");
 			break;
 		case "subtract":
 			result1 = v1.sub(v2);
-			console.log(result1);
+			// console.log(result1);
 			drawVector(result1, "green");
 			break;
 		case "multiply":
 			result1 = v1.mul(scalar);
 			result2 = v2.mul(scalar);
-			console.log(result1);
-			console.log(result2);
+			// console.log(result1);
+			// console.log(result2);
 			drawVector(result1, "green");
 			drawVector(result2, "green");
 			break;
@@ -123,8 +123,8 @@ function handleDrawOperationEvent() {
 			}
 			result1 = v1.div(scalar);
 			result2 = v2.div(scalar);
-			console.log(result1);
-			console.log(result2);
+			// console.log(result1);
+			// console.log(result2);
 			drawVector(result1, "green");
 			drawVector(result2, "green");
 			break;
