@@ -39,7 +39,7 @@ function handleDrawEvent() {
 	// Reset the background
 	ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	console.log("Canvas cleared and background reset");
+	// console.log("Canvas cleared and background reset");
 
 	//read v1 values from input fields
 	let v1_x = document.getElementById("v1.x").value;
@@ -67,7 +67,7 @@ function handleDrawOperationEvent() {
 	// Reset the background
 	ctx.fillStyle = "rgba(0, 0, 0, 1.0)";
 	ctx.fillRect(0, 0, canvas.width, canvas.height);
-	console.log("Canvas cleared and background reset");
+	// console.log("Canvas cleared and background reset");
 
 	// Read v1 values from input fields
 	let v1_x = parseFloat(document.getElementById("v1.x").value);
