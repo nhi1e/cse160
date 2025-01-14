@@ -111,3 +111,4 @@ function getWebGLContext(canvas, opt_debug) {
 
 	return gl;
 }
+	
