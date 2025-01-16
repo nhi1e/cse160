@@ -122,37 +122,17 @@ function main() {
 
 var g_shapesList = [];
 
-// var g_points = []; // The array for the position of a mouse press
-// var g_colors = []; // The array to store the color of a point
-// var g_sizes = [];
 function click(ev) {
 	//extract event click and return it in GL coordinates
 	let [x, y] = convertCoordinatesEventToGL(ev);
 
 	//create and store the new point
-	let point = new Point();
+	let point = new Triangle();
 	point.position = [x, y];
 	point.color = g_selectedColor.slice();
 	point.size = g_selectedSize;
 	g_shapesList.push(point);
 
-	// // Store the coordinates to g_points array
-	// g_points.push([x, y]);
-
-	// g_colors.push(g_selectedColor.slice());
-
-	// g_sizes.push(g_selectedSize);
-	// // Store the coordinates to g_points array
-	// if (x >= 0.0 && y >= 0.0) {
-	// 	// First quadrant
-	// 	g_colors.push([1.0, 0.0, 0.0, 1.0]); // Red
-	// } else if (x < 0.0 && y < 0.0) {
-	// 	// Third quadrant
-	// 	g_colors.push([0.0, 1.0, 0.0, 1.0]); // Green
-	// } else {
-	// 	// Others
-	// 	g_colors.push([1.0, 1.0, 1.0, 1.0]); // White
-	// }
 	// draw every shape that is supposed to be rendered on canvas
 	renderAllShapes();
 }
