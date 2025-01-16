@@ -38,7 +38,7 @@ function drawTriangle(vertices) {
 	// Assign the buffer object to a_Position variable
 	gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
 
-	// Enable the assignment to a_Position variable
+	// Enable the assignment to a_Position variable (turn back on)
 	gl.enableVertexAttribArray(a_Position);
 
 	// Draw the rectangle
