@@ -75,6 +75,10 @@ function addActionsForHtmlUI() {
 		g_selectedColor = [1.0, 0.0, 0.0, 1.0];
 	};
 
+	document.getElementById("clear").onclick = function () {
+		g_shapesList = [];
+		renderAllShapes();
+	}
 	document.getElementById("redSlide").addEventListener("mouseup", function () {
 		g_selectedColor[0] = this.value / 100;
 	});
