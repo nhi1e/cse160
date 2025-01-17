@@ -16,6 +16,27 @@ function drawOcean() {
 		gl.uniform4f(u_FragColor, color[0], color[1], color[2], color[3]);
 		drawTriangle(triangles[i]);
 	}
+	const triangles1 = [
+		[...gridToWebGL(2, 2.5), ...gridToWebGL(4, 2), ...gridToWebGL(6, 2.5)],
+
+		[...gridToWebGL(8, 8.5), ...gridToWebGL(10, 8), ...gridToWebGL(12, 8.5)],
+		[...gridToWebGL(18, 4.5), ...gridToWebGL(20, 4), ...gridToWebGL(22, 4.5)],
+		[
+			...gridToWebGL(28, 10.5),
+			...gridToWebGL(30, 10),
+			...gridToWebGL(32, 10.5),
+		],
+		[...gridToWebGL(38, 2.5), ...gridToWebGL(40, 2), ...gridToWebGL(42, 2.5)],
+		[...gridToWebGL(50, 8.5), ...gridToWebGL(52, 8), ...gridToWebGL(54, 8.5)],
+		[...gridToWebGL(25, 1.5), ...gridToWebGL(27, 1), ...gridToWebGL(29, 1.5)],
+		[...gridToWebGL(44, 7.5), ...gridToWebGL(46, 7), ...gridToWebGL(48, 7.5)],
+	];
+	// Draw each triangle
+	for (let i = 0; i < triangles1.length; i++) {
+		let color = [0.38, 0.4, 1.0, 1.0]; // Light blue color for the cloud
+		gl.uniform4f(u_FragColor, color[0], color[1], color[2], color[3]);
+		drawTriangle(triangles1[i]);
+	}
 }
 function drawGrass() {
 	//darkest green
