@@ -64,9 +64,11 @@ function drawGrass() {
 function drawMountains() {
 	//light blue mountain
 	const triangles1 = [
+		[...gridToWebGL(40, 20), ...gridToWebGL(48, 40), ...gridToWebGL(54, 20)],
 		[...gridToWebGL(0, 20), ...gridToWebGL(8, 36), ...gridToWebGL(13, 20)],
-		[...gridToWebGL(16, 20), ...gridToWebGL(12, 28), ...gridToWebGL(18, 32)],
-		[...gridToWebGL(16, 20), ...gridToWebGL(25, 20), ...gridToWebGL(18, 32)],
+		[...gridToWebGL(16, 20), ...gridToWebGL(12, 28), ...gridToWebGL(19, 32)],
+		[...gridToWebGL(16, 20), ...gridToWebGL(25, 20), ...gridToWebGL(19, 32)],
+		[...gridToWebGL(24, 20), ...gridToWebGL(32, 44), ...gridToWebGL(40, 20)],
 	];
 	// Draw each triangle
 	for (let i = 0; i < triangles1.length; i++) {
@@ -76,7 +78,10 @@ function drawMountains() {
 	}
 	//dark blue mountain
 	const triangles2 = [
+		[...gridToWebGL(58, 20), ...gridToWebGL(48, 40), ...gridToWebGL(54, 20)],
 		[...gridToWebGL(13, 20), ...gridToWebGL(16, 20), ...gridToWebGL(8, 36)],
+		[...gridToWebGL(31, 20), ...gridToWebGL(25, 20), ...gridToWebGL(19, 32)],
+		[...gridToWebGL(40, 20), ...gridToWebGL(32, 44), ...gridToWebGL(44, 20)],
 	];
 	// Draw each triangle
 	for (let i = 0; i < triangles2.length; i++) {
@@ -89,6 +94,20 @@ function drawMountains() {
 		[...gridToWebGL(8, 36), ...gridToWebGL(5, 30), ...gridToWebGL(11, 30)],
 		[...gridToWebGL(5, 30), ...gridToWebGL(6, 29), ...gridToWebGL(7, 30)],
 		[...gridToWebGL(7, 30), ...gridToWebGL(8, 28), ...gridToWebGL(10, 30)],
+		[...gridToWebGL(12, 28), ...gridToWebGL(14, 27), ...gridToWebGL(15, 28)],
+		[...gridToWebGL(15, 28), ...gridToWebGL(16, 26), ...gridToWebGL(18, 28)],
+		[...gridToWebGL(18, 28), ...gridToWebGL(20, 26), ...gridToWebGL(21, 28)],
+		[...gridToWebGL(21, 28), ...gridToWebGL(22, 26), ...gridToWebGL(22, 28)],
+		[...gridToWebGL(12, 28), ...gridToWebGL(19, 32), ...gridToWebGL(23, 28)],
+		[...gridToWebGL(29, 35), ...gridToWebGL(32, 44), ...gridToWebGL(36.5, 35)],
+		[...gridToWebGL(29, 35), ...gridToWebGL(30, 33), ...gridToWebGL(32, 35)],
+		[...gridToWebGL(34, 35), ...gridToWebGL(33, 32), ...gridToWebGL(32, 35)],
+		[...gridToWebGL(34, 35), ...gridToWebGL(35, 34), ...gridToWebGL(36.5, 35)],
+		[...gridToWebGL(45, 32), ...gridToWebGL(48, 40), ...gridToWebGL(52, 32)],
+		[...gridToWebGL(45, 32), ...gridToWebGL(46, 29), ...gridToWebGL(47, 32)],
+		[...gridToWebGL(47, 32), ...gridToWebGL(48, 31), ...gridToWebGL(49, 32)],
+		[...gridToWebGL(49, 32), ...gridToWebGL(50, 30), ...gridToWebGL(51, 32)],
+		[...gridToWebGL(51, 32), ...gridToWebGL(52, 30), ...gridToWebGL(52, 32)],
 	];
 	// Draw each triangle
 	for (let i = 0; i < triangles3.length; i++) {
