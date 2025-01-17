@@ -117,6 +117,44 @@ function drawMountains() {
 	}
 }
 
+function drawClouds() {
+	//light white cloud
+	const triangles1 = [
+		[...gridToWebGL(10, 40), ...gridToWebGL(10, 43), ...gridToWebGL(21, 43)],
+		[...gridToWebGL(20, 38), ...gridToWebGL(18, 38), ...gridToWebGL(22, 40)],
+		[...gridToWebGL(10, 40), ...gridToWebGL(9, 42), ...gridToWebGL(10, 43)],
+		[...gridToWebGL(10, 40), ...gridToWebGL(9, 42), ...gridToWebGL(8, 40)],
+		[...gridToWebGL(10, 43), ...gridToWebGL(11, 44), ...gridToWebGL(13, 44)],
+		[...gridToWebGL(14, 43), ...gridToWebGL(10, 43), ...gridToWebGL(13, 44)],
+	];
+	// Draw each triangle
+	for (let i = 0; i < triangles1.length; i++) {
+		let color = [1, 0.98, 0.98, 1.0]; // Light blue color for the cloud
+		gl.uniform4f(u_FragColor, color[0], color[1], color[2], color[3]);
+		drawTriangle(triangles1[i]);
+	}
+	//gray cloud
+	const triangles2 = [
+		[...gridToWebGL(10, 40), ...gridToWebGL(21, 43), ...gridToWebGL(22, 40)],
+		[...gridToWebGL(16, 40), ...gridToWebGL(18, 38), ...gridToWebGL(22, 40)],
+		[...gridToWebGL(10, 40), ...gridToWebGL(9, 38), ...gridToWebGL(8, 40)],
+		[...gridToWebGL(10, 40), ...gridToWebGL(9, 38), ...gridToWebGL(14, 38)],
+		[...gridToWebGL(10, 40), ...gridToWebGL(15, 40), ...gridToWebGL(14, 38)],
+		[...gridToWebGL(15, 43), ...gridToWebGL(16, 45), ...gridToWebGL(18, 45)],
+		[...gridToWebGL(15, 43), ...gridToWebGL(18, 45), ...gridToWebGL(19, 43)],
+		[...gridToWebGL(21, 43), ...gridToWebGL(22, 40), ...gridToWebGL(23, 42)],
+		[...gridToWebGL(24, 40), ...gridToWebGL(22, 40), ...gridToWebGL(23, 42)],
+		[...gridToWebGL(24, 40), ...gridToWebGL(22, 40), ...gridToWebGL(24, 39)],
+		[...gridToWebGL(21, 39), ...gridToWebGL(22, 40), ...gridToWebGL(24, 39)],
+	];
+	// Draw each triangle
+	for (let i = 0; i < triangles2.length; i++) {
+		let color = [0.96, 0.96, 0.96, 1.0]; // Light blue color for the cloud
+		gl.uniform4f(u_FragColor, color[0], color[1], color[2], color[3]);
+		drawTriangle(triangles2[i]);
+	}
+}
+
 function drawPic() {
 	// Specify the color for clearing <canvas>
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -125,4 +163,5 @@ function drawPic() {
 	drawMountains();
 	drawOcean();
 	drawGrass();
+	drawClouds();
 }
