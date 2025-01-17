@@ -73,20 +73,20 @@ const CIRCLE = 2;
 let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 5;
 let g_selectedType = POINT;
+let g_selectedSegments = 10;
 
 //set up actions for html ui elements
 function addActionsForHtmlUI() {
 	//button events
-	document.getElementById("green").onclick = function () {
-		g_selectedColor = [0.0, 1.0, 0.0, 1.0];
-	};
-	document.getElementById("red").onclick = function () {
-		g_selectedColor = [1.0, 0.0, 0.0, 1.0];
-	};
+
 	document.getElementById("clear").onclick = function () {
 		g_shapesList = [];
 		renderAllShapes();
 	};
+	document.getElementById("drawPic").onclick = function () {
+		drawPic();
+	};
+
 	document.getElementById("point").onclick = function () {
 		g_selectedType = POINT;
 	};
@@ -114,6 +114,13 @@ function addActionsForHtmlUI() {
 	document.getElementById("sizeSlide").addEventListener("mouseup", function () {
 		g_selectedSize = this.value;
 	});
+
+	//segment slider events
+	document
+		.getElementById("segmentsSlide")
+		.addEventListener("mouseup", function () {
+			g_selectedSegments = this.value;
+		});
 }
 
 function main() {
@@ -154,6 +161,7 @@ function click(ev) {
 	point.position = [x, y];
 	point.color = g_selectedColor.slice();
 	point.size = g_selectedSize;
+	point.segments = g_selectedSegments;
 	g_shapesList.push(point);
 
 	// draw every shape that is supposed to be rendered on canvas

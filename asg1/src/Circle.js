@@ -3,13 +3,14 @@ class Circle {
 		this.type = "circle";
 		this.position = [0.0, 0.0, 0.0];
 		this.color = [1.0, 1.0, 1.0, 1.0];
-		this.size = 5.0;
+		this.size = 15.0;
 		this.segments = 10;
 	}
 	render() {
 		var xy = this.position;
 		var rgba = this.color;
 		var size = this.size;
+		var segments = this.segments;
 
 		// Pass the color of a point to u_FragColor variable
 		gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
@@ -17,7 +18,7 @@ class Circle {
 		// Draw
 		var delta = this.size / 200.0;
 
-		let angleStep = 360 / this.segments;
+		let angleStep = 360 / segments;
 		for (var angle = 0; angle < 360; angle += angleStep) {
 			let centerPt = [xy[0], xy[1]];
 			let angle1 = angle;
