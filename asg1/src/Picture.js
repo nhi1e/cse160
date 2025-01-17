@@ -126,6 +126,13 @@ function drawClouds() {
 		[...gridToWebGL(10, 40), ...gridToWebGL(9, 42), ...gridToWebGL(8, 40)],
 		[...gridToWebGL(10, 43), ...gridToWebGL(11, 44), ...gridToWebGL(13, 44)],
 		[...gridToWebGL(14, 43), ...gridToWebGL(10, 43), ...gridToWebGL(13, 44)],
+		[...gridToWebGL(38, 48), ...gridToWebGL(39, 44), ...gridToWebGL(51, 44)],
+		[...gridToWebGL(35, 44), ...gridToWebGL(39, 44), ...gridToWebGL(35, 46)],
+		[...gridToWebGL(44, 42), ...gridToWebGL(43, 44), ...gridToWebGL(49, 44)],
+		[...gridToWebGL(44, 42), ...gridToWebGL(48, 42), ...gridToWebGL(49, 44)],
+		[...gridToWebGL(51, 44), ...gridToWebGL(54, 46), ...gridToWebGL(58, 44)],
+		[...gridToWebGL(52, 42), ...gridToWebGL(54, 44), ...gridToWebGL(56, 42)],
+		[...gridToWebGL(58, 44), ...gridToWebGL(54, 44), ...gridToWebGL(56, 42)],
 	];
 	// Draw each triangle
 	for (let i = 0; i < triangles1.length; i++) {
@@ -146,6 +153,17 @@ function drawClouds() {
 		[...gridToWebGL(24, 40), ...gridToWebGL(22, 40), ...gridToWebGL(23, 42)],
 		[...gridToWebGL(24, 40), ...gridToWebGL(22, 40), ...gridToWebGL(24, 39)],
 		[...gridToWebGL(21, 39), ...gridToWebGL(22, 40), ...gridToWebGL(24, 39)],
+		[...gridToWebGL(52, 48), ...gridToWebGL(38, 48), ...gridToWebGL(51, 44)],
+		[...gridToWebGL(38, 48), ...gridToWebGL(39, 44), ...gridToWebGL(35, 46)],
+		[...gridToWebGL(35, 44), ...gridToWebGL(37, 42), ...gridToWebGL(41, 42)],
+		[...gridToWebGL(35, 44), ...gridToWebGL(42, 44), ...gridToWebGL(41, 42)],
+		[...gridToWebGL(41, 48), ...gridToWebGL(43, 50), ...gridToWebGL(46, 48)],
+		[...gridToWebGL(45, 50), ...gridToWebGL(43, 50), ...gridToWebGL(46, 48)],
+		[...gridToWebGL(51, 44), ...gridToWebGL(54, 46), ...gridToWebGL(52, 48)],
+		[...gridToWebGL(49, 44), ...gridToWebGL(52, 42), ...gridToWebGL(54, 44)],
+		[...gridToWebGL(48, 48), ...gridToWebGL(52, 48), ...gridToWebGL(50, 48)],
+		[...gridToWebGL(48, 48), ...gridToWebGL(49, 50), ...gridToWebGL(52, 48)],
+		[...gridToWebGL(51, 50), ...gridToWebGL(49, 50), ...gridToWebGL(52, 48)],
 	];
 	// Draw each triangle
 	for (let i = 0; i < triangles2.length; i++) {
