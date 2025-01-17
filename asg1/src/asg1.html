@@ -3,12 +3,25 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>Asg1 - Nhi</title>
+		<style>
+			.container {
+				display: flex;
+				align-items: flex-start;
+				gap: 20px; /* Adds space between the canvas and the image */
+			}
+
+
+		</style>
 	</head>
 
 	<body onload="main()">
-		<canvas id="webgl" width="600" height="600">
-			Please use a browser that supports "canvas"
-		</canvas>
+		<div class="container">
+			<canvas id="webgl" width="600" height="600">
+				Please use a browser that supports "canvas"
+			</canvas>
+
+			<img src="../img/reference.png" alt="Reference Picture" width="600" height="6gi00">
+		</div>
 
 		<p>
 			<button type="button" id="clear">Clear Canvas</button>
