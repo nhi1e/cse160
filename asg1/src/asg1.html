@@ -9,6 +9,7 @@
 				align-items: flex-start;
 				gap: 20px; /* Adds space between the canvas and the image */
 			}
+
 		</style>
 	</head>
 
@@ -28,6 +29,10 @@
 			<button type="button" id="drawPic">Draw Pic</button>
 
 		</p>
+		<p>
+    <button type="button" id="toggleFilling">Toggle Filling Mode</button>
+</p>
+
 		<p>Drawing Mode:</p>
 		<p>
 			<button type="button" id="point">Point</button>
@@ -88,7 +93,18 @@
 				id="segmentsSlide"
 			/>
 		</p>
-		
+		<p>
+    Transparency
+    <input
+        type="range"
+        min="0"
+        max="100"
+        value="100"
+        class="slider"
+        id="alphaSlide"
+    />
+</p>
+
 		
 
 			<script src="../lib/webgl-utils.js"></script>

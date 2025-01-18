@@ -7,6 +7,7 @@ var VSHADER_SOURCE = `
     gl_Position = a_Position;
     gl_PointSize = u_Size;
   }`;
+
 // Fragment shader program
 var FSHADER_SOURCE = `
   precision mediump float;
@@ -87,6 +88,12 @@ function addActionsForHtmlUI() {
 		drawPic();
 	};
 
+	document.getElementById("toggleFilling").onclick = function () {
+		isFillingMode = !isFillingMode;
+		const status = isFillingMode ? "ON" : "OFF";
+		console.log(`Filling Mode is now ${status}`);
+	};
+
 	document.getElementById("point").onclick = function () {
 		g_selectedType = POINT;
 	};
@@ -121,12 +128,22 @@ function addActionsForHtmlUI() {
 		.addEventListener("mouseup", function () {
 			g_selectedSegments = this.value;
 		});
+
+	//alpha slider events
+	document
+		.getElementById("alphaSlide")
+		.addEventListener("mouseup", function () {
+			g_selectedColor[3] = this.value / 100;
+		});
 }
 
 function main() {
 	setupWebGL();
 	connectVariablesToGLSL();
 	addActionsForHtmlUI();
+
+	gl.enable(gl.BLEND);
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 	// Register function (event handler) to be called on a mouse press
 	canvas.onmousedown = click;
@@ -144,12 +161,23 @@ function main() {
 }
 
 var g_shapesList = [];
+let prevPoint = null; // To store the last drawn point
+let isFillingMode = false;
 
 function click(ev) {
-	//extract event click and return it in GL coordinates
+	// Extract event click and return it in GL coordinates
 	let [x, y] = convertCoordinatesEventToGL(ev);
 
-	//create and store the new point
+	// If filling mode is active, interpolate shapes between the previous and current points
+	if (isFillingMode && prevPoint) {
+		interpolateAndDraw(prevPoint, [x, y]);
+	}
+
+	// Store the current point as the previous point for the next event
+	prevPoint = [x, y];
+	createShape([x, y]);
+
+	// Create and store the new shape
 	let point;
 	if (g_selectedType == POINT) {
 		point = new Point();
@@ -164,8 +192,53 @@ function click(ev) {
 	point.segments = g_selectedSegments;
 	g_shapesList.push(point);
 
-	// draw every shape that is supposed to be rendered on canvas
+	// Render all shapes on the canvas
 	renderAllShapes();
+}
+
+function interpolateAndDraw(start, end) {
+	const distance = Math.sqrt(
+		Math.pow(end[0] - start[0], 2) + Math.pow(end[1] - start[1], 2)
+	);
+
+	// Divide the line into segments based on the brush size to avoid gaps
+	const step = g_selectedSize / 100;
+	const steps = Math.ceil(distance / step);
+
+	for (let i = 1; i <= steps; i++) {
+		const t = i / steps;
+		const interpolatedX = start[0] + t * (end[0] - start[0]);
+		const interpolatedY = start[1] + t * (end[1] - start[1]);
+
+		// Create the appropriate shape at the interpolated position
+		createShape([interpolatedX, interpolatedY]);
+	}
+}
+function createShape(position) {
+	let shape;
+	if (g_selectedType == POINT) {
+		shape = new Point();
+	} else if (g_selectedType == TRIANGLE) {
+		shape = new Triangle();
+	} else if (g_selectedType == CIRCLE) {
+		shape = new Circle();
+	}
+
+	shape.position = position;
+	shape.color = g_selectedColor.slice();
+	shape.size = g_selectedSize;
+	shape.segments = g_selectedSegments;
+
+	g_shapesList.push(shape);
+}
+
+function drawPoint(position) {
+	// Create a new point and add it to the shapes list
+	let point = new Point();
+	point.position = position;
+	point.color = g_selectedColor.slice();
+	point.size = g_selectedSize;
+	g_shapesList.push(point);
 }
 
 function convertCoordinatesEventToGL(ev) {
