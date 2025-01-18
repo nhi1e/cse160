@@ -27,14 +27,12 @@
 		</p>
 		<p>
 			<button type="button" id="drawPic">Draw Pic</button>
-
 		</p>
-		<p>
-			<button type="button" id="toggleFilling">Toggle Filling Mode</button>
+		
 		</p>
 		<p>Drawing Mode:</p>
 		<p>
-			<button type="button" id="point">Point</button>
+			<button type="button" id="point">Square</button>
 			<button type="button" id="triangle">Triangle</button>
 			<button type="button" id="circle">Circle</button>
 		</p>
@@ -102,8 +100,10 @@
         class="slider"
         id="alphaSlide"
     />
-</p>
-
+	<span style="color: red;">The opacity slider allows you to adjust the transparency level of the shapes, enabling more control over their visibility.</span>
+	<p></p>
+		<button type="button" id="toggleFilling">Toggle Filling Mode</button>
+    <span style="color: red;">The filling mode connects two points by drawing a straight line of shapes (circle, triangle, etc.) between them, allowing you to create straight strokes by simply clicking.</span>
 		
 
 			<script src="../lib/webgl-utils.js"></script>
