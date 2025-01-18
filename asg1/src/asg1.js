@@ -88,12 +88,16 @@ function addActionsForHtmlUI() {
 		drawPic();
 	};
 
-	document.getElementById("toggleFilling").onclick = function () {
+	const toggleFillingButton = document.getElementById("toggleFilling");
+	toggleFillingButton.onclick = function () {
 		isFillingMode = !isFillingMode;
-		const status = isFillingMode ? "ON" : "OFF";
-		console.log(`Filling Mode is now ${status}`);
-	};
+		toggleFillingButton.textContent = isFillingMode
+			? "Untoggle Filling Mode"
+			: "Toggle Filling Mode";
 
+		console.log(`Filling Mode is now ${isFillingMode ? "ON" : "OFF"}`);
+	};
+	
 	document.getElementById("point").onclick = function () {
 		g_selectedType = POINT;
 	};
