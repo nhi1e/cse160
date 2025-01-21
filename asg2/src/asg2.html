@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Asg1 - Nhi</title>
+		<style>
+			.container {
+				display: flex;
+				align-items: flex-start;
+				gap: 20px; /* Adds space between the canvas and the image */
+			}
+
+		</style>
+	</head>
+
+	<body onload="main()">
+		<div class="container">
+			<canvas id="webgl" width="600" height="600">
+				Please use a browser that supports "canvas"
+			</canvas>
+		</div>
+
+		<p>
+			<button type="button" id="clear">Clear Canvas</button>
+		</p>
+		<p>
+			<button type="button" id="drawPic">Draw Pic</button>
+		</p>
+		
+		</p>
+		<p>Drawing Mode:</p>
+		<p>
+			<button type="button" id="point">Square</button>
+			<button type="button" id="triangle">Triangle</button>
+			<button type="button" id="circle">Circle</button>
+		</p>
+		<p>Color:</p>
+		<p>
+			Red
+			<input
+				type="range"
+				min="0"
+				max="100"
+				value="100"
+				class="slider"
+				id="redSlide"
+			/>
+	
+			Green
+			<input
+				type="range"
+				min="0"
+				max="100"
+				value="100"
+				class="slider"
+				id="greenSlide"
+			/>
+		
+			Blue
+			<input
+				type="range"
+				min="0"
+				max="100"
+				value="100"
+				class="slider"
+				id="blueSlide"
+			/>
+		</p>
+		<p>
+			Size
+			<input
+				type="range"
+				min="5"
+				max="40"
+				value="5"
+				class="slider"
+				id="sizeSlide"
+			/>
+		</p>
+		<p>
+			Segments
+			<input
+				type="range"
+				min="15"
+				max="40"
+				value="15"
+				class="slider"
+				id="segmentsSlide"
+			/>
+		</p>
+		<p>
+    Opacity
+    <input
+        type="range"
+        min="0"
+        max="100"
+        value="100"
+        class="slider"
+        id="alphaSlide"
+    />
+	<span style="color: red;">The opacity slider allows you to adjust the transparency level of the shapes, enabling more control over their visibility.</span>
+	<p></p>
+		<button type="button" id="toggleFilling">Toggle Filling Mode</button>
+    <span style="color: red;">The filling mode connects two points by drawing a straight line of shapes (circle, triangle, etc.) between them, allowing you to create straight strokes by simply clicking.</span>
+		
+
+			<script src="../lib/webgl-utils.js"></script>
+			<script src="../lib/webgl-debug.js"></script>
+			<script src="../lib/cuon-utils.js"></script>
+			<script src="../lib/cuon-matrix.js"></script>
+
+			<script src="Point.js"></script>
+			<script src="asg2.js"></script>
+			<script src="Triangle.js"></script>
+			<script src="Circle.js"></script>
+			<script src="Picture.js"></script>
+			<script src="Cube.js"></script>
+
+		</p>
+	</body>
+</html>
