@@ -2,8 +2,9 @@
 var VSHADER_SOURCE = `
   attribute vec4 a_Position;
   uniform mat4 u_ModelMatrix;
+  uniform mat4 u_GlobalRotateMatrix;
   void main() {
-    gl_Position = u_ModelMatrix * a_Position;
+    gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
   }`;
 
 // Fragment shader program
@@ -34,6 +35,7 @@ function setupWebGL() {
 		console.log("Failed to get the rendering context for WebGL");
 		return;
 	}
+	gl.enable(gl.DEPTH_TEST);
 }
 
 function connectVariablesToGLSL() {
@@ -64,6 +66,16 @@ function connectVariablesToGLSL() {
 		return;
 	}
 
+	// Get the storage location of u_GlobalRotateMatrix
+	u_GlobalRotateMatrix = gl.getUniformLocation(
+		gl.program,
+		"u_GlobalRotateMatrix"
+	);
+	if (!u_GlobalRotateMatrix) {
+		console.log("Failed to get the storage location of u_GlobalRotateMatrix");
+		return;
+	}
+
 	var identityM = new Matrix4();
 	gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
 }
@@ -76,69 +88,40 @@ let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
 let g_selectedSize = 5;
 let g_selectedType = POINT;
 let g_selectedSegments = 10;
-
+let g_globalAngle = 0;
+let g_yellowAngle = 0;
+let g_magentaAngle = 0;
+let g_yellowAnimation = false;
 //set up actions for html ui elements
 function addActionsForHtmlUI() {
 	//button events
-
-	document.getElementById("clear").onclick = function () {
-		g_shapesList = [];
-		renderAllShapes();
+	document.getElementById("animationOnButton").onclick = function () {
+		g_yellowAnimation = true;
 	};
-	document.getElementById("drawPic").onclick = function () {
-		drawPic();
+	document.getElementById("animationOffButton").onclick = function () {
+		g_yellowAnimation = false;
 	};
 
-	const toggleFillingButton = document.getElementById("toggleFilling");
-	toggleFillingButton.onclick = function () {
-		isFillingMode = !isFillingMode;
-		toggleFillingButton.textContent = isFillingMode
-			? "Untoggle Filling Mode"
-			: "Toggle Filling Mode";
-
-		console.log(`Filling Mode is now ${isFillingMode ? "ON" : "OFF"}`);
-	};
-
-	document.getElementById("point").onclick = function () {
-		g_selectedType = POINT;
-	};
-	document.getElementById("triangle").onclick = function () {
-		g_selectedType = TRIANGLE;
-	};
-	document.getElementById("circle").onclick = function () {
-		g_selectedType = CIRCLE;
-	};
-
-	//color slider events
-	document.getElementById("redSlide").addEventListener("mouseup", function () {
-		g_selectedColor[0] = this.value / 100;
-	});
+	//Size slider events
 	document
-		.getElementById("greenSlide")
-		.addEventListener("mouseup", function () {
-			g_selectedColor[1] = this.value / 100;
-		});
-	document.getElementById("blueSlide").addEventListener("mouseup", function () {
-		g_selectedColor[2] = this.value / 100;
-	});
-
-	//size slider events
-	document.getElementById("sizeSlide").addEventListener("mouseup", function () {
-		g_selectedSize = this.value;
-	});
-
-	//segment slider events
-	document
-		.getElementById("segmentsSlide")
-		.addEventListener("mouseup", function () {
-			g_selectedSegments = this.value;
+		.getElementById("angleSlide")
+		.addEventListener("mousemove", function () {
+			g_globalAngle = this.value;
+			renderAllShapes();
 		});
 
-	//alpha slider events
 	document
-		.getElementById("alphaSlide")
-		.addEventListener("mouseup", function () {
-			g_selectedColor[3] = this.value / 100;
+		.getElementById("yellowSlide")
+		.addEventListener("mousemove", function () {
+			g_yellowAngle = this.value;
+			renderAllShapes();
+		});
+
+	document
+		.getElementById("magentaSlide")
+		.addEventListener("mousemove", function () {
+			g_magentaAngle = this.value;
+			renderAllShapes();
 		});
 }
 
@@ -150,76 +133,33 @@ function main() {
 	gl.enable(gl.BLEND);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-	// Register function (event handler) to be called on a mouse press
-	canvas.onmousedown = click;
-	canvas.onmousemove = function (ev) {
-		if (ev.buttons == 1) {
-			click(ev);
-		}
-	};
-
 	// Specify the color for clearing <canvas>
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
 	// // Clear <canvas>
-	// gl.clear(gl.COLOR_BUFFER_BIT);
 	renderAllShapes();
+	requestAnimationFrame(tick);
+}
+
+var g_startTime = performance.now() / 1000.0;
+var g_seconds = performance.now() / 1000.0 - g_startTime;
+function tick() {
+	g_seconds = performance.now() / 1000.0 - g_startTime;
+	updateAnimationAngles();
+	renderAllShapes();
+	requestAnimationFrame(tick);
+}
+ 
+function updateAnimationAngles() {
+	if (g_yellowAnimation) {
+		g_yellowAngle = 45 * Math.sin(g_seconds);
+	}
 }
 
 var g_shapesList = [];
 let prevPoint = null; // To store the last drawn point
 let isFillingMode = false;
 
-function click(ev) {
-	// Extract event click and return it in GL coordinates
-	let [x, y] = convertCoordinatesEventToGL(ev);
-
-	// If filling mode is active, interpolate shapes between the previous and current points
-	if (isFillingMode && prevPoint) {
-		interpolateAndDraw(prevPoint, [x, y]);
-	}
-
-	// Store the current point as the previous point for the next event
-	prevPoint = [x, y];
-	createShape([x, y]);
-
-	// Create and store the new shape
-	let point;
-	if (g_selectedType == POINT) {
-		point = new Point();
-	} else if (g_selectedType == TRIANGLE) {
-		point = new Triangle();
-	} else {
-		point = new Circle();
-	}
-	point.position = [x, y];
-	point.color = g_selectedColor.slice();
-	point.size = g_selectedSize;
-	point.segments = g_selectedSegments;
-	g_shapesList.push(point);
-
-	// Render all shapes on the canvas
-	renderAllShapes();
-}
-
-function interpolateAndDraw(start, end) {
-	const distance = Math.sqrt(
-		Math.pow(end[0] - start[0], 2) + Math.pow(end[1] - start[1], 2)
-	);
-
-	// Divide the line into segments based on the brush size to avoid gaps
-	const step = g_selectedSize / 100;
-	const steps = Math.ceil(distance / step);
-
-	for (let i = 1; i <= steps; i++) {
-		const t = i / steps;
-		const interpolatedX = start[0] + t * (end[0] - start[0]);
-		const interpolatedY = start[1] + t * (end[1] - start[1]);
-
-		// Create the appropriate shape at the interpolated position
-		createShape([interpolatedX, interpolatedY]);
-	}
-}
 function createShape(position) {
 	let shape;
 	if (g_selectedType == POINT) {
@@ -247,38 +187,53 @@ function drawPoint(position) {
 	g_shapesList.push(point);
 }
 
-function convertCoordinatesEventToGL(ev) {
-	var x = ev.clientX; // x coordinate of a mouse pointer
-	var y = ev.clientY; // y coordinate of a mouse pointer
-	var rect = ev.target.getBoundingClientRect();
-
-	x = (x - rect.left - canvas.width / 2) / (canvas.width / 2);
-	y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
-	return [x, y];
-}
-
 function renderAllShapes() {
-	// var start = performance.now();
+	var start = performance.now();
+
+	// pass matrix to u_ModelMatrix attribute
+	var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
+	gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
 	// Clear <canvas>
-	gl.clear(gl.COLOR_BUFFER_BIT);
-	// Draw test triangle
-	// drawTriangle3D([-1.0, 0.0, 0.0, -0.5, -1.0, 0.0, 0.0, 0.0, 0.0]);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
 	//Draw a cube
 	var body = new Cube();
 	body.color = [1.0, 0.0, 0.0, 1.0];
-	body.matrix.translate(-0.25, -0.5, 0.0);
-	body.matrix.scale(0.5, 1, 0.5);
+	body.matrix.translate(-0.25, -0.75, 0.0);
+	body.matrix.rotate(-5, 1, 0, 0);
+	body.matrix.scale(0.5, 0.3, 0.5);
 	body.render();
 
 	// Draw left arm
-	var leftArm = new Cube();
-	leftArm.color = [1.0, 1.0, 0.0, 1.0];
-	leftArm.matrix.setTranslate(0.7, 0, 0);
-	leftArm.matrix.rotate(45, 0, 0, 1);
-	leftArm.matrix.scale(0.25, 0.7, 0.5);
-	leftArm.render();
+	var yellow = new Cube();
+	yellow.color = [1.0, 1.0, 0.0, 1.0];
+	yellow.matrix.setTranslate(0, -0.5, 0);
+
+	yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
+
+	// yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
+	// if (g_yellowAnimation) {
+	// 	yellow.matrix.rotate(45 * Math.sin(g_seconds), 0, 0, 1);
+	// 	console.log("here");
+	// } else {
+	// 	yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
+	// }
+
+	var yellowCoordinatesMat = new Matrix4(yellow.matrix);
+	yellow.matrix.scale(0.25, 0.7, 0.5);
+	yellow.matrix.translate(-0.5, 0, 0);
+	yellow.render();
+
+	// test box
+	var box = new Cube();
+	box.color = [1.0, 0.0, 1.0, 1.0];
+	box.matrix = yellowCoordinatesMat; //attach to yellow arm
+	box.matrix.translate(0, 0.65, 0);
+	box.matrix.rotate(g_magentaAngle, 0, 0, 1);
+	box.matrix.scale(0.3, 0.3, 0.3);
+	box.matrix.translate(-0.5, 0, -0.001);
+	box.render();
 
 	//check time
 	// var duration = performance.now() - start;
