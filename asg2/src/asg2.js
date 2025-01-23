@@ -92,14 +92,21 @@ let g_globalAngle = 0;
 let g_yellowAngle = 0;
 let g_magentaAngle = 0;
 let g_yellowAnimation = false;
+let g_magentaAnimation = false;
 //set up actions for html ui elements
 function addActionsForHtmlUI() {
 	//button events
-	document.getElementById("animationOnButton").onclick = function () {
+	document.getElementById("YellowAnimationOnButton").onclick = function () {
 		g_yellowAnimation = true;
 	};
-	document.getElementById("animationOffButton").onclick = function () {
+	document.getElementById("YellowAnimationOffButton").onclick = function () {
 		g_yellowAnimation = false;
+	};
+	document.getElementById("MagentaAnimationOnButton").onclick = function () {
+		g_magentaAnimation = true;
+	};
+	document.getElementById("MagentaAnimationOffButton").onclick = function () {
+		g_magentaAnimation = false;
 	};
 
 	//Size slider events
@@ -149,10 +156,13 @@ function tick() {
 	renderAllShapes();
 	requestAnimationFrame(tick);
 }
- 
+
 function updateAnimationAngles() {
 	if (g_yellowAnimation) {
 		g_yellowAngle = 45 * Math.sin(g_seconds);
+	}
+	if (g_magentaAnimation) {
+		g_magentaAngle = 45 * Math.sin(3 * g_seconds);
 	}
 }
 
