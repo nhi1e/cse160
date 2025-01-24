@@ -25,8 +25,6 @@ function setupWebGL() {
 	// Retrieve <canvas> element
 	canvas = document.getElementById("webgl");
 
-	// Get the rendering context for WebGL
-	// gl = getWebGLContext(canvas);
 	gl =
 		canvas.getContext("webgl", { preserveDrawingBuffer: true }) ||
 		canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true });
@@ -141,7 +139,8 @@ function main() {
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
 	// Specify the color for clearing <canvas>
-	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	// gl.clearColor(0.396, 0.18, 0.216, 1.0);
+	gl.clearColor(0, 0, 0, 1.0);
 
 	// // Clear <canvas>
 	renderAllShapes();
@@ -244,17 +243,4 @@ function renderAllShapes() {
 	box.matrix.scale(0.3, 0.3, 0.3);
 	box.matrix.translate(-0.5, 0, -0.001);
 	box.render();
-
-	//check time
-	// var duration = performance.now() - start;
-	// sendTextToHTML("  ms: " + Math.floor(duration) + "  fps: " + Math.floor(10000 / duration));
 }
-
-// function sendTextToHTML(text) {
-// 	var htmlElem = document.getElementById(htmlID);
-// 	if (!htmlElem) {
-// 		console.log("Failed to get the HTML element with id of", htmlID);
-// 		return;
-// 	}
-// 	htmlElem.innerHTML = text;
-// }
