@@ -129,11 +129,54 @@ function addActionsForHtmlUI() {
 			renderAllShapes();
 		});
 }
+//camera angle
+// Global variables for mouse drag and camera angles
+let isDragging = false;
+let lastMouseX = 0;
+let lastMouseY = 0;
+let cameraAngleX = 0; // Rotation around the X-axis
+let cameraAngleY = 0; // Rotation around the Y-axis
 
+function addMouseDragControls() {
+	canvas.addEventListener("mousedown", (event) => {
+		isDragging = true;
+		lastMouseX = event.clientX;
+		lastMouseY = event.clientY;
+	});
+
+	canvas.addEventListener("mousemove", (event) => {
+		if (isDragging) {
+			// Calculate mouse movement
+			const deltaX = event.clientX - lastMouseX;
+			const deltaY = event.clientY - lastMouseY;
+
+			// Update camera angles
+			cameraAngleX -= deltaY * 0.5; // Adjust sensitivity as needed
+			cameraAngleY -= deltaX * 0.5;
+
+			// Clamp the X-axis rotation to prevent flipping
+			cameraAngleX = Math.max(-90, Math.min(90, cameraAngleX));
+
+			lastMouseX = event.clientX;
+			lastMouseY = event.clientY;
+
+			renderAllShapes();
+		}
+	});
+
+	canvas.addEventListener("mouseup", () => {
+		isDragging = false;
+	});
+
+	canvas.addEventListener("mouseleave", () => {
+		isDragging = false;
+	});
+}
 function main() {
 	setupWebGL();
 	connectVariablesToGLSL();
 	addActionsForHtmlUI();
+	addMouseDragControls(); // Enable mouse drag for camera
 
 	gl.enable(gl.BLEND);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -165,82 +208,84 @@ function updateAnimationAngles() {
 	}
 }
 
-var g_shapesList = [];
-let prevPoint = null; // To store the last drawn point
-let isFillingMode = false;
-
-function createShape(position) {
-	let shape;
-	if (g_selectedType == POINT) {
-		shape = new Point();
-	} else if (g_selectedType == TRIANGLE) {
-		shape = new Triangle();
-	} else if (g_selectedType == CIRCLE) {
-		shape = new Circle();
-	}
-
-	shape.position = position;
-	shape.color = g_selectedColor.slice();
-	shape.size = g_selectedSize;
-	shape.segments = g_selectedSegments;
-
-	g_shapesList.push(shape);
-}
-
-function drawPoint(position) {
-	// Create a new point and add it to the shapes list
-	let point = new Point();
-	point.position = position;
-	point.color = g_selectedColor.slice();
-	point.size = g_selectedSize;
-	g_shapesList.push(point);
-}
-
 function renderAllShapes() {
-	var start = performance.now();
-
-	// pass matrix to u_ModelMatrix attribute
-	var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
-	gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
+	// // pass matrix to u_ModelMatrix attribute
+	// var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
+	// gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	//Draw a cube
-	var body = new Cube();
-	body.color = [1.0, 0.0, 0.0, 1.0];
-	body.matrix.translate(-0.25, -0.75, 0.0);
-	body.matrix.rotate(-5, 1, 0, 0);
-	body.matrix.scale(0.5, 0.3, 0.5);
-	body.render();
+	// Create a combined rotation matrix based on camera angles
+	const globalRotMat = new Matrix4()
+		.rotate(cameraAngleX, 1, 0, 0) // Rotate around X-axis
+		.rotate(cameraAngleY, 0, 1, 0); // Rotate around Y-axis
 
+	// Pass the combined rotation matrix to the shader
+	gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
+
+	//BODY
+	//rotate: angle, x, y, z
+	//rotate z is away from face
+	//rotate y is left and right
+
+	var neck1 = new Cube();
+	neck1.color = [0.87, 0.96, 0.643, 1.0];
+	neck1.matrix.translate(-0.4, 0.1, 0.0);
+	neck1.matrix.rotate(-50, 1, -5, 0);
+	neck1.matrix.scale(0.13, 0.13, 0.13);
+	neck1.render();
+
+	var neck2 = new Cube();
+	neck2.color = [0.87, 0.96, 0.643, 1.0];
+	neck2.matrix = new Matrix4(neck1.matrix);
+	neck2.matrix.translate(0, -0.81, 0.41);
+	neck2.matrix.rotate(25, -0.6, 0, 0);
+	neck2.render();
+
+	var neck3 = new Cube();
+	neck3.color = [0.87, 0.96, 0.643, 1.0];
+	neck3.matrix = new Matrix4(neck2.matrix);
+	neck3.matrix.translate(0, -0.8, 0.41);
+	neck3.matrix.rotate(25, -0.6, 0, 0);
+	neck3.render();
+
+	var neck4 = new Cube();
+	neck4.color = [0.87, 0.96, 0.643, 1.0];
+	neck4.matrix = new Matrix4(neck1.matrix);
+	neck4.matrix.translate(0, 1, -0.0);
+	neck4.matrix.rotate(20, 0.6, 0, 0);
+	neck4.render();
+
+	var neck5 = new Cube();
+	neck5.color = [0.87, 0.96, 0.643, 1.0];
+	neck5.matrix = new Matrix4(neck4.matrix);
+	neck5.matrix.translate(0, 1, 0);
+	neck5.matrix.rotate(20, 0.6, 0, 0);
+	neck5.render();
+
+
+
+	
 	// Draw left arm
-	var yellow = new Cube();
-	yellow.color = [1.0, 1.0, 0.0, 1.0];
-	yellow.matrix.setTranslate(0, -0.5, 0);
-
-	yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
+	// var yellow = new Cube();
+	// yellow.color = [1.0, 1.0, 0.0, 1.0];
+	// yellow.matrix.setTranslate(0, -0.5, 0);
 
 	// yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
-	// if (g_yellowAnimation) {
-	// 	yellow.matrix.rotate(45 * Math.sin(g_seconds), 0, 0, 1);
-	// 	console.log("here");
-	// } else {
-	// 	yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
-	// }
 
-	var yellowCoordinatesMat = new Matrix4(yellow.matrix);
-	yellow.matrix.scale(0.25, 0.7, 0.5);
-	yellow.matrix.translate(-0.5, 0, 0);
-	yellow.render();
+	// var yellowCoordinatesMat = new Matrix4(yellow.matrix);
+	// yellow.matrix.scale(0.25, 0.7, 0.5);
+	// yellow.matrix.translate(-0.5, 0, 0);
+	// yellow.render();
 
-	// test box
-	var box = new Cube();
-	box.color = [1.0, 0.0, 1.0, 1.0];
-	box.matrix = yellowCoordinatesMat; //attach to yellow arm
-	box.matrix.translate(0, 0.65, 0);
-	box.matrix.rotate(g_magentaAngle, 0, 0, 1);
-	box.matrix.scale(0.3, 0.3, 0.3);
-	box.matrix.translate(-0.5, 0, -0.001);
-	box.render();
+	// // test box
+	// var box = new Cube();
+	// box.color = [1.0, 0.0, 1.0, 1.0];
+	// box.matrix = yellowCoordinatesMat; //attach to yellow arm
+	// box.matrix.translate(0, 0.65, 0);
+	// box.matrix.rotate(g_magentaAngle, 0, 0, 1);
+	// box.matrix.scale(0.3, 0.3, 0.3);
+	// box.matrix.translate(-0.5, 0, -0.001);
+	// box.render();
 }
