@@ -231,7 +231,7 @@ function renderAllShapes() {
 
 	var neck1 = new Cube();
 	neck1.color = [0.87, 0.96, 0.643, 1.0];
-	neck1.matrix.translate(-0.4, 0.1, 0.0);
+	neck1.matrix.translate(-0.4, -0.1, 0.0);
 	neck1.matrix.rotate(-50, 1, -5, 0);
 	neck1.matrix.scale(0.13, 0.13, 0.13);
 	neck1.render();
@@ -264,9 +264,27 @@ function renderAllShapes() {
 	neck5.matrix.rotate(20, 0.6, 0, 0);
 	neck5.render();
 
+	var neck6 = new Cube();
+	neck6.color = [0.87, 0.96, 0.643, 1.0];
+	neck6.matrix = new Matrix4(neck5.matrix);
+	neck6.matrix.translate(0, 1, 0);
+	neck6.matrix.rotate(13, 0.6, 0, 0);
+	neck6.render();
 
+	var neck7 = new Cube();
+	neck7.color = [0.87, 0.96, 0.643, 1.0];
+	neck7.matrix = new Matrix4(neck6.matrix);
+	neck7.matrix.translate(0, 0.55, 0.1);
+	neck7.matrix.rotate(-25, 0.6, 0, 0);
+	neck7.render();
 
-	
+	var neck8 = new Cube();
+	neck8.color = [0.87, 0.96, 0.643, 1.0];
+	neck8.matrix = new Matrix4(neck7.matrix);
+	neck8.matrix.translate(0, 0.5, 0.13);
+	neck8.matrix.rotate(-30, 0.6, 0, 0);
+	neck8.render();
+
 	// Draw left arm
 	// var yellow = new Cube();
 	// yellow.color = [1.0, 1.0, 0.0, 1.0];
