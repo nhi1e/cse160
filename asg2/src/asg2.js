@@ -231,7 +231,7 @@ function renderAllShapes() {
 
 	var neck1 = new Cube();
 	neck1.color = [0.87, 0.96, 0.643, 1.0];
-	neck1.matrix.translate(-0.4, -0.1, 0.0);
+	neck1.matrix.translate(-0.6, -0.1, 0.0);
 	neck1.matrix.rotate(-50, 1, -5, 0);
 	neck1.matrix.scale(0.13, 0.13, 0.13);
 	neck1.render();
@@ -244,21 +244,158 @@ function renderAllShapes() {
 	neck2.matrix.scale(1.1, 1.1, 1.1);
 	neck2.render();
 
-	var neck3 = new Cube();
-	neck3.color = [0.87, 0.96, 0.643, 1.0];
-	neck3.matrix = new Matrix4(neck2.matrix);
-	neck3.matrix.translate(-0.05, -0.9, 0.41);
-	neck3.matrix.rotate(25, -0.6, 0, 0);
-	neck3.matrix.scale(1.1, 1.1, 1.1);
-	neck3.render();
+	var belly1 = new Cube();
+	belly1.color = [0.87, 0.96, 0.643, 1.0];
+	belly1.matrix = new Matrix4(neck2.matrix);
+	belly1.matrix.translate(-0.05, -0.9, 0.41);
+	belly1.matrix.rotate(25, -0.6, 0, 0);
+	belly1.matrix.scale(1.1, 1.1, 1.1);
+	belly1.render();
 
-	var neck9 = new Cube();
-	neck9.color = [0.87, 0.96, 0.643, 1.0];
-	neck9.matrix = new Matrix4(neck3.matrix);
-	neck9.matrix.translate(-0.05, -0.9, 0.41);
-	neck9.matrix.rotate(25, -0.6, 0, 0);
-	neck9.matrix.scale(1.1, 1.1, 1.1);
-	neck9.render();
+	var belly2 = new Cube();
+	belly2.color = [0.87, 0.96, 0.643, 1.0];
+	belly2.matrix = new Matrix4(belly1.matrix);
+	belly2.matrix.translate(-0.05, -0.9, 0.41);
+	belly2.matrix.rotate(25, -0.6, 0, 0);
+	belly2.matrix.scale(1.1, 1.1, 1.1);
+	belly2.render();
+
+	var belly3 = new Cube();
+	belly3.color = [0.87, 0.96, 0.643, 1.0];
+	belly3.matrix = new Matrix4(belly2.matrix);
+	belly3.matrix.translate(0, -0.9, 0.4);
+	belly3.matrix.rotate(25, -1, 0, 0);
+	belly3.render();
+
+	var belly4 = new Cube();
+	belly4.color = [0.87, 0.96, 0.643, 1.0];
+	belly4.matrix = new Matrix4(belly3.matrix);
+	belly4.matrix.translate(0, -0.9, 0.4);
+	belly4.matrix.rotate(25, -1, 0, 0);
+	belly4.render();
+
+	var belly5 = new Cube();
+	belly5.color = [0.87, 0.96, 0.643, 1.0];
+	belly5.matrix = new Matrix4(belly4.matrix);
+	belly5.matrix.translate(0.07, -0.6, -0.14);
+	belly5.matrix.rotate(17, 1.3, 0, 0);
+	belly5.matrix.scale(0.9, 0.9, 0.9);
+	belly5.render();
+
+	var belly6 = new Cube();
+	belly6.color = [0.87, 0.96, 0.643, 1.0];
+	belly6.matrix = new Matrix4(belly5.matrix);
+	belly6.matrix.translate(0.07, -0.5, -0.14);
+	belly6.matrix.rotate(20, 1.3, 0, 0);
+	belly6.matrix.scale(0.9, 0.9, 0.9);
+	belly6.render();
+
+	var belly7 = new Cube();
+	belly7.color = [0.87, 0.96, 0.643, 1.0];
+	belly7.matrix = new Matrix4(belly6.matrix);
+	belly7.matrix.translate(0.07, -0.35, -0.2);
+	belly7.matrix.rotate(30, 1.3, 0, 0);
+	belly7.matrix.scale(0.9, 0.9, 0.9);
+	belly7.render();
+
+	//tail
+	var tail1 = new Cube();
+	tail1.color = [0.87, 0.96, 0.643, 1.0];
+	tail1.matrix = new Matrix4(belly7.matrix);
+	tail1.matrix.translate(0.07, -0.29, -0.19);
+	tail1.matrix.rotate(34, 1.3, 0, 0);
+	tail1.matrix.scale(0.9, 0.9, 0.9);
+	tail1.render();
+
+	var tail2 = new Cube();
+	tail2.color = [0.87, 0.96, 0.643, 1.0];
+	tail2.matrix = new Matrix4(tail1.matrix);
+	tail2.matrix.translate(0.03, -0.4, -0.1);
+	tail2.matrix.rotate(20, 1.3, 0, 0);
+	tail2.matrix.scale(0.9, 0.9, 0.9);
+	tail2.render();
+
+	var tail3 = new Cube();
+	tail3.color = [0.87, 0.96, 0.643, 1.0];
+	tail3.matrix = new Matrix4(tail2.matrix);
+	tail3.matrix.translate(0.03, -0.4, -0.1);
+	tail3.matrix.rotate(15, 1.3, 0, 0);
+	tail3.matrix.scale(0.9, 0.9, 0.9);
+	tail3.render();
+
+	var tail4 = new Cube();
+	tail4.color = [0.87, 0.96, 0.643, 1.0];
+	tail4.matrix = new Matrix4(tail3.matrix);
+	tail4.matrix.translate(0.03, -0.8, 0.18);
+	tail4.matrix.rotate(10, -1.3, 0, 0);
+	tail4.matrix.scale(0.9, 0.9, 0.9);
+	tail4.render();
+
+	var tail5 = new Cube();
+	tail5.color = [0.87, 0.96, 0.643, 1.0];
+	tail5.matrix = new Matrix4(tail4.matrix);
+	tail5.matrix.translate(0.03, -0.8, 0.18);
+	tail5.matrix.rotate(10, -1.3, 0, 0);
+	tail5.matrix.scale(0.9, 0.9, 0.9);
+	tail5.render();
+
+	var tail6 = new Cube();
+	tail6.color = [0.87, 0.96, 0.643, 1.0];
+	tail6.matrix = new Matrix4(tail5.matrix);
+	tail6.matrix.translate(0.03, -0.8, 0.18);
+	tail6.matrix.rotate(10, -1.3, 0, 0);
+	tail6.matrix.scale(0.9, 0.9, 0.9);
+	tail6.render();
+
+	var tail7 = new Cube();
+	tail7.color = [0.87, 0.96, 0.643, 1.0];
+	tail7.matrix = new Matrix4(tail6.matrix);
+	tail7.matrix.translate(0.03, -0.8, 0.3);
+	tail7.matrix.rotate(20	, -1.3, 0, 0);
+	tail7.matrix.scale(0.9, 0.9, 0.9);
+	tail7.render();
+
+	var tail8 = new Cube();
+	tail8.color = [0.87, 0.96, 0.643, 1.0];
+	tail8.matrix = new Matrix4(tail7.matrix);
+	tail8.matrix.translate(0.03, -0.8, 0.3);
+	tail8.matrix.rotate(20, -1.3, 0, 0);
+	tail8.matrix.scale(0.9, 0.9, 0.9);
+	tail8.render();
+
+	var tail9 = new Cube();
+	tail9.color = [0.87, 0.96, 0.643, 1.0];
+	tail9.matrix = new Matrix4(tail8.matrix);
+	tail9.matrix.translate(0.03, -0.8, 0.3);
+	tail9.matrix.rotate(20, -1.3, 0, 0);
+	tail9.matrix.scale(0.9, 0.9, 0.9);
+	tail9.render();
+
+	var tail10 = new Cube();
+	tail10.color = [0.87, 0.96, 0.643, 1.0];
+	tail10.matrix = new Matrix4(tail9.matrix);
+	tail10.matrix.translate(0.03, -0.8, 0.3);
+	tail10.matrix.rotate(20, -1.3, 0, 0);
+	tail10.matrix.scale(0.9, 0.9, 0.9);
+	tail10.render();
+
+	var tail11 = new Cube();
+	tail11.color = [0.87, 0.96, 0.643, 1.0];
+	tail11.matrix = new Matrix4(tail10.matrix);
+	tail11.matrix.translate(0.03, -0.8, 0.3);
+	tail11.matrix.rotate(20, -1.3, 0, 0);
+	tail11.matrix.scale(0.9, 0.9, 0.9);
+	tail11.render();
+
+	var tail12 = new Cube();
+	tail12.color = [0.87, 0.96, 0.643, 1.0];
+	tail12.matrix = new Matrix4(tail11.matrix);
+	tail12.matrix.translate(0.03, -1, 0.5);
+	tail12.matrix.rotate(20, -1.3, 0, 0);
+	tail12.matrix.scale(0.9, 1.3, 0.9);
+	tail12.render();
+
+
 
 	//upper neck
 	var neck4 = new Cube();
