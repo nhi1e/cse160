@@ -230,14 +230,14 @@ function renderAllShapes() {
 	//rotate y is left and right
 
 	var neck1 = new Cube();
-	neck1.color = [0.87, 0.96, 0.643, 1.0];
+	neck1.color = [0.58, 0.0, 0.06, 1.0];
 	neck1.matrix.translate(-0.6, -0.1, 0.0);
 	neck1.matrix.rotate(-50, 1, -5, 0);
 	neck1.matrix.scale(0.13, 0.13, 0.13);
 	neck1.render();
 
 	var neck2 = new Cube();
-	neck2.color = [0.87, 0.96, 0.643, 1.0];
+	neck2.color = [0.58, 0.0, 0.06, 1.0];
 	neck2.matrix = new Matrix4(neck1.matrix);
 	neck2.matrix.translate(-0.05, -0.9, 0.4);
 	neck2.matrix.rotate(25, -0.8, 0, 0);
@@ -245,7 +245,7 @@ function renderAllShapes() {
 	neck2.render();
 
 	var belly1 = new Cube();
-	belly1.color = [0.87, 0.96, 0.643, 1.0];
+	belly1.color = [0.58, 0.0, 0.06, 1.0];
 	belly1.matrix = new Matrix4(neck2.matrix);
 	belly1.matrix.translate(-0.05, -0.9, 0.41);
 	belly1.matrix.rotate(25, -0.6, 0, 0);
@@ -253,7 +253,7 @@ function renderAllShapes() {
 	belly1.render();
 
 	var belly2 = new Cube();
-	belly2.color = [0.87, 0.96, 0.643, 1.0];
+	belly2.color = [0.58, 0.0, 0.06, 1.0];
 	belly2.matrix = new Matrix4(belly1.matrix);
 	belly2.matrix.translate(-0.05, -0.9, 0.41);
 	belly2.matrix.rotate(25, -0.6, 0, 0);
@@ -261,21 +261,21 @@ function renderAllShapes() {
 	belly2.render();
 
 	var belly3 = new Cube();
-	belly3.color = [0.87, 0.96, 0.643, 1.0];
+	belly3.color = [0.58, 0.0, 0.06, 1.0];
 	belly3.matrix = new Matrix4(belly2.matrix);
 	belly3.matrix.translate(0, -0.9, 0.4);
 	belly3.matrix.rotate(25, -1, 0, 0);
 	belly3.render();
 
 	var belly4 = new Cube();
-	belly4.color = [0.87, 0.96, 0.643, 1.0];
+	belly4.color = [0.58, 0.0, 0.06, 1.0];
 	belly4.matrix = new Matrix4(belly3.matrix);
 	belly4.matrix.translate(0, -0.9, 0.4);
 	belly4.matrix.rotate(25, -1, 0, 0);
 	belly4.render();
 
 	var belly5 = new Cube();
-	belly5.color = [0.87, 0.96, 0.643, 1.0];
+	belly5.color = [0.58, 0.0, 0.06, 1.0];
 	belly5.matrix = new Matrix4(belly4.matrix);
 	belly5.matrix.translate(0.07, -0.6, -0.14);
 	belly5.matrix.rotate(17, 1.3, 0, 0);
@@ -283,7 +283,7 @@ function renderAllShapes() {
 	belly5.render();
 
 	var belly6 = new Cube();
-	belly6.color = [0.87, 0.96, 0.643, 1.0];
+	belly6.color = [0.58, 0.0, 0.06, 1.0];
 	belly6.matrix = new Matrix4(belly5.matrix);
 	belly6.matrix.translate(0.07, -0.5, -0.14);
 	belly6.matrix.rotate(20, 1.3, 0, 0);
@@ -291,7 +291,7 @@ function renderAllShapes() {
 	belly6.render();
 
 	var belly7 = new Cube();
-	belly7.color = [0.87, 0.96, 0.643, 1.0];
+	belly7.color = [0.58, 0.0, 0.06, 1.0];
 	belly7.matrix = new Matrix4(belly6.matrix);
 	belly7.matrix.translate(0.07, -0.35, -0.2);
 	belly7.matrix.rotate(30, 1.3, 0, 0);
@@ -300,7 +300,7 @@ function renderAllShapes() {
 
 	//tail
 	var tail1 = new Cube();
-	tail1.color = [0.87, 0.96, 0.643, 1.0];
+	tail1.color = [0.58, 0.0, 0.06, 1.0];
 	tail1.matrix = new Matrix4(belly7.matrix);
 	tail1.matrix.translate(0.07, -0.29, -0.19);
 	tail1.matrix.rotate(34, 1.3, 0, 0);
@@ -308,7 +308,7 @@ function renderAllShapes() {
 	tail1.render();
 
 	var tail2 = new Cube();
-	tail2.color = [0.87, 0.96, 0.643, 1.0];
+	tail2.color = [0.58, 0.0, 0.06, 1.0];
 	tail2.matrix = new Matrix4(tail1.matrix);
 	tail2.matrix.translate(0.03, -0.4, -0.1);
 	tail2.matrix.rotate(20, 1.3, 0, 0);
@@ -316,7 +316,7 @@ function renderAllShapes() {
 	tail2.render();
 
 	var tail3 = new Cube();
-	tail3.color = [0.87, 0.96, 0.643, 1.0];
+	tail3.color = [0.58, 0.0, 0.06, 1.0];
 	tail3.matrix = new Matrix4(tail2.matrix);
 	tail3.matrix.translate(0.03, -0.4, -0.1);
 	tail3.matrix.rotate(15, 1.3, 0, 0);
@@ -324,7 +324,7 @@ function renderAllShapes() {
 	tail3.render();
 
 	var tail4 = new Cube();
-	tail4.color = [0.87, 0.96, 0.643, 1.0];
+	tail4.color = [0.58, 0.0, 0.06, 1.0];
 	tail4.matrix = new Matrix4(tail3.matrix);
 	tail4.matrix.translate(0.03, -0.8, 0.18);
 	tail4.matrix.rotate(10, -1.3, 0, 0);
@@ -332,7 +332,7 @@ function renderAllShapes() {
 	tail4.render();
 
 	var tail5 = new Cube();
-	tail5.color = [0.87, 0.96, 0.643, 1.0];
+	tail5.color = [0.58, 0.0, 0.06, 1.0];
 	tail5.matrix = new Matrix4(tail4.matrix);
 	tail5.matrix.translate(0.03, -0.8, 0.18);
 	tail5.matrix.rotate(10, -1.3, 0, 0);
@@ -340,7 +340,7 @@ function renderAllShapes() {
 	tail5.render();
 
 	var tail6 = new Cube();
-	tail6.color = [0.87, 0.96, 0.643, 1.0];
+	tail6.color = [0.58, 0.0, 0.06, 1.0];
 	tail6.matrix = new Matrix4(tail5.matrix);
 	tail6.matrix.translate(0.03, -0.8, 0.18);
 	tail6.matrix.rotate(10, -1.3, 0, 0);
@@ -348,7 +348,7 @@ function renderAllShapes() {
 	tail6.render();
 
 	var tail7 = new Cube();
-	tail7.color = [0.87, 0.96, 0.643, 1.0];
+	tail7.color = [0.58, 0.0, 0.06, 1.0];
 	tail7.matrix = new Matrix4(tail6.matrix);
 	tail7.matrix.translate(0.03, -0.8, 0.3);
 	tail7.matrix.rotate(20, -1.3, 0, 0);
@@ -356,7 +356,7 @@ function renderAllShapes() {
 	tail7.render();
 
 	var tail8 = new Cube();
-	tail8.color = [0.87, 0.96, 0.643, 1.0];
+	tail8.color = [0.58, 0.0, 0.06, 1.0];
 	tail8.matrix = new Matrix4(tail7.matrix);
 	tail8.matrix.translate(0.03, -0.8, 0.3);
 	tail8.matrix.rotate(20, -1.3, 0, 0);
@@ -364,7 +364,7 @@ function renderAllShapes() {
 	tail8.render();
 
 	var tail9 = new Cube();
-	tail9.color = [0.87, 0.96, 0.643, 1.0];
+	tail9.color = [0.58, 0.0, 0.06, 1.0];
 	tail9.matrix = new Matrix4(tail8.matrix);
 	tail9.matrix.translate(0.03, -0.8, 0.3);
 	tail9.matrix.rotate(20, -1.3, 0, 0);
@@ -372,7 +372,7 @@ function renderAllShapes() {
 	tail9.render();
 
 	var tail10 = new Cube();
-	tail10.color = [0.87, 0.96, 0.643, 1.0];
+	tail10.color = [0.58, 0.0, 0.06, 1.0];
 	tail10.matrix = new Matrix4(tail9.matrix);
 	tail10.matrix.translate(0.03, -0.8, 0.3);
 	tail10.matrix.rotate(20, -1.3, 0, 0);
@@ -380,7 +380,7 @@ function renderAllShapes() {
 	tail10.render();
 
 	var tail11 = new Cube();
-	tail11.color = [0.87, 0.96, 0.643, 1.0];
+	tail11.color = [0.58, 0.0, 0.06, 1.0];
 	tail11.matrix = new Matrix4(tail10.matrix);
 	tail11.matrix.translate(0.03, -0.8, 0.3);
 	tail11.matrix.rotate(20, -1.3, 0, 0);
@@ -388,7 +388,7 @@ function renderAllShapes() {
 	tail11.render();
 
 	var tail12 = new Cube();
-	tail12.color = [0.87, 0.96, 0.643, 1.0];
+	tail12.color = [0.58, 0.0, 0.06, 1.0];
 	tail12.matrix = new Matrix4(tail11.matrix);
 	tail12.matrix.translate(0.03, -1, 0.5);
 	tail12.matrix.rotate(20, -1.3, 0, 0);
@@ -400,7 +400,7 @@ function renderAllShapes() {
 	//smaller z = thinner
 	//bigger y = taller triangle
 	var tailtip1 = new TrianglePrism();
-	tailtip1.color = [0.77, 0.354, 0.354, 1.0];
+	tailtip1.color = [0.18, 0.46, 0.34, 1.0];
 	tailtip1.matrix = new Matrix4(tail12.matrix);
 	tailtip1.matrix.translate(0.9, 0, 0.6);
 	tailtip1.matrix.rotate(180, 0, 0, 1);
@@ -408,7 +408,7 @@ function renderAllShapes() {
 	tailtip1.render();
 
 	var tailtip2 = new TrianglePrism();
-	tailtip2.color = [0.77, 0.354, 0.354, 1.0];
+	tailtip2.color = [0.18, 0.46, 0.34, 1.0];
 	tailtip2.matrix = new Matrix4(tailtip1.matrix);
 	tailtip2.matrix.translate(0.6, 0.5, 0.1);
 	tailtip2.matrix.scale(0.6, 0.6, 1);
@@ -416,14 +416,14 @@ function renderAllShapes() {
 	tailtip2.render();
 
 	var tailtip3 = new TrianglePrism();
-	tailtip3.color = [0.77, 0.354, 0.354, 1.0];
+	tailtip3.color = [0.18, 0.46, 0.34, 1.0];
 	tailtip3.matrix = new Matrix4(tailtip1.matrix);
 	tailtip3.matrix.scale(0.6, 0.6, 1);
 	tailtip3.matrix.rotate(50, 0, 0, 1);
 	tailtip3.render();
 
 	var tailtip4 = new TrianglePrism();
-	tailtip4.color = [0.77, 0.354, 0.354, 1.0];
+	tailtip4.color = [0.18, 0.46, 0.34, 1.0];
 	tailtip4.matrix = new Matrix4(tailtip1.matrix);
 	tailtip4.matrix.translate(-0.06, 0, 0);
 	tailtip4.matrix.scale(0.7, 0.5, 1);
@@ -431,7 +431,7 @@ function renderAllShapes() {
 	tailtip4.render();
 
 	var tailtip5 = new TrianglePrism();
-	tailtip5.color = [0.77, 0.354, 0.354, 1.0];
+	tailtip5.color = [0.18, 0.46, 0.34, 1.0];
 	tailtip5.matrix = new Matrix4(tailtip1.matrix);
 	tailtip5.matrix.translate(0.68, 0.4, 0);
 	tailtip5.matrix.scale(0.7, 0.5, 1);
@@ -440,7 +440,7 @@ function renderAllShapes() {
 
 	//upper neck
 	var neck4 = new Cube();
-	neck4.color = [0.87, 0.96, 0.643, 1.0];
+	neck4.color = [0.58, 0.0, 0.06, 1.0];
 	neck4.matrix = new Matrix4(neck1.matrix);
 	neck4.matrix.translate(0.05, 1, 0.06);
 	neck4.matrix.scale(0.9, 0.9, 0.9);
@@ -448,7 +448,7 @@ function renderAllShapes() {
 	neck4.render();
 
 	var neck5 = new Cube();
-	neck5.color = [0.87, 0.96, 0.643, 1.0];
+	neck5.color = [0.58, 0.0, 0.06, 1.0];
 	neck5.matrix = new Matrix4(neck4.matrix);
 	neck5.matrix.translate(0.04, 1, 0.08);
 	neck5.matrix.scale(0.95, 0.95, 0.95);
@@ -456,7 +456,7 @@ function renderAllShapes() {
 	neck5.render();
 
 	var neck6 = new Cube();
-	neck6.color = [0.87, 0.96, 0.643, 1.0];
+	neck6.color = [0.58, 0.0, 0.06, 1.0];
 	neck6.matrix = new Matrix4(neck5.matrix);
 	neck6.matrix.translate(0.02, 1, 0.08);
 	neck6.matrix.rotate(13, 0.6, 0, 0);
@@ -464,21 +464,21 @@ function renderAllShapes() {
 	neck6.render();
 
 	var neck7 = new Cube();
-	neck7.color = [0.87, 0.96, 0.643, 1.0];
+	neck7.color = [0.58, 0.0, 0.06, 1.0];
 	neck7.matrix = new Matrix4(neck6.matrix);
 	neck7.matrix.translate(0, 0.55, 0.1);
 	neck7.matrix.rotate(-25, 0.6, 0, 0);
 	neck7.render();
 
 	var neck8 = new Cube();
-	neck8.color = [0.87, 0.96, 0.643, 1.0];
+	neck8.color = [0.58, 0.0, 0.06, 1.0];
 	neck8.matrix = new Matrix4(neck7.matrix);
 	neck8.matrix.translate(0, 0.5, 0.1);
 	neck8.matrix.rotate(-30, 0.6, 0, 0);
 	neck8.render();
 
 	var neck10 = new Cube();
-	neck10.color = [0.87, 0.96, 0.643, 1.0];
+	neck10.color = [0.58, 0.0, 0.06, 1.0];
 	neck10.matrix = new Matrix4(neck8.matrix);
 	neck10.matrix.translate(0, 0.65, 0.08);
 	neck10.matrix.rotate(-20, 0.6, 0, 0);
@@ -486,32 +486,32 @@ function renderAllShapes() {
 
 	// Head
 	var head1 = new Cube();
-	head1.color = [0.87, 0.96, 0.643, 1.0];
+	head1.color = [0.58, 0.0, 0.06, 1.0];
 	head1.matrix = new Matrix4(neck10.matrix);
 	head1.matrix.translate(0, 1.4, -0.4);
-	head1.matrix.rotate(60,1, 0, 0);
+	head1.matrix.rotate(60, 1, 0, 0);
 	head1.matrix.scale(1, 1, 1.1);
 	head1.render();
 
 	var head2 = new Cube();
-	head2.color = [0.87, 0.96, 0.643, 1.0];
+	head2.color = [0.58, 0.0, 0.06, 1.0];
 	head2.matrix = new Matrix4(head1.matrix);
 	head2.matrix.translate(0, -0.4, -0.25);
-	head2.matrix.rotate(-30,1, 0, 0);
+	head2.matrix.rotate(-30, 1, 0, 0);
 	head2.matrix.scale(1, 1.1, 1.1);
 	head2.render();
 
 	var nose1 = new TrianglePrism();
-	nose1.color = [0.87, 0.96, 0.643, 1.0];
+	nose1.color = [0.58, 0.0, 0.06, 1.0];
 	nose1.matrix = new Matrix4(head2.matrix);
 	nose1.matrix.translate(0, 0.8, 0.16);
 	nose1.matrix.rotate(270, 1, 0, 0);
-	nose1.matrix.rotate(90,0,1,0)
+	nose1.matrix.rotate(90, 0, 1, 0);
 	nose1.matrix.scale(0.87, 1.15, 1);
 	nose1.render();
 
 	var nose2 = new Cube();
-	nose2.color = [0.87, 0.96, 0.643, 1.0];
+	nose2.color = [0.58, 0.0, 0.06, 1.0];
 	nose2.matrix = new Matrix4(head2.matrix);
 	nose2.matrix.translate(0, 0, -1);
 	// nose2.matrix.rotate(270, 1, 0, 0);
@@ -519,13 +519,83 @@ function renderAllShapes() {
 	nose2.render();
 
 	var mouth1 = new Cube();
-	mouth1.color = [0.87, 0.96, 0.643, 1.0];
+	mouth1.color = [0.58, 0.0, 0.06, 1.0];
 	mouth1.matrix = new Matrix4(nose2.matrix);
 	mouth1.matrix.translate(0, -0.2, 0.2);
 	mouth1.matrix.scale(0.9, 1, 1);
 	mouth1.render();
 
+	var horn1 = new Cube();
+	horn1.uniformFaceColor = true;
+	horn1.color = [0.94, 0.79, 0.28, 1.0];
+	horn1.matrix = new Matrix4(head2.matrix);
+	horn1.matrix.translate(0.7, 1, 0.3);
+	horn1.matrix.rotate(65, 1, 0, 0);
+	horn1.matrix.scale(0.13, 1, 0.13);
+	horn1.render();
 
+	var horn2 = new Cube();
+	horn2.uniformFaceColor = true;
+	horn2.color = [0.94, 0.79, 0.28, 1.0];
+	horn2.matrix = new Matrix4(horn1.matrix);
+	horn2.matrix.translate(0.4, 0.9, 0.3);
+	horn2.matrix.rotate(30, 1, 0, 0);
+	horn2.matrix.scale(1, 1, 1);
+	horn2.render();
+
+	var horn3 = new Cube();
+	horn3.uniformFaceColor = true;
+	horn3.color = [0.94, 0.79, 0.28, 1.0];
+	horn3.matrix = new Matrix4(horn1.matrix);
+	horn3.matrix.translate(-4, 0, 0);
+	horn3.render();	
+
+	var horn4 = new Cube();
+	horn4.uniformFaceColor = true;
+	horn4.color = [0.94, 0.79, 0.28, 1.0];
+	horn4.matrix = new Matrix4(horn2.matrix);
+	horn4.matrix.translate(-4.9, 0, 0);
+	horn4.render();
+
+	var mustache = new Cube();
+	mustache.uniformFaceColor = true;
+	mustache.color = [0.94, 0.79, 0.28, 1.0];
+	mustache.matrix = new Matrix4(head2.matrix);
+	mustache.matrix.translate(1.1, 0.1, 0);
+	mustache.matrix.rotate(180, 1, 0, 0);
+	mustache.matrix.scale(0.08, 0.8, 0.08);
+	mustache.render();
+
+	var mustache2 = new Cube();
+	mustache2.uniformFaceColor = true;
+	mustache2.color = [0.94, 0.79, 0.28, 1.0];
+	mustache2.matrix = new Matrix4(head2.matrix);
+	mustache2.matrix.translate(1.2, 0.1, -0.1);
+	mustache2.matrix.rotate(90, 1, 0, 0);
+	mustache2.matrix.rotate(90, 0, 0, 1);
+	mustache2.matrix.scale(0.08, 0.8, 0.08);
+	mustache2.render();
+
+	var mustache3 = new Cube();
+	mustache3.uniformFaceColor = true;
+	mustache3.color = [0.94, 0.79, 0.28, 1.0];
+	mustache3.matrix = new Matrix4(head2.matrix);
+	mustache3.matrix.translate(-0.2, 0.1, 0);
+	mustache3.matrix.rotate(180, 1, 0, 0);
+	mustache3.matrix.scale(0.08, 0.8, 0.08);
+	mustache3.render();
+
+	var mustache4 = new Cube();
+	mustache4.uniformFaceColor = true;
+	mustache4.color = [0.94, 0.79, 0.28, 1.0];
+	mustache4.matrix = new Matrix4(head2.matrix);
+	mustache4.matrix.translate(0.6, 0.1, -0.1);
+	mustache4.matrix.rotate(90, 1, 0, 0);
+	mustache4.matrix.rotate(90, 0, 0, 1);
+	mustache4.matrix.scale(0.08, 0.8, 0.08);
+	mustache4.render();
+
+	
 
 	// var head = new Sphere(1.0, 10, 10); // Radius = 1.0, 30 latitude bands, 30 longitude bands
 	// head.color = [0.706, 0.75, 0.0825, 1.0];
@@ -541,7 +611,7 @@ function renderAllShapes() {
 	// sphere2.render();
 
 	// var mouth = new Cube();
-	// mouth.color = [0.87, 0.96, 0.643, 1.0];
+	// mouth.color = [0.58, 0.0, 0.06, 1.0];
 	// mouth.matrix = new Matrix4(neck10.matrix);
 	// mouth.matrix.translate(0, 0.4, -1.3);
 	// mouth.matrix.rotate(-25,1, 0, 0);
