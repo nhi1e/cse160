@@ -4,79 +4,42 @@
 		<meta charset="utf-8" />
 		<title>Asg2 - Nhi</title>
 		<style>
-	
 			body {
 				background-color: #652e37;
 			}
-
 		</style>
 	</head>
 
 	<body onload="main()">
-	
-			<canvas id="webgl" width="900" height="900">
-				Please use a browser that supports "canvas"
-			</canvas>
-	
-		<p>
-			Yellow Animation
-			<button type="button" id="YellowAnimationOnButton">ON</button>
-			<button type="button" id="YellowAnimationOffButton">OFF</button>
-		</p>
-		<p>
-			Magenta Animation
-			<button type="button" id="MagentaAnimationOnButton">ON</button>
-			<button type="button" id="MagentaAnimationOffButton">OFF</button>
-		</p>
-		
-		<p>Camera Angle 
-			<input
-				type="range"
-				min="0"
-				max="90"
-				value="5"
-				class="slider"
-				id="angleSlide"
-			/>
-		</p>
-
-		<p>Yellow Slider
-			<input
-				type="range"
-				min="-45"
-				max="45"
-				value="0"
-				class="slider"
-				id="yellowSlide"
-			/>
-		</p>
-		<p>Magenta Slider
-			<input
-				type="range"
-				min="-45"
-				max="45"
-				value="0"
-				class="slider"
-				id="magentaSlide"
-			/>
-		</p>
+		<canvas id="webgl" width="900" height="900">
+			Please use a browser that supports "canvas"
+		</canvas>
+		<!-- <button id="TailAnimationOnButton">Tail Animation On</button>
+		<button id="TailAnimationOffButton">Tail Animation Off</button> -->
+		<button id="DragonAnimationOnButton">Dragon Animation On</button>
+<button id="DragonAnimationOffButton">Dragon Animation Off</button>
 
 
-			<script src="../lib/webgl-utils.js"></script>
-			<script src="../lib/webgl-debug.js"></script>
-			<script src="../lib/cuon-utils.js"></script>
-			<script src="../lib/cuon-matrix.js"></script>
-
-			<script src="Point.js"></script>
-			<script src="asg2.js"></script>
-			<script src="Triangle.js"></script>
-			<script src="Circle.js"></script>
-			<script src="Picture.js"></script>
-			<script src="Cube.js"></script>
-			<script src="TrianglePrism.js"></script>
-			<script src="Sphere.js"></script>
-			<script src="Cylinder.js"></script>
-
+		<p>cameraXSlide
+			<input type="range" id="cameraXSlide" min="-90" max="90" value="0">
 		</p>
+		<p>cameraYSlide
+			<input type="range" id="cameraYSlide" min="0" max="360" value="0">
+		</p>
+
+		<script src="../lib/webgl-utils.js"></script>
+		<script src="../lib/webgl-debug.js"></script>
+		<script src="../lib/cuon-utils.js"></script>
+		<script src="../lib/cuon-matrix.js"></script>
+
+		<script src="Point.js"></script>
+		<script src="asg2.js"></script>
+		<script src="Triangle.js"></script>
+		<script src="Circle.js"></script>
+		<script src="Picture.js"></script>
+		<script src="Cube.js"></script>
+		<script src="TrianglePrism.js"></script>
+		<script src="Sphere.js"></script>
+		<script src="Cylinder.js"></script>
 	</body>
 </html>
