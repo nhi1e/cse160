@@ -484,6 +484,70 @@ function renderAllShapes() {
 	neck10.matrix.rotate(-20, 0.6, 0, 0);
 	neck10.render();
 
+	// Head
+	var head1 = new Cube();
+	head1.color = [0.87, 0.96, 0.643, 1.0];
+	head1.matrix = new Matrix4(neck10.matrix);
+	head1.matrix.translate(0, 1.4, -0.4);
+	head1.matrix.rotate(60,1, 0, 0);
+	head1.matrix.scale(1, 1, 1.1);
+	head1.render();
+
+	var head2 = new Cube();
+	head2.color = [0.87, 0.96, 0.643, 1.0];
+	head2.matrix = new Matrix4(head1.matrix);
+	head2.matrix.translate(0, -0.4, -0.25);
+	head2.matrix.rotate(-30,1, 0, 0);
+	head2.matrix.scale(1, 1.1, 1.1);
+	head2.render();
+
+	var nose1 = new TrianglePrism();
+	nose1.color = [0.87, 0.96, 0.643, 1.0];
+	nose1.matrix = new Matrix4(head2.matrix);
+	nose1.matrix.translate(0, 0.8, 0.16);
+	nose1.matrix.rotate(270, 1, 0, 0);
+	nose1.matrix.rotate(90,0,1,0)
+	nose1.matrix.scale(0.87, 1.15, 1);
+	nose1.render();
+
+	var nose2 = new Cube();
+	nose2.color = [0.87, 0.96, 0.643, 1.0];
+	nose2.matrix = new Matrix4(head2.matrix);
+	nose2.matrix.translate(0, 0, -1);
+	// nose2.matrix.rotate(270, 1, 0, 0);
+	nose2.matrix.scale(1, 0.4, 1);
+	nose2.render();
+
+	var mouth1 = new Cube();
+	mouth1.color = [0.87, 0.96, 0.643, 1.0];
+	mouth1.matrix = new Matrix4(nose2.matrix);
+	mouth1.matrix.translate(0, -0.2, 0.2);
+	mouth1.matrix.scale(0.9, 1, 1);
+	mouth1.render();
+
+
+
+	// var head = new Sphere(1.0, 10, 10); // Radius = 1.0, 30 latitude bands, 30 longitude bands
+	// head.color = [0.706, 0.75, 0.0825, 1.0];
+	// head.matrix.translate(-0.44, 0.5, 0); // Position sphere1 to the left
+	// head.matrix.scale(0.1, 0.1, 0.1); // Scale down sphere1
+	// head.render();
+
+	//Create the second sphere
+	// var sphere2 = new Sphere(1.0, 10, 10); // Radius = 1.0, 30 latitude bands, 30 longitude bands
+	// sphere2.color = [0.706, 0.75, 0.0825, 1.0]; // Blue sphere
+	// sphere2.matrix.scale(0.06, 0.06, 0.06); // Slightly larger sphere2
+	// sphere2.matrix.translate(-8.6, 7.7, -1.4); // Position sphere2 to the right
+	// sphere2.render();
+
+	// var mouth = new Cube();
+	// mouth.color = [0.87, 0.96, 0.643, 1.0];
+	// mouth.matrix = new Matrix4(neck10.matrix);
+	// mouth.matrix.translate(0, 0.4, -1.3);
+	// mouth.matrix.rotate(-25,1, 0, 0);
+	// 	mouth.matrix.scale(1, 0.2, 1);
+	// mouth.render();
+
 	// Draw left arm
 	// var yellow = new Cube();
 	// yellow.color = [1.0, 1.0, 0.0, 1.0];
