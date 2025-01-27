@@ -351,7 +351,7 @@ function renderAllShapes() {
 	tail7.color = [0.87, 0.96, 0.643, 1.0];
 	tail7.matrix = new Matrix4(tail6.matrix);
 	tail7.matrix.translate(0.03, -0.8, 0.3);
-	tail7.matrix.rotate(20	, -1.3, 0, 0);
+	tail7.matrix.rotate(20, -1.3, 0, 0);
 	tail7.matrix.scale(0.9, 0.9, 0.9);
 	tail7.render();
 
@@ -395,7 +395,48 @@ function renderAllShapes() {
 	tail12.matrix.scale(0.9, 1.3, 0.9);
 	tail12.render();
 
+	//tailtip
+	//scaling:
+	//smaller z = thinner
+	//bigger y = taller triangle
+	var tailtip1 = new TrianglePrism();
+	tailtip1.color = [0.77, 0.354, 0.354, 1.0];
+	tailtip1.matrix = new Matrix4(tail12.matrix);
+	tailtip1.matrix.translate(0.9, 0, 0.6);
+	tailtip1.matrix.rotate(180, 0, 0, 1);
+	tailtip1.matrix.scale(1, 3, 0.1);
+	tailtip1.render();
 
+	var tailtip2 = new TrianglePrism();
+	tailtip2.color = [0.77, 0.354, 0.354, 1.0];
+	tailtip2.matrix = new Matrix4(tailtip1.matrix);
+	tailtip2.matrix.translate(0.6, 0.5, 0.1);
+	tailtip2.matrix.scale(0.6, 0.6, 1);
+	tailtip2.matrix.rotate(50, 0, 0, -1);
+	tailtip2.render();
+
+	var tailtip3 = new TrianglePrism();
+	tailtip3.color = [0.77, 0.354, 0.354, 1.0];
+	tailtip3.matrix = new Matrix4(tailtip1.matrix);
+	tailtip3.matrix.scale(0.6, 0.6, 1);
+	tailtip3.matrix.rotate(50, 0, 0, 1);
+	tailtip3.render();
+
+	var tailtip4 = new TrianglePrism();
+	tailtip4.color = [0.77, 0.354, 0.354, 1.0];
+	tailtip4.matrix = new Matrix4(tailtip1.matrix);
+	tailtip4.matrix.translate(-0.06, 0, 0);
+	tailtip4.matrix.scale(0.7, 0.5, 1);
+	tailtip4.matrix.rotate(60, 0, 0, 1);
+	tailtip4.render();
+
+	var tailtip5 = new TrianglePrism();
+	tailtip5.color = [0.77, 0.354, 0.354, 1.0];
+	tailtip5.matrix = new Matrix4(tailtip1.matrix);
+	tailtip5.matrix.translate(0.68, 0.4, 0);
+	tailtip5.matrix.scale(0.7, 0.5, 1);
+	tailtip5.matrix.rotate(60, 0, 0, -1);
+	tailtip5.render();
 
 	//upper neck
 	var neck4 = new Cube();

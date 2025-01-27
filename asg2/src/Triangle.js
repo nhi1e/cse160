@@ -21,6 +21,29 @@ class Triangle {
 		drawTriangle([xy[0], xy[1], xy[0] + delta, xy[1], xy[0], xy[1] + delta]);
 	}
 }
+
+class TrianglePlane{
+	constructor() {
+		this.type = "triangle";
+		this.color = [1.0, 1.0, 1.0, 1.0]; // Default color
+		this.matrix = new Matrix4(); // Transformation matrix
+	}
+
+	render() {
+		var rgba = this.color;
+
+		// Pass the color to the fragment shader
+		gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
+		// Pass the transformation matrix to the shader
+		gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+
+		// Draw the triangle
+		drawTriangle3D([0.0, 0.0, 0.0, 0.5, 1.0, 0.0, 1.0, 0.0, 0.0]);
+	}
+}
+
+
+
 function drawTriangle(vertices) {
 	var n = 3; // The number of vertices
 
@@ -44,6 +67,8 @@ function drawTriangle(vertices) {
 	// Draw the rectangle
 	gl.drawArrays(gl.TRIANGLES, 0, n);
 }
+
+
 
 function drawTriangle3D(vertices) {
 	var n = 3; // The number of vertices
