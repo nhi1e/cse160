@@ -315,9 +315,7 @@ function renderAllShapes() {
 	tail1.color = [0.58, 0.0, 0.06, 1.0];
 	tail1.matrix = new Matrix4(belly7.matrix);
 	tail1.matrix.translate(0.07, -0.29, -0.19);
-	// tail1.matrix.rotate(34, 1.3, 0, 0);
 	tail1.matrix.rotate(34, 1.3, 0, 0); // Apply g_tailAngle
-
 	tail1.matrix.scale(0.9, 0.9, 0.9);
 	tail1.render();
 
@@ -494,7 +492,6 @@ function renderAllShapes() {
 	neck7.matrix = new Matrix4(neck6.matrix);
 	neck7.matrix.translate(0, 0.55, 0.1);
 	neck7.matrix.rotate(-25, 0.6, 0, 0);
-	// neck7.matrix.rotate(-25 + g_neckAngle * 0.4, 0, 1, 0); // Slight motion added
 	neck7.render();
 
 	var neck8 = new Cube();
@@ -549,10 +546,7 @@ function renderAllShapes() {
 	mouth1.matrix = new Matrix4(nose2.matrix);
 	mouth1.matrix.translate(0, -0.17, 0.2);
 	mouth1.matrix.rotate(30, 1, 0, 0); // Rotate around the x-axis
-
-	// mouth1.matrix.translate(0, -0.2 - g_mouthAngle * 0.1, 0.2); // Dynamic opening/closing
 	mouth1.matrix.scale(0.9, 1, 1);
-
 	mouth1.render();
 
 	var horn1 = new Cube();
@@ -641,6 +635,131 @@ function renderAllShapes() {
 	eye2.matrix.translate(-0.08, 0.5, 0.3);
 	eye2.matrix.scale(0.27, 0.12, 0.27);
 	eye2.render();
+
+	//scales
+
+	var scale2 = new Cone();
+	scale2.color = [0.18, 0.46, 0.34, 1.0];
+	scale2.matrix = new Matrix4(belly3.matrix);
+	scale2.matrix.rotate(90, 1, 0, 0);
+	scale2.matrix.translate(0.5, 0.9, -0.3); //z is x
+	scale2.matrix.scale(0.16, 0.2, 0.16);
+	scale2.render();
+
+	var scale3 = new Cone();
+	scale3.color = [0.18, 0.46, 0.34, 1.0];
+	scale3.matrix = new Matrix4(belly4.matrix);
+	scale3.matrix.rotate(100, 1, 0, 0);
+	scale3.matrix.translate(0.5, 0.85, -0.3); //z is x
+	scale3.matrix.scale(0.16, 0.2, 0.16);
+	scale3.render();
+
+	var scale4 = new Cone();
+	scale4.color = [0.18, 0.46, 0.34, 1.0];
+	scale4.matrix = new Matrix4(belly5.matrix);
+	scale4.matrix.rotate(90, 1, 0, 0);
+	scale4.matrix.translate(0.5, 0.9, -0.4); //z is x
+	scale4.matrix.scale(0.16, 0.2, 0.16);
+	scale4.render();
+
+	var scale5 = new Cone();
+	scale5.color = [0.18, 0.46, 0.34, 1.0];
+	scale5.matrix = new Matrix4(belly6.matrix);
+	scale5.matrix.rotate(90, 1, 0, 0);
+	scale5.matrix.translate(0.5, 0.9, -0.4); //z is x
+	scale5.matrix.scale(0.16, 0.2, 0.16);
+	scale5.render();
+
+	var scale6 = new Cone();
+	scale6.color = [0.18, 0.46, 0.34, 1.0];
+	scale6.matrix = new Matrix4(belly7.matrix);
+	scale6.matrix.rotate(90, 1, 0, 0);
+	scale6.matrix.translate(0.5, 1, -0.4); //z is x
+	scale6.matrix.scale(0.16, 0.2, 0.16);
+	scale6.render();
+
+	var scale7 = new Cone();
+	scale7.color = [0.18, 0.46, 0.34, 1.0];
+	scale7.matrix = new Matrix4(tail1.matrix);
+	scale7.matrix.rotate(90, 1, 0, 0);
+	scale7.matrix.translate(0.5, 1, -0.4); //z is x
+	scale7.matrix.scale(0.16, 0.2, 0.16);
+	scale7.render();
+
+	var scale8 = new Cone();
+	scale8.color = [0.18, 0.46, 0.34, 1.0];
+	scale8.matrix = new Matrix4(tail2.matrix);
+	scale8.matrix.rotate(90, 1, 0, 0);
+	scale8.matrix.translate(0.5, 1, -0.4); //z is x
+	scale8.matrix.scale(0.16, 0.2, 0.16);
+	scale8.render();
+
+	var scale9 = new Cone();
+	scale9.color = [0.18, 0.46, 0.34, 1.0];
+	scale9.matrix = new Matrix4(tail3.matrix);
+	scale9.matrix.rotate(90, 1, 0, 0);
+	scale9.matrix.translate(0.5, 1, -0.4); //z is x
+	scale9.matrix.scale(0.16, 0.2, 0.16);
+	scale9.render();
+
+	var scale10 = new Cone();
+	scale10.color = [0.18, 0.46, 0.34, 1.0];
+	scale10.matrix = new Matrix4(tail4.matrix);
+	scale10.matrix.rotate(90, 1, 0, 0);
+	scale10.matrix.translate(0.5, 1, -0.4); //z is x
+	scale10.matrix.scale(0.16, 0.2, 0.16);
+	scale10.render();
+
+	//going from scale2 to head now
+	var scale11 = new Cone();
+	scale11.color = [0.18, 0.46, 0.34, 1.0];
+	scale11.matrix = new Matrix4(belly2.matrix);
+	scale11.matrix.rotate(90, 1, 0, 0);
+	scale11.matrix.translate(0.5, 0.9, -0.4); //z is x
+	scale11.matrix.scale(0.16, 0.2, 0.16);
+	scale11.render();
+
+	var scale12 = new Cone();
+	scale12.color = [0.18, 0.46, 0.34, 1.0];
+	scale12.matrix = new Matrix4(belly1.matrix);
+	scale12.matrix.rotate(80, 1, 0, 0);
+	scale12.matrix.translate(0.5, 1.1, -0.4); //z is x
+	scale12.matrix.scale(0.16, 0.2, 0.16);
+	scale12.render();
+
+	var scale13 = new Cone();
+	scale13.color = [0.18, 0.46, 0.34, 1.0];
+	scale13.matrix = new Matrix4(neck1.matrix);
+	scale13.matrix.rotate(90, 1, 0, 0);
+	scale13.matrix.translate(0.5, 1, -0.6); //z is x
+	scale13.matrix.scale(0.16, 0.2, 0.16);
+	scale13.render();
+
+	var scale14 = new Cone();
+	scale14.color = [0.18, 0.46, 0.34, 1.0];
+	scale14.matrix = new Matrix4(neck2.matrix);
+	scale14.matrix.rotate(110, 1, 0, 0);
+	scale14.matrix.translate(0.5, 0.6, -2); //z is x
+	scale14.matrix.scale(0.16, 0.3, 0.16);
+	scale14.render();
+
+	var scale15 = new Cone();
+	scale15.color = [0.18, 0.46, 0.34, 1.0];
+	scale15.matrix = new Matrix4(neck5.matrix);
+	scale15.matrix.rotate(90, 1, 0, 0);
+	scale15.matrix.translate(0.5,1, -0.6); 
+	scale15.matrix.scale(0.16, 0.4, 0.2);
+	scale15.render();
+
+	var scale16 = new Cone();
+	scale16.color = [0.18, 0.46, 0.34, 1.0];
+	scale16.matrix = new Matrix4(head2.matrix);
+	scale16.matrix.rotate(120, 1, 0, 0);
+	scale16.matrix.translate(0.5, 2.3, 1);
+	scale16.matrix.scale(0.16, 0.4, 0.2);
+	scale16.render();
+
+
 
 	// Draw left arm
 	// var yellow = new Cube();
