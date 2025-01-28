@@ -194,7 +194,10 @@ function tick() {
 // let g_tailAnimation = false;
 let g_tailAngle = 0;
 let g_neckAngle = 0;
-let g_dragonAnimation = true; // Toggle for dragon animation
+let g_bodyAngle = 0;
+let g_mouthAngle = 0;
+
+let g_dragonAnimation = false; // Toggle for dragon animation
 let g_dragonFloatOffset = 0; // Global offset for floating animation
 
 function updateAnimationAngles() {
@@ -205,6 +208,10 @@ function updateAnimationAngles() {
 		g_tailAngle = -6 * Math.cos(g_seconds + Math.PI / 4);
 		// Neck rotation: Smooth oscillating rotation
 		g_neckAngle = 10 * Math.sin(g_seconds); // Adjust amplitude (10) as needed
+		// Body rotation:
+		g_bodyAngle = 5 * Math.sin(g_seconds); // Adjust amplitude (5) as needed
+		// Mouth angle:
+		g_mouthAngle = 15 * Math.abs(Math.sin(g_seconds * 2)); // Always negative
 	}
 }
 
@@ -253,7 +260,7 @@ function renderAllShapes() {
 	belly1.color = [0.58, 0.0, 0.06, 1.0];
 	belly1.matrix = new Matrix4(neck2.matrix);
 	belly1.matrix.translate(-0.05, -0.9, 0.41);
-	belly1.matrix.rotate(25, -0.6, 0, 0);
+	belly1.matrix.rotate(25 + g_bodyAngle, -0.6, 0, 0);
 	belly1.matrix.scale(1.1, 1.1, 1.1);
 	belly1.render();
 
@@ -261,7 +268,7 @@ function renderAllShapes() {
 	belly2.color = [0.58, 0.0, 0.06, 1.0];
 	belly2.matrix = new Matrix4(belly1.matrix);
 	belly2.matrix.translate(-0.05, -0.9, 0.41);
-	belly2.matrix.rotate(25, -0.6, 0, 0);
+	belly2.matrix.rotate(25 + g_bodyAngle * 0.8, -0.6, 0, 0);
 	belly2.matrix.scale(1.1, 1.1, 1.1);
 	belly2.render();
 
@@ -269,14 +276,14 @@ function renderAllShapes() {
 	belly3.color = [0.58, 0.0, 0.06, 1.0];
 	belly3.matrix = new Matrix4(belly2.matrix);
 	belly3.matrix.translate(0, -0.9, 0.4);
-	belly3.matrix.rotate(25 + g_tailAngle, -1, 0, 0);
+	belly3.matrix.rotate(25 + g_bodyAngle * 0.6, -1, 0, 0);
 	belly3.render();
 
 	var belly4 = new Cube();
 	belly4.color = [0.58, 0.0, 0.06, 1.0];
 	belly4.matrix = new Matrix4(belly3.matrix);
 	belly4.matrix.translate(0, -0.9, 0.4);
-	belly4.matrix.rotate(25, -1, 0, 0);
+	belly4.matrix.rotate(25 + g_tailAngle, -1, 0, 0);
 	belly4.render();
 
 	var belly5 = new Cube();
@@ -487,6 +494,7 @@ function renderAllShapes() {
 	neck7.matrix = new Matrix4(neck6.matrix);
 	neck7.matrix.translate(0, 0.55, 0.1);
 	neck7.matrix.rotate(-25, 0.6, 0, 0);
+	// neck7.matrix.rotate(-25 + g_neckAngle * 0.4, 0, 1, 0); // Slight motion added
 	neck7.render();
 
 	var neck8 = new Cube();
@@ -533,15 +541,18 @@ function renderAllShapes() {
 	nose2.color = [0.58, 0.0, 0.06, 1.0];
 	nose2.matrix = new Matrix4(head2.matrix);
 	nose2.matrix.translate(0, 0, -1);
-	// nose2.matrix.rotate(270, 1, 0, 0);
 	nose2.matrix.scale(1, 0.4, 1);
 	nose2.render();
 
 	var mouth1 = new Cube();
 	mouth1.color = [0.58, 0.0, 0.06, 1.0];
 	mouth1.matrix = new Matrix4(nose2.matrix);
-	mouth1.matrix.translate(0, -0.2, 0.2);
+	mouth1.matrix.translate(0, -0.17, 0.2);
+	mouth1.matrix.rotate(30, 1, 0, 0); // Rotate around the x-axis
+
+	// mouth1.matrix.translate(0, -0.2 - g_mouthAngle * 0.1, 0.2); // Dynamic opening/closing
 	mouth1.matrix.scale(0.9, 1, 1);
+
 	mouth1.render();
 
 	var horn1 = new Cube();
