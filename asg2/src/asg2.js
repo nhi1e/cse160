@@ -747,7 +747,7 @@ function renderAllShapes() {
 	scale15.color = [0.18, 0.46, 0.34, 1.0];
 	scale15.matrix = new Matrix4(neck5.matrix);
 	scale15.matrix.rotate(90, 1, 0, 0);
-	scale15.matrix.translate(0.5,1, -0.6); 
+	scale15.matrix.translate(0.5, 1, -0.6);
 	scale15.matrix.scale(0.16, 0.4, 0.2);
 	scale15.render();
 
@@ -759,27 +759,94 @@ function renderAllShapes() {
 	scale16.matrix.scale(0.16, 0.4, 0.2);
 	scale16.render();
 
+	var scale17 = new Cone();
+	scale17.color = [0.18, 0.46, 0.34, 1.0];
+	scale17.matrix = new Matrix4(neck7.matrix);
+	scale17.matrix.rotate(90, 1, 0, 0);
+	scale17.matrix.translate(0.5, 1, -0.8);
+	scale17.matrix.scale(0.16, 0.4, 0.2);
+	scale17.render();
+
+	var scale18 = new Cone();
+	scale18.color = [0.18, 0.46, 0.34, 1.0];
+	scale18.matrix = new Matrix4(neck8.matrix);
+	scale18.matrix.rotate(90, 1, 0, 0);
+	scale18.matrix.translate(0.5, 1, -0.8);
+	scale18.matrix.scale(0.16, 0.4, 0.2);
+	scale18.render();
+
+	//back left leg
+	const legBL = new TruncatedCone(1.0, 0.5, 2.7, 36); //x, y, z, n
+	legBL.color = [0.58, 0.0, 0.06, 1.0];
+	legBL.matrix = new Matrix4(belly5.matrix);
+	legBL.matrix.rotate(90, 1, 0, -3);
+	legBL.matrix.rotate(60, 0, 0, -1); //x is x, y is z
+	legBL.matrix.rotate(30, -1, 0, 0); //x is x, y is z
+	legBL.matrix.scale(0.4, 0.4, 0.4);
+	legBL.matrix.translate(-2.3, 0.6, 1); //x is x, y is z
+	legBL.render();
+
+	const legBL2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
+	legBL2.color = [0.58, 0.0, 0.06, 1.0];
+	legBL2.matrix = new Matrix4(legBL.matrix);
+	legBL2.matrix.rotate(90, -1, 0, 0);
+	legBL2.matrix.translate(0, 0, 2.1);//x is z, y is 
+	legBL2.render();
+
+	const legBL3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
+	legBL3.color = [0.58, 0.0, 0.06, 1.0];
+	legBL3.matrix = new Matrix4(legBL2.matrix);
+	legBL3.matrix.rotate(180, 1, 0, 0);
+	legBL3.matrix.translate(0, -3.5, 0);//y is z, z is z
+	legBL3.render();
+
+	const legBL4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+	legBL4toe1.color = [0.58, 1.0, 0.06, 1.0];
+	legBL4toe1.matrix = new Matrix4(legBL3.matrix);
+	legBL4toe1.matrix.rotate(180, 1.1, -1, 0);
+	legBL4toe1.matrix.translate(-0.2, 0, 0.1);//y is z, x is y
+	legBL4toe1.render();
+
+	const legBL4toe1nail = new TruncatedCone(0.08, 0.15, 0.8, 36); //x, y, z, n
+	legBL4toe1nail.color = [0.58, 1.0, 0.06, 1.0];
+	legBL4toe1nail.matrix = new Matrix4(legBL4toe1.matrix);
+	legBL4toe1nail.matrix.rotate(180, 1.1, -1, 0);
+	legBL4toe1nail.matrix.translate(-1.2,-0.8, 0);//y is y, x is z
+	legBL4toe1nail.render();
+
+	const legBL4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+	legBL4toe2.color = [0.58, 1.0, 0.06, 1.0];
+	legBL4toe2.matrix = new Matrix4(legBL3.matrix);
+	legBL4toe2.matrix.rotate(180, 1.1, -1, 0);
+	legBL4toe2.matrix.rotate(40, 1, 0, 0);
+	legBL4toe2.matrix.translate(-0.15, 0, 0.1);//y is z, x is y
+	legBL4toe2.render();
+
+	const legBL4toe2nail = new TruncatedCone(0.08, 0.15, 0.8, 36); //x, y, z, n
+	legBL4toe2nail.color = [0.58, 1.0, 0.06, 1.0];
+	legBL4toe2nail.matrix = new Matrix4(legBL4toe2.matrix);
+	legBL4toe2nail.matrix.rotate(180, 1.1, -1, 0);
+	legBL4toe2nail.matrix.translate(-1.2,-0.8, 0);//y is y, x is z
+	legBL4toe2nail.render();
+
+	const legBL4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+	legBL4toe3.color = [0.58, 1.0, 0.06, 1.0];
+	legBL4toe3.matrix = new Matrix4(legBL3.matrix);
+	legBL4toe3.matrix.rotate(180, 1.1, -1, 0);
+	legBL4toe3.matrix.rotate(80, 1, 0, 0);
+	legBL4toe3.matrix.translate(-0.15, 0, 0.1);//y is z, x is y	
+	legBL4toe3.render();
+
+	const legBL4toe3nail = new TruncatedCone(0.08, 0.15, 0.8, 36); //x, y, z, n
+	legBL4toe3nail.color = [0.58, 1.0, 0.06, 1.0];
+	legBL4toe3nail.matrix = new Matrix4(legBL4toe3.matrix);
+	legBL4toe3nail.matrix.rotate(180, 1.1, -1, 0);
+	legBL4toe3nail.matrix.translate(-1.2,-0.8, 0);//y is y, x is z
+	legBL4toe3nail.render();
+	
 
 
-	// Draw left arm
-	// var yellow = new Cube();
-	// yellow.color = [1.0, 1.0, 0.0, 1.0];
-	// yellow.matrix.setTranslate(0, -0.5, 0);
+	//back right leg
 
-	// yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
 
-	// var yellowCoordinatesMat = new Matrix4(yellow.matrix);
-	// yellow.matrix.scale(0.25, 0.7, 0.5);
-	// yellow.matrix.translate(-0.5, 0, 0);
-	// yellow.render();
-
-	// // test box
-	// var box = new Cube();
-	// box.color = [1.0, 0.0, 1.0, 1.0];
-	// box.matrix = yellowCoordinatesMat; //attach to yellow arm
-	// box.matrix.translate(0, 0.65, 0);
-	// box.matrix.rotate(g_magentaAngle, 0, 0, 1);
-	// box.matrix.scale(0.3, 0.3, 0.3);
-	// box.matrix.translate(-0.5, 0, -0.001);
-	// box.render();
 }
