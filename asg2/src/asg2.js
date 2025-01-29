@@ -89,6 +89,7 @@ let g_selectedSegments = 10;
 let g_globalAngle = 0;
 let g_tailAngleX = 0;
 let g_tailAngleZ = 0;
+let g_legAngle = 0;
 
 //set up actions for html ui elements
 function addActionsForHtmlUI() {
@@ -212,7 +213,7 @@ function updateAnimationAngles() {
 
 		// Tail rotation along both X and Z axes for a more dynamic effect
 		g_tailAngleX = 5 * Math.sin(g_seconds * 2); // Rotate along X-axis
-		g_tailAngleZ = -8 * Math.cos(g_seconds + Math.PI / 4); // Rotate along Z-axis
+		g_tailAngleZ = -6 * Math.cos(g_seconds + Math.PI / 4); // Rotate along Z-axis
 
 		// Neck rotation: Smooth oscillating rotation
 		g_neckAngle = 10 * Math.sin(g_seconds); // Adjust amplitude (10) as needed
@@ -220,6 +221,8 @@ function updateAnimationAngles() {
 		g_bodyAngle = 5 * Math.sin(g_seconds); // Adjust amplitude (5) as needed
 		// Mouth angle:
 		g_mouthAngle = 15 * Math.abs(Math.sin(g_seconds * 2)); // Always negative
+
+		g_legAngle = g_bodyAngle * 2; // Amplify a bit for natural effect
 	}
 }
 
@@ -315,6 +318,7 @@ function renderAllShapes() {
 	belly7.matrix = new Matrix4(belly6.matrix);
 	belly7.matrix.translate(0.07, -0.35, -0.2);
 	belly7.matrix.rotate(30 + g_tailAngleX * 0.7, 1.3, 0, 0);
+	belly7.matrix.rotate(g_tailAngleZ * 0.2, 0, 0, 2); // Rotate gradually along Z-axis
 	belly7.matrix.scale(0.9, 0.9, 0.9);
 	belly7.render();
 
@@ -368,7 +372,8 @@ function renderAllShapes() {
 	tail6.color = [0.58, 0.0, 0.06, 1.0];
 	tail6.matrix = new Matrix4(tail5.matrix);
 	tail6.matrix.translate(0.03, -0.8, 0.18);
-	tail6.matrix.rotate(10, -1.3, 0, 0);
+	tail6.matrix.rotate(10 + g_tailAngleX * 0.35, -1.3, 0, 0);
+	tail6.matrix.rotate(g_tailAngleZ * 0.45, 0, 0, 2); // Rotate gradually along Z-axis
 	tail6.matrix.scale(0.9, 0.9, 0.9);
 	tail6.render();
 
@@ -376,7 +381,8 @@ function renderAllShapes() {
 	tail7.color = [0.58, 0.0, 0.06, 1.0];
 	tail7.matrix = new Matrix4(tail6.matrix);
 	tail7.matrix.translate(0.03, -0.8, 0.3);
-	tail7.matrix.rotate(20, -1.3, 0, 0);
+	tail7.matrix.rotate(20 + g_tailAngleX * 0.3, -1.3, 0, 0);
+	tail7.matrix.rotate(g_tailAngleZ * 0.35, 0, 0, 2); // Rotate gradually along Z-axis
 	tail7.matrix.scale(0.9, 0.9, 0.9);
 	tail7.render();
 
@@ -384,7 +390,8 @@ function renderAllShapes() {
 	tail8.color = [0.58, 0.0, 0.06, 1.0];
 	tail8.matrix = new Matrix4(tail7.matrix);
 	tail8.matrix.translate(0.03, -0.8, 0.3);
-	tail8.matrix.rotate(20, -1.3, 0, 0);
+	tail8.matrix.rotate(20 + g_tailAngleX * 0.25, -1.3, 0, 0);
+	tail8.matrix.rotate(g_tailAngleZ * 0.3, 0, 0, 2); // Rotate gradually along Z-axis
 	tail8.matrix.scale(0.9, 0.9, 0.9);
 	tail8.render();
 
@@ -392,7 +399,8 @@ function renderAllShapes() {
 	tail9.color = [0.58, 0.0, 0.06, 1.0];
 	tail9.matrix = new Matrix4(tail8.matrix);
 	tail9.matrix.translate(0.03, -0.8, 0.3);
-	tail9.matrix.rotate(20, -1.3, 0, 0);
+	tail9.matrix.rotate(20 + g_tailAngleX * 0.2, -1.3, 0, 0);
+	tail9.matrix.rotate(g_tailAngleZ * 0.2, 0, 0, 2); // Rotate gradually along Z-axis
 	tail9.matrix.scale(0.9, 0.9, 0.9);
 	tail9.render();
 
@@ -400,7 +408,7 @@ function renderAllShapes() {
 	tail10.color = [0.58, 0.0, 0.06, 1.0];
 	tail10.matrix = new Matrix4(tail9.matrix);
 	tail10.matrix.translate(0.03, -0.8, 0.3);
-	tail10.matrix.rotate(20, -1.3, 0, 0);
+	tail10.matrix.rotate(20 + g_tailAngleX * 0.15, -1.3, 0, 0);
 	tail10.matrix.scale(0.9, 0.9, 0.9);
 	tail10.render();
 
@@ -408,7 +416,7 @@ function renderAllShapes() {
 	tail11.color = [0.58, 0.0, 0.06, 1.0];
 	tail11.matrix = new Matrix4(tail10.matrix);
 	tail11.matrix.translate(0.03, -0.8, 0.3);
-	tail11.matrix.rotate(20, -1.3, 0, 0);
+	tail11.matrix.rotate(20 + g_tailAngleX * 0.1, -1.3, 0, 0);
 	tail11.matrix.scale(0.9, 0.9, 0.9);
 	tail11.render();
 
@@ -787,6 +795,7 @@ function renderAllShapes() {
 	legBL.matrix.rotate(90, 1, 0, -3);
 	legBL.matrix.rotate(60, 0, 0, -1); //x is x, y is z
 	legBL.matrix.rotate(30, -1, 0, 0); //x is x, y is z
+	legBL.matrix.rotate(g_legAngle, -2, 0, 0); // Apply g_legAngle
 	legBL.matrix.scale(0.4, 0.4, 0.4);
 	legBL.matrix.translate(-2.3, 0.2, 1); //x is x, y is z
 	legBL.render();
@@ -856,6 +865,7 @@ function renderAllShapes() {
 	legBR.matrix.rotate(270, 1, 0, -3);
 	legBR.matrix.rotate(-50, 0, 0, -1); //x is x, y is z
 	legBR.matrix.rotate(15, -1, 0, 0); //x is x, y is z
+	legBR.matrix.rotate(g_legAngle, -2, 0, 0); // Apply g_legAngle
 	legBR.matrix.scale(0.4, 0.4, 0.4);
 	legBR.matrix.translate(-1, -0.8, 0.7); //x is z, y is x, z is y
 	legBR.render();
@@ -919,4 +929,27 @@ function renderAllShapes() {
 	legBR4toe3nail.matrix.rotate(90, 1, 0, 0);
 	legBR4toe3nail.matrix.translate(0, -0.7, -1.2); //correct coords
 	legBR4toe3nail.render();
+
+	//front left leg
+	const legFL = new TruncatedCone(0.8, 0.5, 2.7, 36); //x, y, z, n
+	legFL.color = [0.52, 0, 0.12, 1.0];
+	legFL.matrix = new Matrix4(belly5.matrix);
+	legFL.matrix.rotate(90, 1, 0, -3);
+	legFL.matrix.rotate(60, 0, 0, -1); //x is x, y is z
+	legFL.matrix.rotate(30, -1, 0, 0); //x is x, y is z
+	legFL.matrix.scale(0.4, 0.4, 0.4);
+	legFL.matrix.translate(-10, -10, -2); //x is x, y is z, z is y
+	legFL.matrix.rotate(180, 0, 0, 1); // Apply g_legAngle
+	legFL.matrix.translate(-1.7, -3, 0); // x is z,y is x, z is y
+	legFL.matrix.rotate(-140, 1, 0, 0); //x is y
+	legFL.matrix.rotate(5, 0, 0, 1); //z is x
+	legFL.render();
+
+	const legFL2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
+	legFL2.color = [0.52, 0, 0.12, 1.0];
+	legFL2.matrix = new Matrix4(legFL.matrix);
+	legFL2.matrix.rotate(90, 1, 0, 0); //rotate round z
+	legFL2.matrix.rotate(55, 0, 0, -1); //rotate round y
+	legFL2.matrix.translate(0, -0.4, -2.5); //negative z is down
+	legFL2.render();
 }
