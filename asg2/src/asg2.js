@@ -433,7 +433,7 @@ function renderAllShapes() {
 	//smaller z = thinner
 	//bigger y = taller triangle
 	var tailtip1 = new TrianglePrism();
-	tailtip1.color = [0.18, 0.46, 0.34, 1.0];
+	tailtip1.color = [0.05, 0.25, 0.05, 1];
 	tailtip1.matrix = new Matrix4(tail12.matrix);
 	tailtip1.matrix.translate(0.9, 0, 0.6);
 	tailtip1.matrix.rotate(180, 0, 0, 1);
@@ -441,7 +441,7 @@ function renderAllShapes() {
 	tailtip1.render();
 
 	var tailtip2 = new TrianglePrism();
-	tailtip2.color = [0.18, 0.46, 0.34, 1.0];
+	tailtip2.color = [0.05, 0.25, 0.05, 1];
 	tailtip2.matrix = new Matrix4(tailtip1.matrix);
 	tailtip2.matrix.translate(0.6, 0.5, 0.1);
 	tailtip2.matrix.scale(0.6, 0.6, 1);
@@ -449,14 +449,14 @@ function renderAllShapes() {
 	tailtip2.render();
 
 	var tailtip3 = new TrianglePrism();
-	tailtip3.color = [0.18, 0.46, 0.34, 1.0];
+	tailtip3.color = [0.05, 0.25, 0.05, 1];
 	tailtip3.matrix = new Matrix4(tailtip1.matrix);
 	tailtip3.matrix.scale(0.6, 0.6, 1);
 	tailtip3.matrix.rotate(50, 0, 0, 1);
 	tailtip3.render();
 
 	var tailtip4 = new TrianglePrism();
-	tailtip4.color = [0.18, 0.46, 0.34, 1.0];
+	tailtip4.color = [0.05, 0.25, 0.05, 1];
 	tailtip4.matrix = new Matrix4(tailtip1.matrix);
 	tailtip4.matrix.translate(-0.06, 0, 0);
 	tailtip4.matrix.scale(0.7, 0.5, 1);
@@ -464,7 +464,7 @@ function renderAllShapes() {
 	tailtip4.render();
 
 	var tailtip5 = new TrianglePrism();
-	tailtip5.color = [0.18, 0.46, 0.34, 1.0];
+	tailtip5.color = [0.05, 0.25, 0.05, 1];
 	tailtip5.matrix = new Matrix4(tailtip1.matrix);
 	tailtip5.matrix.translate(0.68, 0.4, 0);
 	tailtip5.matrix.scale(0.7, 0.5, 1);
@@ -652,7 +652,7 @@ function renderAllShapes() {
 	//scales
 
 	var scale2 = new Cone();
-	scale2.color = [0.18, 0.46, 0.34, 1.0];
+	scale2.color = [0.05, 0.25, 0.05, 1];
 	scale2.matrix = new Matrix4(belly3.matrix);
 	scale2.matrix.rotate(90, 1, 0, 0);
 	scale2.matrix.translate(0.5, 0.9, -0.3); //z is x
@@ -660,7 +660,7 @@ function renderAllShapes() {
 	scale2.render();
 
 	var scale3 = new Cone();
-	scale3.color = [0.18, 0.46, 0.34, 1.0];
+	scale3.color = [0.05, 0.25, 0.05, 1];
 	scale3.matrix = new Matrix4(belly4.matrix);
 	scale3.matrix.rotate(100, 1, 0, 0);
 	scale3.matrix.translate(0.5, 0.85, -0.3); //z is x
@@ -668,7 +668,7 @@ function renderAllShapes() {
 	scale3.render();
 
 	var scale4 = new Cone();
-	scale4.color = [0.18, 0.46, 0.34, 1.0];
+	scale4.color = [0.05, 0.25, 0.05, 1];
 	scale4.matrix = new Matrix4(belly5.matrix);
 	scale4.matrix.rotate(90, 1, 0, 0);
 	scale4.matrix.translate(0.5, 0.9, -0.4); //z is x
@@ -676,7 +676,7 @@ function renderAllShapes() {
 	scale4.render();
 
 	var scale5 = new Cone();
-	scale5.color = [0.18, 0.46, 0.34, 1.0];
+	scale5.color = [0.05, 0.25, 0.05, 1];
 	scale5.matrix = new Matrix4(belly6.matrix);
 	scale5.matrix.rotate(90, 1, 0, 0);
 	scale5.matrix.translate(0.5, 0.9, -0.4); //z is x
@@ -684,7 +684,7 @@ function renderAllShapes() {
 	scale5.render();
 
 	var scale6 = new Cone();
-	scale6.color = [0.18, 0.46, 0.34, 1.0];
+	scale6.color = [0.05, 0.25, 0.05, 1];
 	scale6.matrix = new Matrix4(belly7.matrix);
 	scale6.matrix.rotate(90, 1, 0, 0);
 	scale6.matrix.translate(0.5, 1, -0.4); //z is x
@@ -692,7 +692,7 @@ function renderAllShapes() {
 	scale6.render();
 
 	var scale7 = new Cone();
-	scale7.color = [0.18, 0.46, 0.34, 1.0];
+	scale7.color = [0.05, 0.25, 0.05, 1];
 	scale7.matrix = new Matrix4(tail1.matrix);
 	scale7.matrix.rotate(90, 1, 0, 0);
 	scale7.matrix.translate(0.5, 1, -0.4); //z is x
@@ -700,7 +700,7 @@ function renderAllShapes() {
 	scale7.render();
 
 	var scale8 = new Cone();
-	scale8.color = [0.18, 0.46, 0.34, 1.0];
+	scale8.color = [0.05, 0.25, 0.05, 1];
 	scale8.matrix = new Matrix4(tail2.matrix);
 	scale8.matrix.rotate(90, 1, 0, 0);
 	scale8.matrix.translate(0.5, 1, -0.4); //z is x
@@ -708,7 +708,7 @@ function renderAllShapes() {
 	scale8.render();
 
 	var scale9 = new Cone();
-	scale9.color = [0.18, 0.46, 0.34, 1.0];
+	scale9.color = [0.05, 0.25, 0.05, 1];
 	scale9.matrix = new Matrix4(tail3.matrix);
 	scale9.matrix.rotate(90, 1, 0, 0);
 	scale9.matrix.translate(0.5, 1, -0.4); //z is x
@@ -716,7 +716,7 @@ function renderAllShapes() {
 	scale9.render();
 
 	var scale10 = new Cone();
-	scale10.color = [0.18, 0.46, 0.34, 1.0];
+	scale10.color = [0.05, 0.25, 0.05, 1];
 	scale10.matrix = new Matrix4(tail4.matrix);
 	scale10.matrix.rotate(90, 1, 0, 0);
 	scale10.matrix.translate(0.5, 1, -0.4); //z is x
@@ -725,7 +725,7 @@ function renderAllShapes() {
 
 	//going from scale2 to head now
 	var scale11 = new Cone();
-	scale11.color = [0.18, 0.46, 0.34, 1.0];
+	scale11.color = [0.05, 0.25, 0.05, 1];
 	scale11.matrix = new Matrix4(belly2.matrix);
 	scale11.matrix.rotate(90, 1, 0, 0);
 	scale11.matrix.translate(0.5, 0.9, -0.4); //z is x
@@ -733,7 +733,7 @@ function renderAllShapes() {
 	scale11.render();
 
 	var scale12 = new Cone();
-	scale12.color = [0.18, 0.46, 0.34, 1.0];
+	scale12.color = [0.05, 0.25, 0.05, 1];
 	scale12.matrix = new Matrix4(belly1.matrix);
 	scale12.matrix.rotate(80, 1, 0, 0);
 	scale12.matrix.translate(0.5, 1.1, -0.4); //z is x
@@ -741,7 +741,7 @@ function renderAllShapes() {
 	scale12.render();
 
 	var scale13 = new Cone();
-	scale13.color = [0.18, 0.46, 0.34, 1.0];
+	scale13.color = [0.05, 0.25, 0.05, 1];
 	scale13.matrix = new Matrix4(neck1.matrix);
 	scale13.matrix.rotate(90, 1, 0, 0);
 	scale13.matrix.translate(0.5, 1, -0.6); //z is x
@@ -749,7 +749,7 @@ function renderAllShapes() {
 	scale13.render();
 
 	var scale14 = new Cone();
-	scale14.color = [0.18, 0.46, 0.34, 1.0];
+	scale14.color = [0.05, 0.25, 0.05, 1];
 	scale14.matrix = new Matrix4(neck2.matrix);
 	scale14.matrix.rotate(110, 1, 0, 0);
 	scale14.matrix.translate(0.5, 0.6, -2); //z is x
@@ -757,7 +757,7 @@ function renderAllShapes() {
 	scale14.render();
 
 	var scale15 = new Cone();
-	scale15.color = [0.18, 0.46, 0.34, 1.0];
+	scale15.color = [0.05, 0.25, 0.05, 1];
 	scale15.matrix = new Matrix4(neck5.matrix);
 	scale15.matrix.rotate(90, 1, 0, 0);
 	scale15.matrix.translate(0.5, 1, -0.6);
@@ -765,7 +765,7 @@ function renderAllShapes() {
 	scale15.render();
 
 	var scale16 = new Cone();
-	scale16.color = [0.18, 0.46, 0.34, 1.0];
+	scale16.color = [0.05, 0.25, 0.05, 1];
 	scale16.matrix = new Matrix4(head2.matrix);
 	scale16.matrix.rotate(120, 1, 0, 0);
 	scale16.matrix.translate(0.5, 2.3, 1);
@@ -773,7 +773,7 @@ function renderAllShapes() {
 	scale16.render();
 
 	var scale17 = new Cone();
-	scale17.color = [0.18, 0.46, 0.34, 1.0];
+	scale17.color = [0.05, 0.25, 0.05, 1];
 	scale17.matrix = new Matrix4(neck7.matrix);
 	scale17.matrix.rotate(90, 1, 0, 0);
 	scale17.matrix.translate(0.5, 1, -0.8);
@@ -781,7 +781,7 @@ function renderAllShapes() {
 	scale17.render();
 
 	var scale18 = new Cone();
-	scale18.color = [0.18, 0.46, 0.34, 1.0];
+	scale18.color = [0.05, 0.25, 0.05, 1];
 	scale18.matrix = new Matrix4(neck8.matrix);
 	scale18.matrix.rotate(90, 1, 0, 0);
 	scale18.matrix.translate(0.5, 1, -0.8);
@@ -1083,6 +1083,4 @@ function renderAllShapes() {
 	legFR4toe3nail.matrix.rotate(90, 1, 0, 0);
 	legFR4toe3nail.matrix.translate(0, -0.8, -1.2);
 	legFR4toe3nail.render();
-
-
 }
