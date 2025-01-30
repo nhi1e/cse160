@@ -90,6 +90,8 @@ let g_globalAngle = 0;
 let g_tailAngleX = 0;
 let g_tailAngleZ = 0;
 let g_legAngle = 0;
+let isBreathingFire = false;
+let fireBlocks = [];
 
 //set up actions for html ui elements
 function addActionsForHtmlUI() {
@@ -137,6 +139,11 @@ function addMouseDragControls() {
 		lastMouseY = event.clientY;
 	});
 
+	canvas.addEventListener("click", function (event) {
+		isBreathingFire = true;
+		generateFireBlocks();
+	});
+
 	canvas.addEventListener("mousemove", (event) => {
 		if (isDragging) {
 			// Calculate mouse movement
@@ -165,6 +172,21 @@ function addMouseDragControls() {
 		isDragging = false;
 	});
 }
+
+function generateFireBlocks() {
+	fireBlocks = [];
+	for (let i = 0; i < 15; i++) {
+		fireBlocks.push({
+			x: Math.random() * 0.2 - 0.05, // Small random offsets
+			y: Math.random() * 0.1 - 0.05,
+			z: 0, // Start in front of the nose
+			scale: Math.random() * 0.1 + 0.1, // Varying size
+			speed: Math.random() * 0.02 + 0.02, // Different speeds
+			lifetime: Math.random() * 1.0 + 0.5, // How long fire stays
+		});
+	}
+}
+
 function main() {
 	setupWebGL();
 	connectVariablesToGLSL();
@@ -223,6 +245,19 @@ function updateAnimationAngles() {
 		g_mouthAngle = 15 * Math.abs(Math.sin(g_seconds * 2)); // Always negative
 
 		g_legAngle = g_bodyAngle * 2; // Amplify a bit for natural effect
+	}
+
+	if (isBreathingFire) {
+		fireBlocks.forEach((fire) => {
+			fire.y += fire.speed; // Move fire outward
+			fire.lifetime -= 0.02;
+		});
+
+		fireBlocks = fireBlocks.filter((fire) => fire.lifetime > 0);
+
+		if (fireBlocks.length === 0) {
+			isBreathingFire = false; // Stop fire animation when all blocks disappear
+		}
 	}
 }
 
@@ -1083,4 +1118,23 @@ function renderAllShapes() {
 	legFR4toe3nail.matrix.rotate(90, 1, 0, 0);
 	legFR4toe3nail.matrix.translate(0, -0.8, -1.2);
 	legFR4toe3nail.render();
+
+	if (isBreathingFire && fireBlocks.length > 0) {
+		let fireOrigin = new Matrix4();
+
+		fireOrigin = new Matrix4(nose1.matrix);
+		fireOrigin.translate(0.5, 1, 0.5); //x is x, y is z, z is y
+
+		fireBlocks.forEach((fire) => {
+			let fireCube = new Cube();
+			fireCube.color = [1.0, 0.4, 0.0, 1.0]; // Orange fire
+			fireCube.matrix = new Matrix4(fireOrigin);
+
+			fireCube.matrix.translate(fire.z, fire.y, -fire.x);
+			fireCube.matrix.rotate(90, 0, 0, 1);
+			fireCube.matrix.scale(fire.scale, fire.scale, fire.scale);
+
+			fireCube.render();
+		});
+	}
 }
