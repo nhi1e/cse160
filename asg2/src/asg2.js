@@ -93,6 +93,9 @@ let g_legAngle = 0;
 let isBreathingFire = false;
 let fireBlocks = [];
 let fireBlocksRight = []; // Fire from the right nostril
+let isSneezing = false;
+let sneezeStartTime = 0;
+const sneezeDuration = 0.5; // Sneezing effect lasts 0.5 seconds
 
 //set up actions for html ui elements
 function addActionsForHtmlUI() {
@@ -134,8 +137,15 @@ function addMouseDragControls() {
 	});
 
 	canvas.addEventListener("click", function (event) {
-		isBreathingFire = true;
-		generateFireBlocks();
+		if (event.shiftKey) {
+			isBreathingFire = true;
+			generateFireBlocks();
+
+			if (!isSneezing) {
+				isSneezing = true;
+				sneezeStartTime = g_seconds; // Record start time
+			}
+		}
 	});
 
 	canvas.addEventListener("mousemove", (event) => {
@@ -248,6 +258,31 @@ function updateAnimationAngles() {
 		g_mouthAngle = 15 * Math.abs(Math.sin(g_seconds * 2)); // Always negative
 
 		g_legAngle = g_bodyAngle * 2; // Amplify a bit for natural effect
+	}
+
+	// if (isSneezing) {
+	// 	let sneezeTimeElapsed = g_seconds - sneezeStartTime;
+
+	// 	if (sneezeTimeElapsed < sneezeDuration) {
+	// 		// Apply sudden jerky motion
+	// 		g_neckAngle = 40 * Math.sin(sneezeTimeElapsed * 10); // Quick neck twitch
+	// 		g_bodyAngle = 15 * Math.sin(sneezeTimeElapsed * 8); // Whole body jerks
+	// 		g_legAngle = 20 * Math.sin(sneezeTimeElapsed * 8);
+	// 	} else {
+	// 		// Reset motion back to normal
+	// 		isSneezing = false;
+	// 	}
+	// }
+
+	if (isSneezing) {
+		let sneezeDuration = g_seconds - sneezeStartTime;
+		if (sneezeDuration < 0.3) {
+			// Small subtle twitch instead of dramatic movement
+			g_neckAngle += Math.sin(sneezeDuration * 20) * 8;
+			g_bodyAngle += Math.sin(sneezeDuration * 15) * 3;
+		} else {
+			isSneezing = false;
+		}
 	}
 
 	if (isBreathingFire) {
