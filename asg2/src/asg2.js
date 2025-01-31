@@ -92,15 +92,10 @@ let g_tailAngleZ = 0;
 let g_legAngle = 0;
 let isBreathingFire = false;
 let fireBlocks = [];
+let fireBlocksRight = []; // Fire from the right nostril
 
 //set up actions for html ui elements
 function addActionsForHtmlUI() {
-	// document.getElementById("TailAnimationOnButton").onclick = function () {
-	// 	g_tailAnimation = true;
-	// };
-	// document.getElementById("TailAnimationOffButton").onclick = function () {
-	// 	g_tailAnimation = false;
-	// };
 	document.getElementById("DragonAnimationOnButton").onclick = function () {
 		g_dragonAnimation = true;
 	};
@@ -108,7 +103,6 @@ function addActionsForHtmlUI() {
 		g_dragonAnimation = false;
 	};
 
-	//Size slider events
 	// Camera slider events
 	document
 		.getElementById("cameraXSlide")
@@ -175,12 +169,23 @@ function addMouseDragControls() {
 
 function generateFireBlocks() {
 	fireBlocks = [];
+	fireBlocksRight = [];
+
 	for (let i = 0; i < 15; i++) {
 		fireBlocks.push({
 			x: Math.random() * 0.2 - 0.05, // Small random offsets
 			y: Math.random() * 0.1 - 0.05,
 			z: 0, // Start in front of the nose
-			scale: Math.random() * 0.1 + 0.1, // Varying size
+			scale: Math.random() * 0.1 + 0.2, // Varying size
+			speed: Math.random() * 0.02 + 0.02, // Different speeds
+			lifetime: Math.random() * 1.0 + 0.5, // How long fire stays
+		});
+
+		fireBlocksRight.push({
+			x: Math.random() * 0.2 - 0.05, // Small random offsets
+			y: Math.random() * 0.1 - 0.05,
+			z: 0, // Start in front of the nose
+			scale: Math.random() * 0.1 + 0.2, // Varying size
 			speed: Math.random() * 0.02 + 0.02, // Different speeds
 			lifetime: Math.random() * 1.0 + 0.5, // How long fire stays
 		});
@@ -230,8 +235,6 @@ function updateAnimationAngles() {
 	if (g_dragonAnimation) {
 		// Use a single sine wave for smoother motion
 		g_dragonFloatOffset = 0.1 * Math.sin(g_seconds);
-		// // Tail follows the dragon's motion with a phase shift
-		// g_tailAngle = -6 * Math.cos(g_seconds + Math.PI / 4);
 
 		// Tail rotation along both X and Z axes for a more dynamic effect
 		g_tailAngleX = 5 * Math.sin(g_seconds * 2); // Rotate along X-axis
@@ -253,7 +256,13 @@ function updateAnimationAngles() {
 			fire.lifetime -= 0.02;
 		});
 
+		fireBlocksRight.forEach((fire) => {
+			fire.y -= fire.speed;
+			fire.lifetime -= 0.02;
+		});
+
 		fireBlocks = fireBlocks.filter((fire) => fire.lifetime > 0);
+		fireBlocksRight = fireBlocksRight.filter((fire) => fire.lifetime > 0);
 
 		if (fireBlocks.length === 0) {
 			isBreathingFire = false; // Stop fire animation when all blocks disappear
@@ -1120,10 +1129,12 @@ function renderAllShapes() {
 	legFR4toe3nail.render();
 
 	if (isBreathingFire && fireBlocks.length > 0) {
-		let fireOrigin = new Matrix4();
+		let fireOrigin = new Matrix4(nose1.matrix);
+		let rightFireOrigin = new Matrix4(nose1.matrix);
 
-		fireOrigin = new Matrix4(nose1.matrix);
-		fireOrigin.translate(0.5, 1, 0.5); //x is x, y is z, z is y
+		// fireOrigin = new Matrix4(nose1.matrix);
+		fireOrigin.translate(0.8, 0, 0.65); //x is x, y is z, z is y
+		rightFireOrigin.translate(0.5, 0, 0.1); //x is x, y is z, z is y
 
 		fireBlocks.forEach((fire) => {
 			let fireCube = new Cube();
@@ -1132,8 +1143,16 @@ function renderAllShapes() {
 
 			fireCube.matrix.translate(fire.z, fire.y, -fire.x);
 			fireCube.matrix.rotate(90, 0, 0, 1);
-			fireCube.matrix.scale(fire.scale, fire.scale, fire.scale);
+			fireCube.matrix.scale(fire.scale, 1.2 * fire.scale, fire.scale);
 
+			fireCube.render();
+		});
+		fireBlocksRight.forEach((fire) => {
+			let fireCube = new Cube();
+			fireCube.color = [1.0, 0.4 + Math.random() * 0.1, 0.0, 1.0];
+			fireCube.matrix = new Matrix4(rightFireOrigin);
+			fireCube.matrix.translate(fire.z, -fire.y, fire.x);
+			fireCube.matrix.scale(fire.scale, fire.scale, fire.scale);
 			fireCube.render();
 		});
 	}
