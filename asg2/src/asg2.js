@@ -184,15 +184,14 @@ function generateFireBlocks() {
 	fireBlocks = [];
 	fireBlocksRight = [];
 	smokeBlocks = [];
-	grayFireBlocks = [];
 
 	for (let i = 0; i < 20; i++) {
-		// Fire particles
+		// More fire particles
 		fireBlocks.push({
-			x: Math.random() * 0.4 - 0.2,
-			y: Math.random() * 0.3 - 0.1,
+			x: Math.random() * 0.4 - 0.2, // Increased spread
+			y: Math.random() * 0.3 - 0.1, // Fire disperses more widely
 			z: 0,
-			scale: Math.random() * 0.15 + 0.3,
+			scale: Math.random() * 0.15 + 0.3, // Larger fire
 			speed: Math.random() * 0.03 + 0.03,
 			lifetime: Math.random() * 1.2 + 0.6,
 		});
@@ -206,24 +205,14 @@ function generateFireBlocks() {
 			lifetime: Math.random() * 1.2 + 0.6,
 		});
 
-		// Gray fire blocks (Mix of smoke and fire effect)
-		grayFireBlocks.push({
-			x: Math.random() * 0.5 - 0.25, // Slightly more spread out
-			y: Math.random() * 0.4 - 0.2, // Floating randomly
-			z: Math.random() * 0.3 - 0.15,
-			scale: Math.random() * 0.2 + 0.25, // Different size
-			speed: Math.random() * 0.02 + 0.015,
-			lifetime: Math.random() * 1.5 + 0.8, // Slightly longer lifetime
-		});
-
 		// Smoke effect
 		smokeBlocks.push({
 			x: Math.random() * 0.4 - 0.2,
 			y: Math.random() * 0.2 + 0.1, // Start slightly above fire
-			z: Math.random() * 0.2 - 0.1,
-			scale: Math.random() * 0.2 + 0.3,
-			speed: Math.random() * 0.02 + 0.015,
-			lifetime: Math.random() * 1.5 + 0.8,
+			z: Math.random() * 0.2 - 0.1, // More dispersed
+			scale: Math.random() * 0.2 + 0.3, // Random smoke sizes
+			speed: Math.random() * 0.02 + 0.015, // Smoke moves slower
+			lifetime: Math.random() * 1.5 + 0.8, // Longer lifetime
 		});
 	}
 }
@@ -372,6 +361,7 @@ function renderAllShapes() {
 	dragonTransform.translate(0, g_dragonFloatOffset, 0); // Move up and down
 
 	//BODY
+
 	var neck1 = new Cube();
 	neck1.color = [0.58, 0.0, 0.06, 1.0];
 	neck1.matrix = new Matrix4(dragonTransform); // Apply floating motion
@@ -606,6 +596,7 @@ function renderAllShapes() {
 	neck5.matrix.translate(0.04, 1, 0.08);
 	neck5.matrix.rotate(g_neckAngle * 0.8, 0, 1, 0.7); // Apply neck rotation
 	neck5.matrix.rotate(g_neckAngleX, 0.9, 0, 0);
+
 	neck5.matrix.scale(0.95, 0.95, 0.95);
 	neck5.matrix.rotate(20, 0.6, 0, 0);
 	neck5.render();
@@ -661,7 +652,6 @@ function renderAllShapes() {
 	var nose1 = new TrianglePrism();
 	nose1.color = [0.58, 0.0, 0.06, 1.0];
 	nose1.matrix = new Matrix4(head2.matrix);
-	// nose1.matrix.translate(0, 0.8, 0.16);
 	nose1.matrix.translate(0, 0.81, 0.18); // Slightly moved forward (was 0.8, 0.16)
 	nose1.matrix.rotate(270, 1, 0, 0);
 	nose1.matrix.rotate(90, 0, 1, 0);
