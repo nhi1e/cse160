@@ -180,24 +180,36 @@ function addMouseDragControls() {
 function generateFireBlocks() {
 	fireBlocks = [];
 	fireBlocksRight = [];
+	smokeBlocks = [];
 
-	for (let i = 0; i < 15; i++) {
+	for (let i = 0; i < 20; i++) {
+		// More fire particles
 		fireBlocks.push({
-			x: Math.random() * 0.2 - 0.05, // Small random offsets
-			y: Math.random() * 0.1 - 0.05,
-			z: 0, // Start in front of the nose
-			scale: Math.random() * 0.1 + 0.2, // Varying size
-			speed: Math.random() * 0.02 + 0.02, // Different speeds
-			lifetime: Math.random() * 1.0 + 0.5, // How long fire stays
+			x: Math.random() * 0.4 - 0.2, // Increased spread
+			y: Math.random() * 0.3 - 0.1, // Fire disperses more widely
+			z: 0,
+			scale: Math.random() * 0.15 + 0.3, // Larger fire
+			speed: Math.random() * 0.03 + 0.03,
+			lifetime: Math.random() * 1.2 + 0.6,
 		});
 
 		fireBlocksRight.push({
-			x: Math.random() * 0.2 - 0.05, // Small random offsets
-			y: Math.random() * 0.1 - 0.05,
-			z: 0, // Start in front of the nose
-			scale: Math.random() * 0.1 + 0.2, // Varying size
-			speed: Math.random() * 0.02 + 0.02, // Different speeds
-			lifetime: Math.random() * 1.0 + 0.5, // How long fire stays
+			x: Math.random() * 0.4 - 0.2,
+			y: Math.random() * 0.3 - 0.1,
+			z: 0,
+			scale: Math.random() * 0.15 + 0.3,
+			speed: Math.random() * 0.03 + 0.03,
+			lifetime: Math.random() * 1.2 + 0.6,
+		});
+
+		// Smoke effect
+		smokeBlocks.push({
+			x: Math.random() * 0.4 - 0.2,
+			y: Math.random() * 0.2 + 0.1, // Start slightly above fire
+			z: Math.random() * 0.2 - 0.1, // More dispersed
+			scale: Math.random() * 0.2 + 0.3, // Random smoke sizes
+			speed: Math.random() * 0.02 + 0.015, // Smoke moves slower
+			lifetime: Math.random() * 1.5 + 0.8, // Longer lifetime
 		});
 	}
 }
@@ -287,10 +299,9 @@ function updateAnimationAngles() {
 		}
 	}
 
-	// Fire movement
 	if (isBreathingFire) {
 		fireBlocks.forEach((fire) => {
-			fire.y += fire.speed; // Move fire outward
+			fire.y += fire.speed;
 			fire.lifetime -= 0.02;
 		});
 
@@ -299,12 +310,17 @@ function updateAnimationAngles() {
 			fire.lifetime -= 0.02;
 		});
 
-		// Remove fire blocks after lifetime ends
+		smokeBlocks.forEach((smoke) => {
+			smoke.y += smoke.speed; // Smoke rises upwards
+			smoke.lifetime -= 0.015; // Smoke lasts slightly longer
+		});
+
+		// Remove expired fire and smoke
 		fireBlocks = fireBlocks.filter((fire) => fire.lifetime > 0);
 		fireBlocksRight = fireBlocksRight.filter((fire) => fire.lifetime > 0);
+		smokeBlocks = smokeBlocks.filter((smoke) => smoke.lifetime > 0);
 
-		// Stop fire animation when all blocks disappear
-		if (fireBlocks.length === 0) {
+		if (fireBlocks.length === 0 && smokeBlocks.length === 0) {
 			isBreathingFire = false;
 		}
 	}
@@ -1175,32 +1191,23 @@ function renderAllShapes() {
 	legFR4toe3nail.matrix.translate(0, -0.8, -1.2);
 	legFR4toe3nail.render();
 
-	if (isBreathingFire && fireBlocks.length > 0) {
-		let fireOrigin = new Matrix4(nose1.matrix);
-		let rightFireOrigin = new Matrix4(nose1.matrix);
+	if (isBreathingFire && smokeBlocks.length > 0) {
+		let smokeOrigin = new Matrix4(nose1.matrix);
+		smokeOrigin.translate(0.65, 0, 0.6); // Centered above fire
 
-		// fireOrigin = new Matrix4(nose1.matrix);
-		fireOrigin.translate(0.8, 0, 0.65); //x is x, y is z, z is y
-		rightFireOrigin.translate(0.5, 0, 0.1); //x is x, y is z, z is y
+		smokeBlocks.forEach((smoke) => {
+			let smokeCube = new Cube();
+			let alpha = Math.max(0.2, smoke.lifetime); // Fade out effect
 
-		fireBlocks.forEach((fire) => {
-			let fireCube = new Cube();
-			fireCube.color = [1.0, 0.4, 0.0, 1.0]; // Orange fire
-			fireCube.matrix = new Matrix4(fireOrigin);
+			// smokeCube.color = [0.5, 0.5, 0.5, alpha]; // Gray smoke
+			smokeCube.color = [1.0, 0.4, 0.0, alpha]; // Orange fire
 
-			fireCube.matrix.translate(fire.z, fire.y, -fire.x);
-			fireCube.matrix.rotate(90, 0, 0, 1);
-			fireCube.matrix.scale(fire.scale, 1.2 * fire.scale, fire.scale);
+			smokeCube.matrix = new Matrix4(smokeOrigin);
+			smokeCube.matrix.translate(0, 0, -0.3);
+			smokeCube.matrix.translate(smoke.x, smoke.y, smoke.z);
+			smokeCube.matrix.scale(smoke.scale, smoke.scale, smoke.scale);
 
-			fireCube.render();
-		});
-		fireBlocksRight.forEach((fire) => {
-			let fireCube = new Cube();
-			fireCube.color = [1.0, 0.4 + Math.random() * 0.1, 0.0, 1.0];
-			fireCube.matrix = new Matrix4(rightFireOrigin);
-			fireCube.matrix.translate(fire.z, -fire.y, fire.x);
-			fireCube.matrix.scale(fire.scale, fire.scale, fire.scale);
-			fireCube.render();
+			smokeCube.render();
 		});
 	}
 }
