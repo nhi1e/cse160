@@ -20,6 +20,9 @@ let gl;
 let a_Position;
 let u_FragColor;
 let u_Size;
+let lastFrameTime = performance.now();
+let frameCount = 0;
+let fps = 0;
 
 function setupWebGL() {
 	// Retrieve <canvas> element
@@ -237,6 +240,17 @@ function main() {
 var g_startTime = performance.now() / 1000.0;
 var g_seconds = performance.now() / 1000.0 - g_startTime;
 function tick() {
+	let now = performance.now();
+	frameCount++;
+
+	// Update FPS every second
+	if (now - lastFrameTime >= 1000) {
+		fps = frameCount;
+		document.getElementById("fpsValue").innerText = fps;
+		frameCount = 0;
+		lastFrameTime = now;
+	}
+
 	g_seconds = performance.now() / 1000.0 - g_startTime;
 	updateAnimationAngles();
 	renderAllShapes();
@@ -1199,7 +1213,6 @@ function renderAllShapes() {
 			let smokeCube = new Cube();
 			let alpha = Math.max(0.2, smoke.lifetime); // Fade out effect
 
-			// smokeCube.color = [0.5, 0.5, 0.5, alpha]; // Gray smoke
 			smokeCube.color = [1.0, 0.4, 0.0, alpha]; // Orange fire
 
 			smokeCube.matrix = new Matrix4(smokeOrigin);

@@ -17,45 +17,108 @@
 				justify-content: center;
 				min-height: 100vh;
 				margin: 0;
-			}
-			#goodbye-text {
 				font-family: "Courier Prime", monospace;
-				font-size: 48px;
 				color: white;
-				margin-bottom: 20px;
 			}
+
+			#goodbye-text {
+				font-size: 24px;
+				margin-bottom: 20px;
+				text-align: left; /* Ensures text alignment */
+				align-self: flex-start; /* Aligns it to the left within the flex container */
+			}
+
+			#main-container {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 100%;
+			}
+
 			#canvas-container {
 				display: flex;
 				justify-content: center;
 				align-items: center;
-				width: 100%;
 			}
+
 			canvas {
 				display: block;
+				border: 3px solid white;
+			}
+
+			#controls {
+				display: flex;
+				flex-direction: column;
+				align-items: flex-start;
+				margin-left: 20px;
+				width: 20%;
+			}
+
+			button {
+				background-color: #ffffff;
+				border: none;
+				padding: 10px;
+				margin: 5px;
+				font-size: 14px;
+				cursor: pointer;
+				font-family: "Courier Prime", monospace;
+			}
+
+			button:hover {
+				background-color: #ddd;
+			}
+
+			p {
+				margin: 5px 0;
+			}
+
+			input[type="range"] {
+				width: 150px;
+			}
+
+			#sneeze-text {
+				margin-top: 10px;
+				font-size: 16px;
 			}
 		</style>
 	</head>
 
 	<body onload="main()">
-		<h1 id="goodbye-text">GOODBYE, YEAR OF THE DRAGON!</h1>
+		<div id="main-container">
+			<!-- Canvas on the left -->
+			<div id="canvas-container">
+				<canvas id="webgl" width="800" height="800">
+					Please use a browser that supports "canvas"
+				</canvas>
+			</div>
 
-		<div id="canvas-container">
-			<canvas id="webgl" width="900" height="900">
-				Please use a browser that supports "canvas"
-			</canvas>
+			<!-- Controls on the right -->
+			<div id="controls">
+				<h1 id="goodbye-text">GOODBYE,YEAR OF THE DRAGON!</h1>
+
+				<button id="DragonAnimationOnButton">Animation ON</button>
+				<button id="DragonAnimationOffButton">Animation OFF</button>
+
+				<p id="sneeze-text">Shift + Click to Sneeze</p>
+				<p id="sneeze-text">Drag mouse to rotate</p>
+
+				<p>Camera X</p>
+				<input type="range" id="cameraXSlide" min="-90" max="90" value="0" />
+
+				<p>Camera Y</p>
+				<input type="range" id="cameraYSlide" min="0" max="360" value="0" />
+				<div
+					id="fpsCounter"
+					style="color: white; background: black; padding: 5px; font-size: 14px"
+				>
+					FPS: <span id="fpsValue">0</span>
+				</div>
+			</div>
 		</div>
 
-		<button id="DragonAnimationOnButton">Dragon Animation On</button>
-		<button id="DragonAnimationOffButton">Dragon Animation Off</button>
+		<!-- Sneeze Instructions -->
 
-		<p>
-			cameraXSlide
-			<input type="range" id="cameraXSlide" min="-90" max="90" value="0" />
-		</p>
-		<p>
-			cameraYSlide
-			<input type="range" id="cameraYSlide" min="0" max="360" value="0" />
-		</p>
+		<!-- FPS Counter -->
 
 		<script src="../lib/webgl-utils.js"></script>
 		<script src="../lib/webgl-debug.js"></script>
