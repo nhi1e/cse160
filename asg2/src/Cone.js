@@ -5,48 +5,75 @@ class Cone {
 		this.matrix = new Matrix4(); // Transformation matrix
 		this.baseRadius = baseRadius;
 		this.height = height;
-		this.numSlices = numSlices; // Number of triangles used to approximate the cone
+		this.numSlices = numSlices;
+
+		// WebGL Buffers
+		this.vertexBuffer = null;
+		this.indexBuffer = null;
+		this.initBuffers();
+	}
+
+	initBuffers() {
+		const vertices = [];
+		const indices = [];
+		const angleStep = (2 * Math.PI) / this.numSlices;
+
+		// Tip of the cone
+		const tipIndex = 0;
+		vertices.push(0.0, this.height, 0.0); // (x, y, z)
+
+		// Base circle vertices
+		for (let i = 0; i < this.numSlices; i++) {
+			let angle = i * angleStep;
+			let cosA = Math.cos(angle);
+			let sinA = Math.sin(angle);
+
+			vertices.push(this.baseRadius * cosA, 0.0, this.baseRadius * sinA);
+		}
+
+		// Base center
+		const baseCenterIndex = this.numSlices + 1;
+		vertices.push(0.0, 0.0, 0.0);
+
+		// Side faces (connect base circle to tip)
+		for (let i = 1; i <= this.numSlices; i++) {
+			let next = i + 1;
+			if (next > this.numSlices) next = 1; // Wrap around
+			indices.push(tipIndex, i, next);
+		}
+
+		// Base circle (triangles fan out from center)
+		for (let i = 1; i <= this.numSlices; i++) {
+			let next = i + 1;
+			if (next > this.numSlices) next = 1; // Wrap around
+			indices.push(baseCenterIndex, next, i);
+		}
+
+		// Create and bind buffers
+		this.vertexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+		this.indexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+		gl.bufferData(
+			gl.ELEMENT_ARRAY_BUFFER,
+			new Uint16Array(indices),
+			gl.STATIC_DRAW
+		);
+
+		this.numIndices = indices.length;
 	}
 
 	render() {
-		var rgba = this.color;
-
-		// Pass the color to the fragment shader
-		gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-
-		// Pass the transformation matrix to the shader
+		gl.uniform4f(u_FragColor, ...this.color);
 		gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
 
-		// Define the top point of the cone (tip)
-		const tip = [0.0, this.height, 0.0];
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+		gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(a_Position);
 
-		// Define the base circle vertices
-		const baseCenter = [0.0, 0.0, 0.0];
-		let angleStep = (2 * Math.PI) / this.numSlices;
-
-		for (let i = 0; i < this.numSlices; i++) {
-			// Current angle and next angle
-			let currentAngle = i * angleStep;
-			let nextAngle = (i + 1) * angleStep;
-
-			// Current and next points on the base circle
-			let currentPoint = [
-				this.baseRadius * Math.cos(currentAngle),
-				0.0,
-				this.baseRadius * Math.sin(currentAngle),
-			];
-
-			let nextPoint = [
-				this.baseRadius * Math.cos(nextAngle),
-				0.0,
-				this.baseRadius * Math.sin(nextAngle),
-			];
-
-			// Draw the triangle connecting the tip to the base edge
-			drawTriangle3D([...tip, ...currentPoint, ...nextPoint]);
-
-			// Draw the triangle for the base (optional, to close the base circle)
-			drawTriangle3D([...baseCenter, ...currentPoint, ...nextPoint]);
-		}
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+		gl.drawElements(gl.TRIANGLES, this.numIndices, gl.UNSIGNED_SHORT, 0);
 	}
 }
