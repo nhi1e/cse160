@@ -894,7 +894,6 @@ function renderAllShapes() {
 
 	//back left leg
 	const legBL = new TruncatedCone(1.0, 0.5, 2.7, 36); //x, y, z, n
-	legBL.color = [0.52, 0, 0.12, 1.0];
 	legBL.matrix = new Matrix4(belly5.matrix);
 	legBL.matrix.rotate(90, 1, 0, -3);
 	legBL.matrix.rotate(60, 0, 0, -1); //x is x, y is z
@@ -905,21 +904,18 @@ function renderAllShapes() {
 	legBL.render();
 
 	const legBL2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
-	legBL2.color = [0.52, 0, 0.12, 1.0];
 	legBL2.matrix = new Matrix4(legBL.matrix);
 	legBL2.matrix.rotate(90, -1, 0, 0);
 	legBL2.matrix.translate(0, 0, 2); //x is z, y is
 	legBL2.render();
 
 	const legBL3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
-	legBL3.color = [0.52, 0, 0.12, 1.0];
 	legBL3.matrix = new Matrix4(legBL2.matrix);
 	legBL3.matrix.rotate(180, 1, 0, 0);
 	legBL3.matrix.translate(0, -3.5, 0); //y is z, z is z
 	legBL3.render();
 
 	const legBL4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBL4toe1.color = [0.52, 0, 0.12, 1.0];
 	legBL4toe1.matrix = new Matrix4(legBL3.matrix);
 	legBL4toe1.matrix.rotate(180, 1.1, -1, 0);
 	legBL4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
@@ -933,7 +929,6 @@ function renderAllShapes() {
 	legBL4toe1nail.render();
 
 	const legBL4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBL4toe2.color = [0.52, 0, 0.12, 1.0];
 	legBL4toe2.matrix = new Matrix4(legBL3.matrix);
 	legBL4toe2.matrix.rotate(180, 1.1, -1, 0);
 	legBL4toe2.matrix.rotate(40, 1, 0, 0);
@@ -948,7 +943,6 @@ function renderAllShapes() {
 	legBL4toe2nail.render();
 
 	const legBL4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBL4toe3.color = [0.52, 0, 0.12, 1.0];
 	legBL4toe3.matrix = new Matrix4(legBL3.matrix);
 	legBL4toe3.matrix.rotate(180, 1.1, -1, 0);
 	legBL4toe3.matrix.rotate(80, 1, 0, 0);
@@ -964,7 +958,6 @@ function renderAllShapes() {
 
 	//back right leg
 	const legBR = new TruncatedCone(1.0, 0.5, 2.7, 36); //x, y, z, n
-	legBR.color = [0.52, 0, 0.12, 1.0];
 	legBR.matrix = new Matrix4(belly5.matrix);
 	legBR.matrix.rotate(270, 1, 0, -3);
 	legBR.matrix.rotate(-50, 0, 0, -1); //x is x, y is z
@@ -983,14 +976,12 @@ function renderAllShapes() {
 	legBR2.render();
 
 	const legBR3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
-	legBR3.color = [0.52, 0, 0.12, 1.0];
 	legBR3.matrix = new Matrix4(legBR2.matrix);
 	legBR3.matrix.rotate(180, 1, 0, 0);
 	legBR3.matrix.translate(0, -3.5, 0); //y is z, z is z
 	legBR3.render();
 
 	const legBR4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBR4toe1.color = [0.52, 0, 0.12, 1.0];
 	legBR4toe1.matrix = new Matrix4(legBR3.matrix);
 	legBR4toe1.matrix.rotate(270, 1, 0, 0);
 	legBR4toe1.matrix.rotate(20, 0, 0, -1);
@@ -1005,7 +996,6 @@ function renderAllShapes() {
 	legBR4toe1nail.render();
 
 	const legBR4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBR4toe2.color = [0.52, 0, 0.12, 1.0];
 	legBR4toe2.matrix = new Matrix4(legBR3.matrix);
 	legBR4toe2.matrix.rotate(270, 1, 0, 0);
 	legBR4toe2.matrix.rotate(20, 0, 0, 1);
@@ -1020,7 +1010,6 @@ function renderAllShapes() {
 	legBR4toe2nail.render();
 
 	const legBR4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBR4toe3.color = [0.52, 0, 0.12, 1.0];
 	legBR4toe3.matrix = new Matrix4(legBR3.matrix);
 	legBR4toe3.matrix.rotate(270, 1, 0, 0);
 	legBR4toe3.matrix.rotate(-60, 0, 0, 1);
@@ -1036,7 +1025,6 @@ function renderAllShapes() {
 
 	//front left leg
 	const legFL = new TruncatedCone(0.8, 0.5, 2.7, 36); //x, y, z, n
-	legFL.color = [0.52, 0, 0.12, 1.0];
 	legFL.matrix = new Matrix4(neck1.matrix);
 	legFL.matrix.scale(0.4, 0.4, 0.4);
 	legFL.matrix.rotate(180, 1, 0, 0);
@@ -1048,7 +1036,6 @@ function renderAllShapes() {
 	legFL.render();
 
 	const legFL2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
-	legFL2.color = [0.52, 0, 0.12, 1.0];
 	legFL2.matrix = new Matrix4(legFL.matrix);
 	legFL2.matrix.rotate(90, 1, 0, 0); //rotate round z
 	legFL2.matrix.rotate(55, 0, 0, -1); //rotate round y
@@ -1056,14 +1043,12 @@ function renderAllShapes() {
 	legFL2.render();
 
 	const legFL3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
-	legFL3.color = [0.52, 0, 0.12, 1.0];
 	legFL3.matrix = new Matrix4(legFL2.matrix);
 	legFL3.matrix.rotate(180, 1, 0, 0);
 	legFL3.matrix.translate(0, -3.5, 0); //y is z, z is z
 	legFL3.render();
 
 	const legFL4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFL4toe1.color = [0.52, 0, 0.12, 1.0];
 	legFL4toe1.matrix = new Matrix4(legFL3.matrix);
 	legFL4toe1.matrix.rotate(100, 1.1, -1, 0);
 	legFL4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
@@ -1079,7 +1064,6 @@ function renderAllShapes() {
 	legFL4toe1nail.render();
 
 	const legFL4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFL4toe2.color = [0.52, 0, 0.12, 1.0];
 	legFL4toe2.matrix = new Matrix4(legFL3.matrix);
 	legFL4toe2.matrix.rotate(100, 1.1, -1, 0);
 	legFL4toe2.matrix.rotate(-40, 1, 0, 0);
@@ -1096,7 +1080,6 @@ function renderAllShapes() {
 	legFL4toe2nail.render();
 
 	const legFL4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFL4toe3.color = [0.52, 0, 0.12, 1.0];
 	legFL4toe3.matrix = new Matrix4(legFL3.matrix);
 	legFL4toe3.matrix.rotate(100, 1.1, -1, 0);
 	legFL4toe3.matrix.rotate(-90, 1, 0, 0);
@@ -1114,7 +1097,6 @@ function renderAllShapes() {
 
 	//front right leg
 	const legFR = new TruncatedCone(0.8, 0.5, 2.7, 36); //x, y, z, n
-	legFR.color = [0.52, 0, 0.12, 1.0];
 	legFR.matrix = new Matrix4(neck1.matrix);
 	legFR.matrix.scale(0.4, 0.4, 0.4);
 	legFR.matrix.rotate(180, 1, 0, 0);
@@ -1126,7 +1108,6 @@ function renderAllShapes() {
 	legFR.render();
 
 	const legFR2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
-	legFR2.color = [0.52, 0, 0.12, 1.0];
 	legFR2.matrix = new Matrix4(legFR.matrix);
 	legFR2.matrix.rotate(90, 1, 0, 0); //rotate round z
 	legFR2.matrix.rotate(240, 0, 0, 1); //rotate round y
@@ -1134,14 +1115,12 @@ function renderAllShapes() {
 	legFR2.render();
 
 	const legFR3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
-	legFR3.color = [0.52, 0, 0.12, 1.0];
 	legFR3.matrix = new Matrix4(legFR2.matrix);
 	legFR3.matrix.rotate(180, 1, 0, 0);
 	legFR3.matrix.translate(0, -3.5, 0); //y is z, z is z
 	legFR3.render();
 
 	const legFR4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFR4toe1.color = [0.52, 0, 0.12, 1.0];
 	legFR4toe1.matrix = new Matrix4(legFR3.matrix);
 	legFR4toe1.matrix.rotate(80, 1.1, -1, 0);
 	legFR4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
@@ -1156,7 +1135,6 @@ function renderAllShapes() {
 	legFR4toe1nail.render();
 
 	const legFR4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFR4toe2.color = [0.52, 0, 0.12, 1.0];
 	legFR4toe2.matrix = new Matrix4(legFR3.matrix);
 	legFR4toe2.matrix.rotate(80, 1.1, -1, 0);
 	legFR4toe2.matrix.rotate(40, 1, 0, 0);
@@ -1172,7 +1150,6 @@ function renderAllShapes() {
 	legFR4toe2nail.render();
 
 	const legFR4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFR4toe3.color = [0.52, 0, 0.12, 1.0];
 	legFR4toe3.matrix = new Matrix4(legFR3.matrix);
 	legFR4toe3.matrix.rotate(80, 1.1, -1, 0);
 	legFR4toe3.matrix.rotate(-40, 1, 0, 0);

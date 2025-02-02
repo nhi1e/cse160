@@ -1,72 +1,81 @@
 class TruncatedCone {
 	constructor(baseRadius = 1.0, topRadius = 0.5, height = 2.0, numSlices = 36) {
 		this.type = "truncatedCone";
-		this.color = [1.0, 1.0, 1.0, 1.0]; // Default color
+		this.color = [0.52, 0, 0.12, 1.0]; // Default color
 		this.matrix = new Matrix4(); // Transformation matrix
 		this.baseRadius = baseRadius;
-		this.topRadius = topRadius; // Radius of the top circle
+		this.topRadius = topRadius;
 		this.height = height;
-		this.numSlices = numSlices; // Number of triangles used to approximate the cone
+		this.numSlices = numSlices;
+
+		// WebGL Buffers
+		this.vertexBuffer = null;
+		this.indexBuffer = null;
+		this.initBuffers();
+	}
+
+	initBuffers() {
+		const vertices = [];
+		const indices = [];
+		const angleStep = (2 * Math.PI) / this.numSlices;
+
+		// Center points for base and top
+		const baseCenterIndex = 2 * this.numSlices;
+		const topCenterIndex = baseCenterIndex + 1;
+
+		vertices.push(0.0, 0.0, 0.0); // Base center
+		vertices.push(0.0, this.height, 0.0); // Top center
+
+		for (let i = 0; i < this.numSlices; i++) {
+			let angle = i * angleStep;
+			let cosA = Math.cos(angle);
+			let sinA = Math.sin(angle);
+
+			// Base circle vertex
+			vertices.push(this.baseRadius * cosA, 0.0, this.baseRadius * sinA);
+			// Top circle vertex
+			vertices.push(this.topRadius * cosA, this.height, this.topRadius * sinA);
+		}
+
+		for (let i = 0; i < this.numSlices; i++) {
+			let next = (i + 1) % this.numSlices;
+
+			// Side faces (quad as two triangles)
+			indices.push(i * 2, i * 2 + 1, next * 2 + 1);
+			indices.push(i * 2, next * 2 + 1, next * 2);
+
+			// Base circle
+			indices.push(baseCenterIndex, i * 2, next * 2);
+
+			// Top circle
+			indices.push(topCenterIndex, next * 2 + 1, i * 2 + 1);
+		}
+
+		// Create and bind buffers
+		this.vertexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+		this.indexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+		gl.bufferData(
+			gl.ELEMENT_ARRAY_BUFFER,
+			new Uint16Array(indices),
+			gl.STATIC_DRAW
+		);
+
+		this.numIndices = indices.length;
 	}
 
 	render() {
-		var rgba = this.color;
-
-		// Pass the color to the fragment shader
-		gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-
-		// Pass the transformation matrix to the shader
+		gl.uniform4f(u_FragColor, ...this.color);
 		gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
 
-		// Define the top and base circle centers
-		const baseCenter = [0.0, 0.0, 0.0];
-		const topCenter = [0.0, this.height, 0.0];
-		let angleStep = (2 * Math.PI) / this.numSlices;
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+		gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(a_Position);
 
-		for (let i = 0; i < this.numSlices; i++) {
-			// Current angle and next angle
-			let currentAngle = i * angleStep;
-			let nextAngle = (i + 1) * angleStep;
-
-			// Current and next points on the base circle
-			let baseCurrentPoint = [
-				this.baseRadius * Math.cos(currentAngle),
-				0.0,
-				this.baseRadius * Math.sin(currentAngle),
-			];
-
-			let baseNextPoint = [
-				this.baseRadius * Math.cos(nextAngle),
-				0.0,
-				this.baseRadius * Math.sin(nextAngle),
-			];
-
-			// Current and next points on the top circle
-			let topCurrentPoint = [
-				this.topRadius * Math.cos(currentAngle),
-				this.height,
-				this.topRadius * Math.sin(currentAngle),
-			];
-
-			let topNextPoint = [
-				this.topRadius * Math.cos(nextAngle),
-				this.height,
-				this.topRadius * Math.sin(nextAngle),
-			];
-
-			// Draw the side quad as two triangles
-			drawTriangle3D([
-				...baseCurrentPoint,
-				...topCurrentPoint,
-				...topNextPoint,
-			]);
-			drawTriangle3D([...baseCurrentPoint, ...topNextPoint, ...baseNextPoint]);
-
-			// Draw the triangle for the base circle (optional)
-			drawTriangle3D([...baseCenter, ...baseCurrentPoint, ...baseNextPoint]);
-
-			// Draw the triangle for the top circle (optional)
-			drawTriangle3D([...topCenter, ...topNextPoint, ...topCurrentPoint]);
-		}
+		gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer);
+		gl.drawElements(gl.TRIANGLES, this.numIndices, gl.UNSIGNED_SHORT, 0);
 	}
 }
