@@ -99,6 +99,9 @@ let fireBlocksRight = []; // Fire from the right nostril
 let isSneezing = false;
 let sneezeStartTime = 0;
 const sneezeDuration = 0.5; // Sneezing effect lasts 0.5 seconds
+let isTongueOut = false;
+let tongueStartTime = 0;
+const tongueDuration = 0.5; // The tongue stays out for 0.5 seconds
 
 //set up actions for html ui elements
 function addActionsForHtmlUI() {
@@ -132,7 +135,7 @@ let lastMouseY = 0;
 let cameraAngleX = 0; // Rotation around the X-axis
 let cameraAngleY = 0; // Rotation around the Y-axis
 
-function addMouseDragControls() {
+function addControls() {
 	canvas.addEventListener("mousedown", (event) => {
 		isDragging = true;
 		lastMouseX = event.clientX;
@@ -148,6 +151,10 @@ function addMouseDragControls() {
 			// Start fire immediately
 			isBreathingFire = true;
 			generateFireBlocks(); // Generate new fire every sneeze
+		}
+		if (isSnake && event.shiftKey) {
+			isTongueOut = true;
+			tongueStartTime = g_seconds; // Track when the tongue starts extending
 		}
 	});
 
@@ -178,6 +185,27 @@ function addMouseDragControls() {
 	canvas.addEventListener("mouseleave", () => {
 		isDragging = false;
 	});
+
+	document.addEventListener("keydown", function (event) {
+		if (event.shiftKey && event.code === "KeyS") {
+			console.log("Shift + S pressed");
+			transformToSnake();
+		}
+	});
+}
+
+let isSnake = false; // Toggle state
+
+function transformToSnake() {
+	isSnake = !isSnake;
+	if (isSnake) {
+		cameraAngleX = 70;
+		cameraAngleY = 40;
+	} else {
+		// Reset dragon posture
+		cameraAngleX = 0;
+		cameraAngleY = 0;
+	}
 }
 
 function generateFireBlocks() {
@@ -221,7 +249,7 @@ function main() {
 	setupWebGL();
 	connectVariablesToGLSL();
 	addActionsForHtmlUI();
-	addMouseDragControls(); // Enable mouse drag for camera
+	addControls(); // Enable mouse drag for camera
 
 	gl.enable(gl.BLEND);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
@@ -266,6 +294,7 @@ let g_mouthAngle = 0;
 let g_neckAngleX = 0;
 let g_dragonAnimation = false; // Toggle for dragon animation
 let g_dragonFloatOffset = 0; // Global offset for floating animation
+let g_tongueExtension = 0; // Tongue extension length
 
 function updateAnimationAngles() {
 	if (g_dragonAnimation) {
@@ -287,7 +316,7 @@ function updateAnimationAngles() {
 		g_legAngle = g_bodyAngle * 2;
 	}
 	// Sneezing logic
-	if (isSneezing) {
+	if (!isSnake && isSneezing) {
 		let t = g_seconds - sneezeStartTime; // Time since sneeze started
 		let phase = t / sneezeDuration; // Normalize t between 0 and 1 over sneeze duration
 
@@ -338,13 +367,20 @@ function updateAnimationAngles() {
 			isBreathingFire = false;
 		}
 	}
+	if (isTongueOut) {
+		let t = g_seconds - tongueStartTime; // Time since the tongue extended
+		let phase = t / tongueDuration; // Normalize time over the duration
+
+		if (phase < 1.0) {
+			g_tongueExtension = Math.sin(phase * Math.PI) * 0.3; // Easing effect
+		} else {
+			isTongueOut = false; // Retract the tongue
+			g_tongueExtension = 0;
+		}
+	}
 }
 
 function renderAllShapes() {
-	// // pass matrix to u_ModelMatrix attribute
-	// var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
-	// gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
-
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -539,54 +575,19 @@ function renderAllShapes() {
 	tail12.matrix.scale(0.9, 1.3, 0.9);
 	tail12.render();
 
-	//tailtip
-	var tailtip1 = new TrianglePrism();
-	tailtip1.color = [0.05, 0.25, 0.05, 1];
-	tailtip1.matrix = new Matrix4(tail12.matrix);
-	tailtip1.matrix.translate(0.9, 0, 0.6);
-	tailtip1.matrix.rotate(180, 0, 0, 1);
-	tailtip1.matrix.scale(1, 3, 0.1);
-	tailtip1.render();
-
-	var tailtip2 = new TrianglePrism();
-	tailtip2.color = [0.05, 0.25, 0.05, 1];
-	tailtip2.matrix = new Matrix4(tailtip1.matrix);
-	tailtip2.matrix.translate(0.6, 0.5, 0.1);
-	tailtip2.matrix.scale(0.6, 0.6, 1);
-	tailtip2.matrix.rotate(50, 0, 0, -1);
-	tailtip2.render();
-
-	var tailtip3 = new TrianglePrism();
-	tailtip3.color = [0.05, 0.25, 0.05, 1];
-	tailtip3.matrix = new Matrix4(tailtip1.matrix);
-	tailtip3.matrix.scale(0.6, 0.6, 1);
-	tailtip3.matrix.rotate(50, 0, 0, 1);
-	tailtip3.render();
-
-	var tailtip4 = new TrianglePrism();
-	tailtip4.color = [0.05, 0.25, 0.05, 1];
-	tailtip4.matrix = new Matrix4(tailtip1.matrix);
-	tailtip4.matrix.translate(-0.06, 0, 0);
-	tailtip4.matrix.scale(0.7, 0.5, 1);
-	tailtip4.matrix.rotate(60, 0, 0, 1);
-	tailtip4.render();
-
-	var tailtip5 = new TrianglePrism();
-	tailtip5.color = [0.05, 0.25, 0.05, 1];
-	tailtip5.matrix = new Matrix4(tailtip1.matrix);
-	tailtip5.matrix.translate(0.68, 0.4, 0);
-	tailtip5.matrix.scale(0.7, 0.5, 1);
-	tailtip5.matrix.rotate(60, 0, 0, -1);
-	tailtip5.render();
-
 	//upper neck
 
 	var neck4 = new Cube();
 	neck4.color = [0.58, 0.0, 0.06, 1.0];
 	neck4.matrix = new Matrix4(neck1.matrix);
 	neck4.matrix.translate(0.05, 1, 0.06);
-	neck4.matrix.rotate(g_neckAngle, 0, 1, 0.7); // Apply neck rotation
-	neck4.matrix.rotate(g_neckAngleX, 1, 0, 0);
+	if (isSnake) {
+		neck4.matrix.rotate(g_neckAngle, 1, 0, 0); // Apply neck rotation
+		neck4.matrix.rotate(g_neckAngleX, 1, 0, 0);
+	} else {
+		neck4.matrix.rotate(g_neckAngle, 0, 1, 0.7); // Apply neck rotation
+		neck4.matrix.rotate(g_neckAngleX, 1, 0, 0);
+	}
 	neck4.matrix.scale(0.9, 0.9, 0.9);
 	neck4.render();
 
@@ -594,9 +595,13 @@ function renderAllShapes() {
 	neck5.color = [0.58, 0.0, 0.06, 1.0];
 	neck5.matrix = new Matrix4(neck4.matrix);
 	neck5.matrix.translate(0.04, 1, 0.08);
-	neck5.matrix.rotate(g_neckAngle * 0.8, 0, 1, 0.7); // Apply neck rotation
-	neck5.matrix.rotate(g_neckAngleX, 0.9, 0, 0);
-
+	if (isSnake) {
+		neck5.matrix.rotate(g_neckAngle, 1, 0, 0); // Apply neck rotation
+		neck5.matrix.rotate(g_neckAngleX, 1, 0, 0);
+	} else {
+		neck5.matrix.rotate(g_neckAngle, 0, 1, 0.7); // Apply neck rotation
+		neck5.matrix.rotate(g_neckAngleX, 0.9, 0, 0);
+	}
 	neck5.matrix.scale(0.95, 0.95, 0.95);
 	neck5.matrix.rotate(20, 0.6, 0, 0);
 	neck5.render();
@@ -605,8 +610,13 @@ function renderAllShapes() {
 	neck6.color = [0.58, 0.0, 0.06, 1.0];
 	neck6.matrix = new Matrix4(neck5.matrix);
 	neck6.matrix.translate(0.02, 1, 0.08);
-	neck6.matrix.rotate(g_neckAngle * 0.6, 0, 1, 0.7); // Apply neck rotation
-	neck6.matrix.rotate(g_neckAngleX, 0.8, 0, 0);
+	if (isSnake) {
+		neck6.matrix.rotate(g_neckAngle, 1, 0, 0); // Apply neck rotation
+		neck6.matrix.rotate(g_neckAngleX, 0.9, 0, 0);
+	} else {
+		neck6.matrix.rotate(g_neckAngle * 0.6, 0, 1, 0.7); // Apply neck rotation
+		neck6.matrix.rotate(g_neckAngleX, 0.8, 0, 0);
+	}
 	neck6.matrix.scale(0.95, 0.95, 0.95);
 	neck6.render();
 
@@ -614,7 +624,12 @@ function renderAllShapes() {
 	neck7.color = [0.58, 0.0, 0.06, 1.0];
 	neck7.matrix = new Matrix4(neck6.matrix);
 	neck7.matrix.translate(0, 0.55, 0.1);
-	neck7.matrix.rotate(g_neckAngleX, 0.7, 0, 0);
+	if (isSnake) {
+		neck7.matrix.rotate(g_neckAngle, 0.8, 0, 0); // Apply neck rotation
+		neck7.matrix.rotate(g_neckAngleX, 0.8, 0, 0);
+	} else {
+		neck7.matrix.rotate(g_neckAngleX, 0.7, 0, 0);
+	}
 	neck7.matrix.rotate(-25, 0.6, 0, 0);
 	neck7.render();
 
@@ -638,6 +653,11 @@ function renderAllShapes() {
 	head1.matrix = new Matrix4(neck10.matrix);
 	head1.matrix.translate(0, 1.4, -0.4);
 	head1.matrix.rotate(60, 1, 0, 0);
+	if (isSnake) {
+		head1.matrix.rotate(-90, 0, 0, 1);
+		head1.matrix.rotate(30, 0, 1, 0);
+		head1.matrix.translate(-1.4, 0, -0.4);
+	}
 	head1.matrix.scale(1, 1, 1.1);
 	head1.render();
 
@@ -646,6 +666,10 @@ function renderAllShapes() {
 	head2.matrix = new Matrix4(head1.matrix);
 	head2.matrix.translate(0, -0.4, -0.25);
 	head2.matrix.rotate(-30, 1, 0, 0);
+	if (isSnake) {
+		head2.matrix.rotate(30, 1, 0, 0);
+		head2.matrix.translate(0.1, 0.5, 0);
+	}
 	head2.matrix.scale(1, 1.1, 1.1);
 	head2.render();
 
@@ -665,84 +689,6 @@ function renderAllShapes() {
 	nose2.matrix.scale(1, 0.4, 1);
 	nose2.render();
 
-	var mouth1 = new Cube();
-	mouth1.color = [0.58, 0.0, 0.06, 1.0];
-	mouth1.matrix = new Matrix4(nose2.matrix);
-	mouth1.matrix.translate(0, -0.17, 0.2);
-	mouth1.matrix.rotate(30, 1, 0, 0); // Rotate around the x-axis
-	mouth1.matrix.scale(0.9, 1, 1);
-	mouth1.render();
-
-	var horn1 = new Cube();
-	horn1.uniformFaceColor = true;
-	horn1.color = [0.94, 0.79, 0.28, 1.0];
-	horn1.matrix = new Matrix4(head2.matrix);
-	horn1.matrix.translate(0.7, 1, 0.3);
-	horn1.matrix.rotate(65, 1, 0, 0);
-	horn1.matrix.scale(0.13, 1, 0.13);
-	horn1.render();
-
-	var horn2 = new Cube();
-	horn2.uniformFaceColor = true;
-	horn2.color = [0.94, 0.79, 0.28, 1.0];
-	horn2.matrix = new Matrix4(horn1.matrix);
-	horn2.matrix.translate(0.4, 0.9, 0.3);
-	horn2.matrix.rotate(30, 1, 0, 0);
-	horn2.matrix.scale(1, 1, 1);
-	horn2.render();
-
-	var horn3 = new Cube();
-	horn3.uniformFaceColor = true;
-	horn3.color = [0.94, 0.79, 0.28, 1.0];
-	horn3.matrix = new Matrix4(horn1.matrix);
-	horn3.matrix.translate(-4, 0, 0);
-	horn3.render();
-
-	var horn4 = new Cube();
-	horn4.uniformFaceColor = true;
-	horn4.color = [0.94, 0.79, 0.28, 1.0];
-	horn4.matrix = new Matrix4(horn2.matrix);
-	horn4.matrix.translate(-4.9, 0, 0);
-	horn4.render();
-
-	var mustache = new Cube();
-	mustache.uniformFaceColor = true;
-	mustache.color = [0.94, 0.79, 0.28, 1.0];
-	mustache.matrix = new Matrix4(head2.matrix);
-	mustache.matrix.translate(1.1, 0.1, 0);
-	mustache.matrix.rotate(180, 1, 0, 0);
-	mustache.matrix.scale(0.08, 0.8, 0.08);
-	mustache.render();
-
-	var mustache2 = new Cube();
-	mustache2.uniformFaceColor = true;
-	mustache2.color = [0.94, 0.79, 0.28, 1.0];
-	mustache2.matrix = new Matrix4(head2.matrix);
-	mustache2.matrix.translate(1.2, 0.1, -0.1);
-	mustache2.matrix.rotate(90, 1, 0, 0);
-	mustache2.matrix.rotate(90, 0, 0, 1);
-	mustache2.matrix.scale(0.08, 0.8, 0.08);
-	mustache2.render();
-
-	var mustache3 = new Cube();
-	mustache3.uniformFaceColor = true;
-	mustache3.color = [0.94, 0.79, 0.28, 1.0];
-	mustache3.matrix = new Matrix4(head2.matrix);
-	mustache3.matrix.translate(-0.2, 0.1, 0);
-	mustache3.matrix.rotate(180, 1, 0, 0);
-	mustache3.matrix.scale(0.08, 0.8, 0.08);
-	mustache3.render();
-
-	var mustache4 = new Cube();
-	mustache4.uniformFaceColor = true;
-	mustache4.color = [0.94, 0.79, 0.28, 1.0];
-	mustache4.matrix = new Matrix4(head2.matrix);
-	mustache4.matrix.translate(0.6, 0.1, -0.1);
-	mustache4.matrix.rotate(90, 1, 0, 0);
-	mustache4.matrix.rotate(90, 0, 0, 1);
-	mustache4.matrix.scale(0.08, 0.8, 0.08);
-	mustache4.render();
-
 	//eyes
 	var eye1 = new Cube();
 	eye1.uniformFaceColor = true;
@@ -760,417 +706,560 @@ function renderAllShapes() {
 	eye2.matrix.scale(0.27, 0.12, 0.27);
 	eye2.render();
 
-	//scales
+	// if (isSnake && g_tongueExtension > 0) {
+	// 	var tongue = new Cube();
+	// 	tongue.color = [1.0, 0.2, 0.6, 1.0]; // Pink color
+	// 	tongue.matrix = new Matrix4(nose1.matrix); // Position at the fire origin
+	// 	tongue.matrix.translate(0.6, 0.2, 0.5); // Adjust to match fire block position
+	// 	tongue.matrix.scale(0.1, g_tongueExtension+1, 0.1); // Extend based on animation
+	// 	tongue.render();
+	// }
+	if (isSnake && g_tongueExtension > 0) {
+		var tongue = new Cube();
+		tongue.color = [1, 0.66, 0.72, 1]; // Pink color
+		tongue.matrix = new Matrix4(nose1.matrix); // Position at the fire origin
+		tongue.matrix.translate(0.6, 0.2, 0.5); // Adjust to match fire block position
 
-	var scale2 = new Cone();
-	scale2.matrix = new Matrix4(belly3.matrix);
-	scale2.matrix.rotate(90, 1, 0, 0);
-	scale2.matrix.translate(0.5, 0.9, -0.3); //z is x
-	scale2.matrix.scale(0.16, 0.2, 0.16);
-	scale2.render();
+		// Introduce a rapid oscillating rotation effect for flicking motion
+		let flickSpeed = 30; // Controls speed of flicking (higher = faster)
+		let flickAngle = Math.sin(g_seconds * flickSpeed) * 10; // Oscillates between -10 and 10 degrees
 
-	var scale3 = new Cone();
-	scale3.matrix = new Matrix4(belly4.matrix);
-	scale3.matrix.rotate(100, 1, 0, 0);
-	scale3.matrix.translate(0.5, 0.85, -0.3); //z is x
-	scale3.matrix.scale(0.16, 0.2, 0.16);
-	scale3.render();
+		tongue.matrix.rotate(flickAngle, 0, 0, 1); // Rotate around X-axis for flicking motion
+		tongue.matrix.scale(0.1, g_tongueExtension + 1, 0.2); // Extend based on animation
+		tongue.render();
+	}
 
-	var scale4 = new Cone();
-	scale4.matrix = new Matrix4(belly5.matrix);
-	scale4.matrix.rotate(90, 1, 0, 0);
-	scale4.matrix.translate(0.5, 0.9, -0.4); //z is x
-	scale4.matrix.scale(0.16, 0.2, 0.16);
-	scale4.render();
+	//dragon only parts
+	if (!isSnake) {
+		var mouth1 = new Cube();
+		mouth1.color = [0.58, 0.0, 0.06, 1.0];
+		mouth1.matrix = new Matrix4(nose2.matrix);
+		mouth1.matrix.translate(0, -0.17, 0.2);
+		mouth1.matrix.rotate(30, 1, 0, 0); // Rotate around the x-axis
+		mouth1.matrix.scale(0.9, 1, 1);
+		mouth1.render();
 
-	var scale5 = new Cone();
-	scale5.matrix = new Matrix4(belly6.matrix);
-	scale5.matrix.rotate(90, 1, 0, 0);
-	scale5.matrix.translate(0.5, 0.9, -0.4); //z is x
-	scale5.matrix.scale(0.16, 0.2, 0.16);
-	scale5.render();
+		var horn1 = new Cube();
+		horn1.uniformFaceColor = true;
+		horn1.color = [0.94, 0.79, 0.28, 1.0];
+		horn1.matrix = new Matrix4(head2.matrix);
+		horn1.matrix.translate(0.7, 1, 0.3);
+		horn1.matrix.rotate(65, 1, 0, 0);
+		horn1.matrix.scale(0.13, 1, 0.13);
+		horn1.render();
 
-	var scale6 = new Cone();
-	scale6.matrix = new Matrix4(belly7.matrix);
-	scale6.matrix.rotate(90, 1, 0, 0);
-	scale6.matrix.translate(0.5, 1, -0.4); //z is x
-	scale6.matrix.scale(0.16, 0.2, 0.16);
-	scale6.render();
+		var horn2 = new Cube();
+		horn2.uniformFaceColor = true;
+		horn2.color = [0.94, 0.79, 0.28, 1.0];
+		horn2.matrix = new Matrix4(horn1.matrix);
+		horn2.matrix.translate(0.4, 0.9, 0.3);
+		horn2.matrix.rotate(30, 1, 0, 0);
+		horn2.matrix.scale(1, 1, 1);
+		horn2.render();
 
-	var scale7 = new Cone();
-	scale7.matrix = new Matrix4(tail1.matrix);
-	scale7.matrix.rotate(90, 1, 0, 0);
-	scale7.matrix.translate(0.5, 1, -0.4); //z is x
-	scale7.matrix.scale(0.16, 0.2, 0.16);
-	scale7.render();
+		var horn3 = new Cube();
+		horn3.uniformFaceColor = true;
+		horn3.color = [0.94, 0.79, 0.28, 1.0];
+		horn3.matrix = new Matrix4(horn1.matrix);
+		horn3.matrix.translate(-4, 0, 0);
+		horn3.render();
 
-	var scale8 = new Cone();
-	scale8.matrix = new Matrix4(tail2.matrix);
-	scale8.matrix.rotate(90, 1, 0, 0);
-	scale8.matrix.translate(0.5, 1, -0.4); //z is x
-	scale8.matrix.scale(0.16, 0.2, 0.16);
-	scale8.render();
+		var horn4 = new Cube();
+		horn4.uniformFaceColor = true;
+		horn4.color = [0.94, 0.79, 0.28, 1.0];
+		horn4.matrix = new Matrix4(horn2.matrix);
+		horn4.matrix.translate(-4.9, 0, 0);
+		horn4.render();
 
-	var scale9 = new Cone();
-	scale9.matrix = new Matrix4(tail3.matrix);
-	scale9.matrix.rotate(90, 1, 0, 0);
-	scale9.matrix.translate(0.5, 1, -0.4); //z is x
-	scale9.matrix.scale(0.16, 0.2, 0.16);
-	scale9.render();
+		var mustache = new Cube();
+		mustache.uniformFaceColor = true;
+		mustache.color = [0.94, 0.79, 0.28, 1.0];
+		mustache.matrix = new Matrix4(head2.matrix);
+		mustache.matrix.translate(1.1, 0.1, 0);
+		mustache.matrix.rotate(180, 1, 0, 0);
+		mustache.matrix.scale(0.08, 0.8, 0.08);
+		mustache.render();
 
-	var scale10 = new Cone();
-	scale10.matrix = new Matrix4(tail4.matrix);
-	scale10.matrix.rotate(90, 1, 0, 0);
-	scale10.matrix.translate(0.5, 1, -0.4); //z is x
-	scale10.matrix.scale(0.16, 0.2, 0.16);
-	scale10.render();
+		var mustache2 = new Cube();
+		mustache2.uniformFaceColor = true;
+		mustache2.color = [0.94, 0.79, 0.28, 1.0];
+		mustache2.matrix = new Matrix4(head2.matrix);
+		mustache2.matrix.translate(1.2, 0.1, -0.1);
+		mustache2.matrix.rotate(90, 1, 0, 0);
+		mustache2.matrix.rotate(90, 0, 0, 1);
+		mustache2.matrix.scale(0.08, 0.8, 0.08);
+		mustache2.render();
 
-	//going from scale2 to head now
-	var scale11 = new Cone();
-	scale11.matrix = new Matrix4(belly2.matrix);
-	scale11.matrix.rotate(90, 1, 0, 0);
-	scale11.matrix.translate(0.5, 0.9, -0.4); //z is x
-	scale11.matrix.scale(0.16, 0.2, 0.16);
-	scale11.render();
+		var mustache3 = new Cube();
+		mustache3.uniformFaceColor = true;
+		mustache3.color = [0.94, 0.79, 0.28, 1.0];
+		mustache3.matrix = new Matrix4(head2.matrix);
+		mustache3.matrix.translate(-0.2, 0.1, 0);
+		mustache3.matrix.rotate(180, 1, 0, 0);
+		mustache3.matrix.scale(0.08, 0.8, 0.08);
+		mustache3.render();
 
-	var scale12 = new Cone();
-	scale12.matrix = new Matrix4(belly1.matrix);
-	scale12.matrix.rotate(80, 1, 0, 0);
-	scale12.matrix.translate(0.5, 1.1, -0.4); //z is x
-	scale12.matrix.scale(0.16, 0.2, 0.16);
-	scale12.render();
+		var mustache4 = new Cube();
+		mustache4.uniformFaceColor = true;
+		mustache4.color = [0.94, 0.79, 0.28, 1.0];
+		mustache4.matrix = new Matrix4(head2.matrix);
+		mustache4.matrix.translate(0.6, 0.1, -0.1);
+		mustache4.matrix.rotate(90, 1, 0, 0);
+		mustache4.matrix.rotate(90, 0, 0, 1);
+		mustache4.matrix.scale(0.08, 0.8, 0.08);
+		mustache4.render();
 
-	var scale13 = new Cone();
-	scale13.matrix = new Matrix4(neck1.matrix);
-	scale13.matrix.rotate(90, 1, 0, 0);
-	scale13.matrix.translate(0.5, 1, -0.6); //z is x
-	scale13.matrix.scale(0.16, 0.2, 0.16);
-	scale13.render();
+		//scales
+		var scale2 = new Cone();
+		scale2.matrix = new Matrix4(belly3.matrix);
+		scale2.matrix.rotate(90, 1, 0, 0);
+		scale2.matrix.translate(0.5, 0.9, -0.3); //z is x
+		scale2.matrix.scale(0.16, 0.2, 0.16);
+		scale2.render();
 
-	var scale14 = new Cone();
-	scale14.matrix = new Matrix4(neck2.matrix);
-	scale14.matrix.rotate(110, 1, 0, 0);
-	scale14.matrix.translate(0.5, 0.6, -2); //z is x
-	scale14.matrix.scale(0.16, 0.3, 0.16);
-	scale14.render();
+		var scale3 = new Cone();
+		scale3.matrix = new Matrix4(belly4.matrix);
+		scale3.matrix.rotate(100, 1, 0, 0);
+		scale3.matrix.translate(0.5, 0.85, -0.3); //z is x
+		scale3.matrix.scale(0.16, 0.2, 0.16);
+		scale3.render();
 
-	var scale15 = new Cone();
-	scale15.matrix = new Matrix4(neck5.matrix);
-	scale15.matrix.rotate(90, 1, 0, 0);
-	scale15.matrix.translate(0.5, 1, -0.6);
-	scale15.matrix.scale(0.16, 0.4, 0.2);
-	scale15.render();
+		var scale4 = new Cone();
+		scale4.matrix = new Matrix4(belly5.matrix);
+		scale4.matrix.rotate(90, 1, 0, 0);
+		scale4.matrix.translate(0.5, 0.9, -0.4); //z is x
+		scale4.matrix.scale(0.16, 0.2, 0.16);
+		scale4.render();
 
-	var scale16 = new Cone();
-	scale16.matrix = new Matrix4(head2.matrix);
-	scale16.matrix.rotate(120, 1, 0, 0);
-	scale16.matrix.translate(0.5, 2.3, 1);
-	scale16.matrix.scale(0.16, 0.4, 0.2);
-	scale16.render();
+		var scale5 = new Cone();
+		scale5.matrix = new Matrix4(belly6.matrix);
+		scale5.matrix.rotate(90, 1, 0, 0);
+		scale5.matrix.translate(0.5, 0.9, -0.4); //z is x
+		scale5.matrix.scale(0.16, 0.2, 0.16);
+		scale5.render();
 
-	var scale17 = new Cone();
-	scale17.matrix = new Matrix4(neck7.matrix);
-	scale17.matrix.rotate(90, 1, 0, 0);
-	scale17.matrix.translate(0.5, 1, -0.8);
-	scale17.matrix.scale(0.16, 0.4, 0.2);
-	scale17.render();
+		var scale6 = new Cone();
+		scale6.matrix = new Matrix4(belly7.matrix);
+		scale6.matrix.rotate(90, 1, 0, 0);
+		scale6.matrix.translate(0.5, 1, -0.4); //z is x
+		scale6.matrix.scale(0.16, 0.2, 0.16);
+		scale6.render();
 
-	var scale18 = new Cone();
-	scale18.matrix = new Matrix4(neck8.matrix);
-	scale18.matrix.rotate(90, 1, 0, 0);
-	scale18.matrix.translate(0.5, 1, -0.8);
-	scale18.matrix.scale(0.16, 0.4, 0.2);
-	scale18.render();
+		var scale7 = new Cone();
+		scale7.matrix = new Matrix4(tail1.matrix);
+		scale7.matrix.rotate(90, 1, 0, 0);
+		scale7.matrix.translate(0.5, 1, -0.4); //z is x
+		scale7.matrix.scale(0.16, 0.2, 0.16);
+		scale7.render();
 
-	//back left leg
-	const legBL = new TruncatedCone(1.0, 0.5, 2.7, 36); //x, y, z, n
-	legBL.matrix = new Matrix4(belly5.matrix);
-	legBL.matrix.rotate(90, 1, 0, -3);
-	legBL.matrix.rotate(60, 0, 0, -1); //x is x, y is z
-	legBL.matrix.rotate(30, -1, 0, 0); //x is x, y is z
-	legBL.matrix.rotate(g_legAngle, -2, 0, 0); // Apply g_legAngle
-	legBL.matrix.scale(0.4, 0.4, 0.4);
-	legBL.matrix.translate(-2.3, 0.2, 1); //x is x, y is z
-	legBL.render();
+		var scale8 = new Cone();
+		scale8.matrix = new Matrix4(tail2.matrix);
+		scale8.matrix.rotate(90, 1, 0, 0);
+		scale8.matrix.translate(0.5, 1, -0.4); //z is x
+		scale8.matrix.scale(0.16, 0.2, 0.16);
+		scale8.render();
 
-	const legBL2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
-	legBL2.matrix = new Matrix4(legBL.matrix);
-	legBL2.matrix.rotate(90, -1, 0, 0);
-	legBL2.matrix.translate(0, 0, 2); //x is z, y is
-	legBL2.render();
+		var scale9 = new Cone();
+		scale9.matrix = new Matrix4(tail3.matrix);
+		scale9.matrix.rotate(90, 1, 0, 0);
+		scale9.matrix.translate(0.5, 1, -0.4); //z is x
+		scale9.matrix.scale(0.16, 0.2, 0.16);
+		scale9.render();
 
-	const legBL3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
-	legBL3.matrix = new Matrix4(legBL2.matrix);
-	legBL3.matrix.rotate(180, 1, 0, 0);
-	legBL3.matrix.translate(0, -3.5, 0); //y is z, z is z
-	legBL3.render();
+		var scale10 = new Cone();
+		scale10.matrix = new Matrix4(tail4.matrix);
+		scale10.matrix.rotate(90, 1, 0, 0);
+		scale10.matrix.translate(0.5, 1, -0.4); //z is x
+		scale10.matrix.scale(0.16, 0.2, 0.16);
+		scale10.render();
 
-	const legBL4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBL4toe1.matrix = new Matrix4(legBL3.matrix);
-	legBL4toe1.matrix.rotate(180, 1.1, -1, 0);
-	legBL4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
-	legBL4toe1.render();
+		//going from scale2 to head now
+		var scale11 = new Cone();
+		scale11.matrix = new Matrix4(belly2.matrix);
+		scale11.matrix.rotate(90, 1, 0, 0);
+		scale11.matrix.translate(0.5, 0.9, -0.4); //z is x
+		scale11.matrix.scale(0.16, 0.2, 0.16);
+		scale11.render();
 
-	const legBL4toe1nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legBL4toe1nail.color = [0.94, 0.79, 0.28, 1.0];
-	legBL4toe1nail.matrix = new Matrix4(legBL4toe1.matrix);
-	legBL4toe1nail.matrix.rotate(180, 1.1, -1, 0);
-	legBL4toe1nail.matrix.translate(-1.2, -0.8, 0); //y is y, x is z
-	legBL4toe1nail.render();
+		var scale12 = new Cone();
+		scale12.matrix = new Matrix4(belly1.matrix);
+		scale12.matrix.rotate(80, 1, 0, 0);
+		scale12.matrix.translate(0.5, 1.1, -0.4); //z is x
+		scale12.matrix.scale(0.16, 0.2, 0.16);
+		scale12.render();
 
-	const legBL4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBL4toe2.matrix = new Matrix4(legBL3.matrix);
-	legBL4toe2.matrix.rotate(180, 1.1, -1, 0);
-	legBL4toe2.matrix.rotate(40, 1, 0, 0);
-	legBL4toe2.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
-	legBL4toe2.render();
+		var scale13 = new Cone();
+		scale13.matrix = new Matrix4(neck1.matrix);
+		scale13.matrix.rotate(90, 1, 0, 0);
+		scale13.matrix.translate(0.5, 1, -0.6); //z is x
+		scale13.matrix.scale(0.16, 0.2, 0.16);
+		scale13.render();
 
-	const legBL4toe2nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legBL4toe2nail.color = [0.94, 0.79, 0.28, 1.0];
-	legBL4toe2nail.matrix = new Matrix4(legBL4toe2.matrix);
-	legBL4toe2nail.matrix.rotate(180, 1.1, -1, 0);
-	legBL4toe2nail.matrix.translate(-1.2, -0.8, 0); //y is y, x is z
-	legBL4toe2nail.render();
+		var scale14 = new Cone();
+		scale14.matrix = new Matrix4(neck2.matrix);
+		scale14.matrix.rotate(110, 1, 0, 0);
+		scale14.matrix.translate(0.5, 0.6, -2); //z is x
+		scale14.matrix.scale(0.16, 0.3, 0.16);
+		scale14.render();
 
-	const legBL4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBL4toe3.matrix = new Matrix4(legBL3.matrix);
-	legBL4toe3.matrix.rotate(180, 1.1, -1, 0);
-	legBL4toe3.matrix.rotate(80, 1, 0, 0);
-	legBL4toe3.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
-	legBL4toe3.render();
+		var scale15 = new Cone();
+		scale15.matrix = new Matrix4(neck5.matrix);
+		scale15.matrix.rotate(90, 1, 0, 0);
+		scale15.matrix.translate(0.5, 1, -0.6);
+		scale15.matrix.scale(0.16, 0.4, 0.2);
+		scale15.render();
 
-	const legBL4toe3nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legBL4toe3nail.color = [0.94, 0.79, 0.28, 1.0];
-	legBL4toe3nail.matrix = new Matrix4(legBL4toe3.matrix);
-	legBL4toe3nail.matrix.rotate(180, 1.1, -1, 0);
-	legBL4toe3nail.matrix.translate(-1.2, -0.8, 0); //y is y, x is z
-	legBL4toe3nail.render();
+		var scale16 = new Cone();
+		scale16.matrix = new Matrix4(head2.matrix);
+		scale16.matrix.rotate(120, 1, 0, 0);
+		scale16.matrix.translate(0.5, 2.3, 1);
+		scale16.matrix.scale(0.16, 0.4, 0.2);
+		scale16.render();
 
-	//back right leg
-	const legBR = new TruncatedCone(1.0, 0.5, 2.7, 36); //x, y, z, n
-	legBR.matrix = new Matrix4(belly5.matrix);
-	legBR.matrix.rotate(270, 1, 0, -3);
-	legBR.matrix.rotate(-50, 0, 0, -1); //x is x, y is z
-	legBR.matrix.rotate(15, -1, 0, 0); //x is x, y is z
-	legBR.matrix.rotate(g_legAngle, -2, 0, 0); // Apply g_legAngle
-	legBR.matrix.scale(0.4, 0.4, 0.4);
-	legBR.matrix.translate(-1, -0.8, 0.7); //x is z, y is x, z is y
-	legBR.render();
+		var scale17 = new Cone();
+		scale17.matrix = new Matrix4(neck7.matrix);
+		scale17.matrix.rotate(90, 1, 0, 0);
+		scale17.matrix.translate(0.5, 1, -0.8);
+		scale17.matrix.scale(0.16, 0.4, 0.2);
+		scale17.render();
 
-	const legBR2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
-	legBR2.color = [0.52, 0, 0.12, 1.0];
-	legBR2.matrix = new Matrix4(legBR.matrix);
-	legBR2.matrix.rotate(90, -1, 0, 0);
-	legBR2.matrix.rotate(300, 0, 0, 1);
-	legBR2.matrix.translate(0, 0, 2.1); //x is z, y is
-	legBR2.render();
+		var scale18 = new Cone();
+		scale18.matrix = new Matrix4(neck8.matrix);
+		scale18.matrix.rotate(90, 1, 0, 0);
+		scale18.matrix.translate(0.5, 1, -0.8);
+		scale18.matrix.scale(0.16, 0.4, 0.2);
+		scale18.render();
 
-	const legBR3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
-	legBR3.matrix = new Matrix4(legBR2.matrix);
-	legBR3.matrix.rotate(180, 1, 0, 0);
-	legBR3.matrix.translate(0, -3.5, 0); //y is z, z is z
-	legBR3.render();
+		//back left leg
+		const legBL = new TruncatedCone(1.0, 0.5, 2.7, 36); //x, y, z, n
+		legBL.matrix = new Matrix4(belly5.matrix);
+		legBL.matrix.rotate(90, 1, 0, -3);
+		legBL.matrix.rotate(60, 0, 0, -1); //x is x, y is z
+		legBL.matrix.rotate(30, -1, 0, 0); //x is x, y is z
+		legBL.matrix.rotate(g_legAngle, -2, 0, 0); // Apply g_legAngle
+		legBL.matrix.scale(0.4, 0.4, 0.4);
+		legBL.matrix.translate(-2.3, 0.2, 1); //x is x, y is z
+		legBL.render();
 
-	const legBR4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBR4toe1.matrix = new Matrix4(legBR3.matrix);
-	legBR4toe1.matrix.rotate(270, 1, 0, 0);
-	legBR4toe1.matrix.rotate(20, 0, 0, -1);
-	legBR4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
-	legBR4toe1.render();
+		const legBL2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
+		legBL2.matrix = new Matrix4(legBL.matrix);
+		legBL2.matrix.rotate(90, -1, 0, 0);
+		legBL2.matrix.translate(0, 0, 2); //x is z, y is
+		legBL2.render();
 
-	const legBR4toe1nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legBR4toe1nail.color = [0.94, 0.79, 0.28, 1.0];
-	legBR4toe1nail.matrix = new Matrix4(legBR4toe1.matrix);
-	legBR4toe1nail.matrix.rotate(90, 1, 0, 0);
-	legBR4toe1nail.matrix.translate(0, -0.7, -1.2); //correct coords
-	legBR4toe1nail.render();
+		const legBL3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
+		legBL3.matrix = new Matrix4(legBL2.matrix);
+		legBL3.matrix.rotate(180, 1, 0, 0);
+		legBL3.matrix.translate(0, -3.5, 0); //y is z, z is z
+		legBL3.render();
 
-	const legBR4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBR4toe2.matrix = new Matrix4(legBR3.matrix);
-	legBR4toe2.matrix.rotate(270, 1, 0, 0);
-	legBR4toe2.matrix.rotate(20, 0, 0, 1);
-	legBR4toe2.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
-	legBR4toe2.render();
+		const legBL4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legBL4toe1.matrix = new Matrix4(legBL3.matrix);
+		legBL4toe1.matrix.rotate(180, 1.1, -1, 0);
+		legBL4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
+		legBL4toe1.render();
 
-	const legBR4toe2nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legBR4toe2nail.color = [0.94, 0.79, 0.28, 1.0];
-	legBR4toe2nail.matrix = new Matrix4(legBR4toe2.matrix);
-	legBR4toe2nail.matrix.rotate(90, 1, 0, 0);
-	legBR4toe2nail.matrix.translate(0, -0.7, -1.2); //correct coords
-	legBR4toe2nail.render();
+		const legBL4toe1nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legBL4toe1nail.color = [0.94, 0.79, 0.28, 1.0];
+		legBL4toe1nail.matrix = new Matrix4(legBL4toe1.matrix);
+		legBL4toe1nail.matrix.rotate(180, 1.1, -1, 0);
+		legBL4toe1nail.matrix.translate(-1.2, -0.8, 0); //y is y, x is z
+		legBL4toe1nail.render();
 
-	const legBR4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legBR4toe3.matrix = new Matrix4(legBR3.matrix);
-	legBR4toe3.matrix.rotate(270, 1, 0, 0);
-	legBR4toe3.matrix.rotate(-60, 0, 0, 1);
-	legBR4toe3.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
-	legBR4toe3.render();
+		const legBL4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legBL4toe2.matrix = new Matrix4(legBL3.matrix);
+		legBL4toe2.matrix.rotate(180, 1.1, -1, 0);
+		legBL4toe2.matrix.rotate(40, 1, 0, 0);
+		legBL4toe2.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
+		legBL4toe2.render();
 
-	const legBR4toe3nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legBR4toe3nail.color = [0.94, 0.79, 0.28, 1.0];
-	legBR4toe3nail.matrix = new Matrix4(legBR4toe3.matrix);
-	legBR4toe3nail.matrix.rotate(90, 1, 0, 0);
-	legBR4toe3nail.matrix.translate(0, -0.7, -1.2); //correct coords
-	legBR4toe3nail.render();
+		const legBL4toe2nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legBL4toe2nail.color = [0.94, 0.79, 0.28, 1.0];
+		legBL4toe2nail.matrix = new Matrix4(legBL4toe2.matrix);
+		legBL4toe2nail.matrix.rotate(180, 1.1, -1, 0);
+		legBL4toe2nail.matrix.translate(-1.2, -0.8, 0); //y is y, x is z
+		legBL4toe2nail.render();
 
-	//front left leg
-	const legFL = new TruncatedCone(0.8, 0.5, 2.7, 36); //x, y, z, n
-	legFL.matrix = new Matrix4(neck1.matrix);
-	legFL.matrix.scale(0.4, 0.4, 0.4);
-	legFL.matrix.rotate(180, 1, 0, 0);
-	legFL.matrix.rotate(-90, 0, 1, 0); //rotate round z
-	legFL.matrix.rotate(0, 0, 0, 1); //z rotate left right
-	legFL.matrix.rotate(g_legAngle, -2, 0, 0); // Apply g_legAngl
-	legFL.matrix.rotate(40, 1, 0, 0);
-	legFL.matrix.translate(-1.5, -2, 1); //x is x, y is z
-	legFL.render();
+		const legBL4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legBL4toe3.matrix = new Matrix4(legBL3.matrix);
+		legBL4toe3.matrix.rotate(180, 1.1, -1, 0);
+		legBL4toe3.matrix.rotate(80, 1, 0, 0);
+		legBL4toe3.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
+		legBL4toe3.render();
 
-	const legFL2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
-	legFL2.matrix = new Matrix4(legFL.matrix);
-	legFL2.matrix.rotate(90, 1, 0, 0); //rotate round z
-	legFL2.matrix.rotate(55, 0, 0, -1); //rotate round y
-	legFL2.matrix.translate(0, -0.4, -2.5); //negative z is down
-	legFL2.render();
+		const legBL4toe3nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legBL4toe3nail.color = [0.94, 0.79, 0.28, 1.0];
+		legBL4toe3nail.matrix = new Matrix4(legBL4toe3.matrix);
+		legBL4toe3nail.matrix.rotate(180, 1.1, -1, 0);
+		legBL4toe3nail.matrix.translate(-1.2, -0.8, 0); //y is y, x is z
+		legBL4toe3nail.render();
 
-	const legFL3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
-	legFL3.matrix = new Matrix4(legFL2.matrix);
-	legFL3.matrix.rotate(180, 1, 0, 0);
-	legFL3.matrix.translate(0, -3.5, 0); //y is z, z is z
-	legFL3.render();
+		//back right leg
+		const legBR = new TruncatedCone(1.0, 0.5, 2.7, 36); //x, y, z, n
+		legBR.matrix = new Matrix4(belly5.matrix);
+		legBR.matrix.rotate(270, 1, 0, -3);
+		legBR.matrix.rotate(-50, 0, 0, -1); //x is x, y is z
+		legBR.matrix.rotate(15, -1, 0, 0); //x is x, y is z
+		legBR.matrix.rotate(g_legAngle, -2, 0, 0); // Apply g_legAngle
+		legBR.matrix.scale(0.4, 0.4, 0.4);
+		legBR.matrix.translate(-1, -0.8, 0.7); //x is z, y is x, z is y
+		legBR.render();
 
-	const legFL4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFL4toe1.matrix = new Matrix4(legFL3.matrix);
-	legFL4toe1.matrix.rotate(100, 1.1, -1, 0);
-	legFL4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
-	legFL4toe1.matrix.rotate(180, 1, 0, 0);
-	legFL4toe1.render();
+		const legBR2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
+		legBR2.color = [0.52, 0, 0.12, 1.0];
+		legBR2.matrix = new Matrix4(legBR.matrix);
+		legBR2.matrix.rotate(90, -1, 0, 0);
+		legBR2.matrix.rotate(300, 0, 0, 1);
+		legBR2.matrix.translate(0, 0, 2.1); //x is z, y is
+		legBR2.render();
 
-	const legFL4toe1nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legFL4toe1nail.color = [0.94, 0.79, 0.28, 1.0];
-	legFL4toe1nail.matrix = new Matrix4(legFL4toe1.matrix);
-	legFL4toe1nail.matrix.rotate(180, 1, 0, 0);
-	legFL4toe1nail.matrix.rotate(90, 0, 0, 1);
-	legFL4toe1nail.matrix.translate(-1.3, -0.7, 0); //correct coords
-	legFL4toe1nail.render();
+		const legBR3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
+		legBR3.matrix = new Matrix4(legBR2.matrix);
+		legBR3.matrix.rotate(180, 1, 0, 0);
+		legBR3.matrix.translate(0, -3.5, 0); //y is z, z is z
+		legBR3.render();
 
-	const legFL4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFL4toe2.matrix = new Matrix4(legFL3.matrix);
-	legFL4toe2.matrix.rotate(100, 1.1, -1, 0);
-	legFL4toe2.matrix.rotate(-40, 1, 0, 0);
-	legFL4toe2.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
-	legFL4toe2.matrix.rotate(180, 1, 0, 0);
-	legFL4toe2.render();
+		const legBR4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legBR4toe1.matrix = new Matrix4(legBR3.matrix);
+		legBR4toe1.matrix.rotate(270, 1, 0, 0);
+		legBR4toe1.matrix.rotate(20, 0, 0, -1);
+		legBR4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
+		legBR4toe1.render();
 
-	const legFL4toe2nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legFL4toe2nail.color = [0.94, 0.79, 0.28, 1.0];
-	legFL4toe2nail.matrix = new Matrix4(legFL4toe2.matrix);
-	legFL4toe2nail.matrix.rotate(180, 1, 0, 0);
-	legFL4toe2nail.matrix.rotate(90, 0, 0, 1);
-	legFL4toe2nail.matrix.translate(-1.3, -0.7, 0); //correct coords
-	legFL4toe2nail.render();
+		const legBR4toe1nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legBR4toe1nail.color = [0.94, 0.79, 0.28, 1.0];
+		legBR4toe1nail.matrix = new Matrix4(legBR4toe1.matrix);
+		legBR4toe1nail.matrix.rotate(90, 1, 0, 0);
+		legBR4toe1nail.matrix.translate(0, -0.7, -1.2); //correct coords
+		legBR4toe1nail.render();
 
-	const legFL4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFL4toe3.matrix = new Matrix4(legFL3.matrix);
-	legFL4toe3.matrix.rotate(100, 1.1, -1, 0);
-	legFL4toe3.matrix.rotate(-90, 1, 0, 0);
-	legFL4toe3.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
-	legFL4toe3.matrix.rotate(180, 1, 0, 0);
-	legFL4toe3.render();
+		const legBR4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legBR4toe2.matrix = new Matrix4(legBR3.matrix);
+		legBR4toe2.matrix.rotate(270, 1, 0, 0);
+		legBR4toe2.matrix.rotate(20, 0, 0, 1);
+		legBR4toe2.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
+		legBR4toe2.render();
 
-	const legFL4toe3nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legFL4toe3nail.color = [0.94, 0.79, 0.28, 1.0];
-	legFL4toe3nail.matrix = new Matrix4(legFL4toe3.matrix);
-	legFL4toe3nail.matrix.rotate(180, 1, 0, 0);
-	legFL4toe3nail.matrix.rotate(90, 0, 0, 1);
-	legFL4toe3nail.matrix.translate(-1.3, -0.7, 0); //correct coords
-	legFL4toe3nail.render();
+		const legBR4toe2nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legBR4toe2nail.color = [0.94, 0.79, 0.28, 1.0];
+		legBR4toe2nail.matrix = new Matrix4(legBR4toe2.matrix);
+		legBR4toe2nail.matrix.rotate(90, 1, 0, 0);
+		legBR4toe2nail.matrix.translate(0, -0.7, -1.2); //correct coords
+		legBR4toe2nail.render();
 
-	//front right leg
-	const legFR = new TruncatedCone(0.8, 0.5, 2.7, 36); //x, y, z, n
-	legFR.matrix = new Matrix4(neck1.matrix);
-	legFR.matrix.scale(0.4, 0.4, 0.4);
-	legFR.matrix.rotate(180, 1, 0, 0);
-	legFR.matrix.rotate(-90, 0, 1, 0); //rotate round z
-	legFR.matrix.rotate(0, 0, 0, 1); //z rotate left right
-	legFR.matrix.rotate(g_legAngle, -2, 0, 0); // Apply g_legAngle
-	legFR.matrix.rotate(-40, 1, 0, 0);
-	legFR.matrix.translate(-1.5, -0.3, -2.8); //x is x, y is z
-	legFR.render();
+		const legBR4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legBR4toe3.matrix = new Matrix4(legBR3.matrix);
+		legBR4toe3.matrix.rotate(270, 1, 0, 0);
+		legBR4toe3.matrix.rotate(-60, 0, 0, 1);
+		legBR4toe3.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
+		legBR4toe3.render();
 
-	const legFR2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
-	legFR2.matrix = new Matrix4(legFR.matrix);
-	legFR2.matrix.rotate(90, 1, 0, 0); //rotate round z
-	legFR2.matrix.rotate(240, 0, 0, 1); //rotate round y
-	legFR2.matrix.translate(0, -0.4, -2.5); //negative z is down
-	legFR2.render();
+		const legBR4toe3nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legBR4toe3nail.color = [0.94, 0.79, 0.28, 1.0];
+		legBR4toe3nail.matrix = new Matrix4(legBR4toe3.matrix);
+		legBR4toe3nail.matrix.rotate(90, 1, 0, 0);
+		legBR4toe3nail.matrix.translate(0, -0.7, -1.2); //correct coords
+		legBR4toe3nail.render();
 
-	const legFR3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
-	legFR3.matrix = new Matrix4(legFR2.matrix);
-	legFR3.matrix.rotate(180, 1, 0, 0);
-	legFR3.matrix.translate(0, -3.5, 0); //y is z, z is z
-	legFR3.render();
+		//front left leg
+		const legFL = new TruncatedCone(0.8, 0.5, 2.7, 36); //x, y, z, n
+		legFL.matrix = new Matrix4(neck1.matrix);
+		legFL.matrix.scale(0.4, 0.4, 0.4);
+		legFL.matrix.rotate(180, 1, 0, 0);
+		legFL.matrix.rotate(-90, 0, 1, 0); //rotate round z
+		legFL.matrix.rotate(0, 0, 0, 1); //z rotate left right
+		legFL.matrix.rotate(g_legAngle, -2, 0, 0); // Apply g_legAngl
+		legFL.matrix.rotate(40, 1, 0, 0);
+		legFL.matrix.translate(-1.5, -2, 1); //x is x, y is z
+		legFL.render();
 
-	const legFR4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFR4toe1.matrix = new Matrix4(legFR3.matrix);
-	legFR4toe1.matrix.rotate(80, 1.1, -1, 0);
-	legFR4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
-	legFR4toe1.matrix.rotate(180, 1, 0, 0);
-	legFR4toe1.render();
+		const legFL2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
+		legFL2.matrix = new Matrix4(legFL.matrix);
+		legFL2.matrix.rotate(90, 1, 0, 0); //rotate round z
+		legFL2.matrix.rotate(55, 0, 0, -1); //rotate round y
+		legFL2.matrix.translate(0, -0.4, -2.5); //negative z is down
+		legFL2.render();
 
-	const legFR4toe1nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legFR4toe1nail.color = [0.94, 0.79, 0.28, 1.0];
-	legFR4toe1nail.matrix = new Matrix4(legFR4toe1.matrix);
-	legFR4toe1nail.matrix.rotate(90, 1, 0, 0);
-	legFR4toe1nail.matrix.translate(0, -0.8, -1.2);
-	legFR4toe1nail.render();
+		const legFL3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
+		legFL3.matrix = new Matrix4(legFL2.matrix);
+		legFL3.matrix.rotate(180, 1, 0, 0);
+		legFL3.matrix.translate(0, -3.5, 0); //y is z, z is z
+		legFL3.render();
 
-	const legFR4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFR4toe2.matrix = new Matrix4(legFR3.matrix);
-	legFR4toe2.matrix.rotate(80, 1.1, -1, 0);
-	legFR4toe2.matrix.rotate(40, 1, 0, 0);
-	legFR4toe2.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
-	legFR4toe2.matrix.rotate(180, 1, 0, 0);
-	legFR4toe2.render();
+		const legFL4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legFL4toe1.matrix = new Matrix4(legFL3.matrix);
+		legFL4toe1.matrix.rotate(100, 1.1, -1, 0);
+		legFL4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
+		legFL4toe1.matrix.rotate(180, 1, 0, 0);
+		legFL4toe1.render();
 
-	const legFR4toe2nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legFR4toe2nail.color = [0.94, 0.79, 0.28, 1.0];
-	legFR4toe2nail.matrix = new Matrix4(legFR4toe2.matrix);
-	legFR4toe2nail.matrix.rotate(90, 1, 0, 0);
-	legFR4toe2nail.matrix.translate(0, -0.8, -1.2);
-	legFR4toe2nail.render();
+		const legFL4toe1nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legFL4toe1nail.color = [0.94, 0.79, 0.28, 1.0];
+		legFL4toe1nail.matrix = new Matrix4(legFL4toe1.matrix);
+		legFL4toe1nail.matrix.rotate(180, 1, 0, 0);
+		legFL4toe1nail.matrix.rotate(90, 0, 0, 1);
+		legFL4toe1nail.matrix.translate(-1.3, -0.7, 0); //correct coords
+		legFL4toe1nail.render();
 
-	const legFR4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
-	legFR4toe3.matrix = new Matrix4(legFR3.matrix);
-	legFR4toe3.matrix.rotate(80, 1.1, -1, 0);
-	legFR4toe3.matrix.rotate(-40, 1, 0, 0);
-	legFR4toe3.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
-	legFR4toe3.matrix.rotate(180, 1, 0, 0);
-	legFR4toe3.matrix.rotate(-30, 0, 1, 0);
-	legFR4toe3.render();
+		const legFL4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legFL4toe2.matrix = new Matrix4(legFL3.matrix);
+		legFL4toe2.matrix.rotate(100, 1.1, -1, 0);
+		legFL4toe2.matrix.rotate(-40, 1, 0, 0);
+		legFL4toe2.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
+		legFL4toe2.matrix.rotate(180, 1, 0, 0);
+		legFL4toe2.render();
 
-	const legFR4toe3nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
-	legFR4toe3nail.color = [0.94, 0.79, 0.28, 1.0];
-	legFR4toe3nail.matrix = new Matrix4(legFR4toe3.matrix);
-	legFR4toe3nail.matrix.rotate(90, 1, 0, 0);
-	legFR4toe3nail.matrix.translate(0, -0.8, -1.2);
-	legFR4toe3nail.render();
+		const legFL4toe2nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legFL4toe2nail.color = [0.94, 0.79, 0.28, 1.0];
+		legFL4toe2nail.matrix = new Matrix4(legFL4toe2.matrix);
+		legFL4toe2nail.matrix.rotate(180, 1, 0, 0);
+		legFL4toe2nail.matrix.rotate(90, 0, 0, 1);
+		legFL4toe2nail.matrix.translate(-1.3, -0.7, 0); //correct coords
+		legFL4toe2nail.render();
 
-	if (isBreathingFire && smokeBlocks.length > 0) {
-		let smokeOrigin = new Matrix4(nose1.matrix);
-		smokeOrigin.translate(0.65, 0, 0.6); // Centered above fire
+		const legFL4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legFL4toe3.matrix = new Matrix4(legFL3.matrix);
+		legFL4toe3.matrix.rotate(100, 1.1, -1, 0);
+		legFL4toe3.matrix.rotate(-90, 1, 0, 0);
+		legFL4toe3.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
+		legFL4toe3.matrix.rotate(180, 1, 0, 0);
+		legFL4toe3.render();
 
-		smokeBlocks.forEach((smoke) => {
-			let smokeCube = new Cube();
-			let alpha = Math.max(0.2, smoke.lifetime); // Fade out effect
+		const legFL4toe3nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legFL4toe3nail.color = [0.94, 0.79, 0.28, 1.0];
+		legFL4toe3nail.matrix = new Matrix4(legFL4toe3.matrix);
+		legFL4toe3nail.matrix.rotate(180, 1, 0, 0);
+		legFL4toe3nail.matrix.rotate(90, 0, 0, 1);
+		legFL4toe3nail.matrix.translate(-1.3, -0.7, 0); //correct coords
+		legFL4toe3nail.render();
 
-			smokeCube.color = [1.0, 0.4, 0.0, alpha]; // Orange fire
+		//front right leg
+		const legFR = new TruncatedCone(0.8, 0.5, 2.7, 36); //x, y, z, n
+		legFR.matrix = new Matrix4(neck1.matrix);
+		legFR.matrix.scale(0.4, 0.4, 0.4);
+		legFR.matrix.rotate(180, 1, 0, 0);
+		legFR.matrix.rotate(-90, 0, 1, 0); //rotate round z
+		legFR.matrix.rotate(0, 0, 0, 1); //z rotate left right
+		legFR.matrix.rotate(g_legAngle, -2, 0, 0); // Apply g_legAngle
+		legFR.matrix.rotate(-40, 1, 0, 0);
+		legFR.matrix.translate(-1.5, -0.3, -2.8); //x is x, y is z
+		legFR.render();
 
-			smokeCube.matrix = new Matrix4(smokeOrigin);
-			smokeCube.matrix.translate(0, 0, -0.3);
-			smokeCube.matrix.translate(smoke.x, smoke.y, smoke.z);
-			smokeCube.matrix.scale(smoke.scale, smoke.scale, smoke.scale);
+		const legFR2 = new TruncatedCone(0.6, 0.2, 2.7, 36); //x, y, z, n
+		legFR2.matrix = new Matrix4(legFR.matrix);
+		legFR2.matrix.rotate(90, 1, 0, 0); //rotate round z
+		legFR2.matrix.rotate(240, 0, 0, 1); //rotate round y
+		legFR2.matrix.translate(0, -0.4, -2.5); //negative z is down
+		legFR2.render();
 
-			smokeCube.render();
-		});
+		const legFR3 = new TruncatedCone(0.3, 0.2, 1.4, 36); //x, y, z, n
+		legFR3.matrix = new Matrix4(legFR2.matrix);
+		legFR3.matrix.rotate(180, 1, 0, 0);
+		legFR3.matrix.translate(0, -3.5, 0); //y is z, z is z
+		legFR3.render();
+
+		const legFR4toe1 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legFR4toe1.matrix = new Matrix4(legFR3.matrix);
+		legFR4toe1.matrix.rotate(80, 1.1, -1, 0);
+		legFR4toe1.matrix.translate(-0.2, 0, 0.1); //y is z, x is y
+		legFR4toe1.matrix.rotate(180, 1, 0, 0);
+		legFR4toe1.render();
+
+		const legFR4toe1nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legFR4toe1nail.color = [0.94, 0.79, 0.28, 1.0];
+		legFR4toe1nail.matrix = new Matrix4(legFR4toe1.matrix);
+		legFR4toe1nail.matrix.rotate(90, 1, 0, 0);
+		legFR4toe1nail.matrix.translate(0, -0.8, -1.2);
+		legFR4toe1nail.render();
+
+		const legFR4toe2 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legFR4toe2.matrix = new Matrix4(legFR3.matrix);
+		legFR4toe2.matrix.rotate(80, 1.1, -1, 0);
+		legFR4toe2.matrix.rotate(40, 1, 0, 0);
+		legFR4toe2.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
+		legFR4toe2.matrix.rotate(180, 1, 0, 0);
+		legFR4toe2.render();
+
+		const legFR4toe2nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legFR4toe2nail.color = [0.94, 0.79, 0.28, 1.0];
+		legFR4toe2nail.matrix = new Matrix4(legFR4toe2.matrix);
+		legFR4toe2nail.matrix.rotate(90, 1, 0, 0);
+		legFR4toe2nail.matrix.translate(0, -0.8, -1.2);
+		legFR4toe2nail.render();
+
+		const legFR4toe3 = new TruncatedCone(0.2, 0.15, 1.3, 36); //x, y, z, n
+		legFR4toe3.matrix = new Matrix4(legFR3.matrix);
+		legFR4toe3.matrix.rotate(80, 1.1, -1, 0);
+		legFR4toe3.matrix.rotate(-40, 1, 0, 0);
+		legFR4toe3.matrix.translate(-0.15, 0, 0.1); //y is z, x is y
+		legFR4toe3.matrix.rotate(180, 1, 0, 0);
+		legFR4toe3.matrix.rotate(-30, 0, 1, 0);
+		legFR4toe3.render();
+
+		const legFR4toe3nail = new TruncatedCone(0.04, 0.15, 0.8, 36); //x, y, z, n
+		legFR4toe3nail.color = [0.94, 0.79, 0.28, 1.0];
+		legFR4toe3nail.matrix = new Matrix4(legFR4toe3.matrix);
+		legFR4toe3nail.matrix.rotate(90, 1, 0, 0);
+		legFR4toe3nail.matrix.translate(0, -0.8, -1.2);
+		legFR4toe3nail.render();
+
+		//tailtip
+		var tailtip1 = new TrianglePrism();
+		tailtip1.color = [0.05, 0.25, 0.05, 1];
+		tailtip1.matrix = new Matrix4(tail12.matrix);
+		tailtip1.matrix.translate(0.9, 0, 0.6);
+		tailtip1.matrix.rotate(180, 0, 0, 1);
+		tailtip1.matrix.scale(1, 3, 0.1);
+		tailtip1.render();
+
+		var tailtip2 = new TrianglePrism();
+		tailtip2.color = [0.05, 0.25, 0.05, 1];
+		tailtip2.matrix = new Matrix4(tailtip1.matrix);
+		tailtip2.matrix.translate(0.6, 0.5, 0.1);
+		tailtip2.matrix.scale(0.6, 0.6, 1);
+		tailtip2.matrix.rotate(50, 0, 0, -1);
+		tailtip2.render();
+
+		var tailtip3 = new TrianglePrism();
+		tailtip3.color = [0.05, 0.25, 0.05, 1];
+		tailtip3.matrix = new Matrix4(tailtip1.matrix);
+		tailtip3.matrix.scale(0.6, 0.6, 1);
+		tailtip3.matrix.rotate(50, 0, 0, 1);
+		tailtip3.render();
+
+		var tailtip4 = new TrianglePrism();
+		tailtip4.color = [0.05, 0.25, 0.05, 1];
+		tailtip4.matrix = new Matrix4(tailtip1.matrix);
+		tailtip4.matrix.translate(-0.06, 0, 0);
+		tailtip4.matrix.scale(0.7, 0.5, 1);
+		tailtip4.matrix.rotate(60, 0, 0, 1);
+		tailtip4.render();
+
+		var tailtip5 = new TrianglePrism();
+		tailtip5.color = [0.05, 0.25, 0.05, 1];
+		tailtip5.matrix = new Matrix4(tailtip1.matrix);
+		tailtip5.matrix.translate(0.68, 0.4, 0);
+		tailtip5.matrix.scale(0.7, 0.5, 1);
+		tailtip5.matrix.rotate(60, 0, 0, -1);
+		tailtip5.render();
+
+		if (isBreathingFire && smokeBlocks.length > 0) {
+			let smokeOrigin = new Matrix4(nose1.matrix);
+			smokeOrigin.translate(0.65, 0, 0.6); // Centered above fire
+
+			smokeBlocks.forEach((smoke) => {
+				let smokeCube = new Cube();
+				let alpha = Math.max(0.2, smoke.lifetime); // Fade out effect
+
+				smokeCube.color = [1.0, 0.4, 0.0, alpha]; // Orange fire
+
+				smokeCube.matrix = new Matrix4(smokeOrigin);
+				smokeCube.matrix.translate(0, 0, -0.3);
+				smokeCube.matrix.translate(smoke.x, smoke.y, smoke.z);
+				smokeCube.matrix.scale(smoke.scale, smoke.scale, smoke.scale);
+
+				smokeCube.render();
+			});
+		}
 	}
 }
