@@ -137,14 +137,14 @@ function addMouseDragControls() {
 	});
 
 	canvas.addEventListener("click", function (event) {
-		if (event.shiftKey) {
-			isBreathingFire = true;
-			generateFireBlocks();
+		if (g_dragonAnimation && event.shiftKey) {
+			// Always allow sneezing to be triggered
+			isSneezing = true;
+			sneezeStartTime = g_seconds; // Reset start time for every sneeze
 
-			if (!isSneezing) {
-				isSneezing = true;
-				sneezeStartTime = g_seconds; // Record start time
-			}
+			// Start fire immediately
+			isBreathingFire = true;
+			generateFireBlocks(); // Generate new fire every sneeze
 		}
 	});
 
@@ -237,7 +237,7 @@ let g_tailAngle = 0;
 let g_neckAngle = 0;
 let g_bodyAngle = 0;
 let g_mouthAngle = 0;
-
+let g_neckAngleX = 0;
 let g_dragonAnimation = false; // Toggle for dragon animation
 let g_dragonFloatOffset = 0; // Global offset for floating animation
 
@@ -247,44 +247,47 @@ function updateAnimationAngles() {
 		g_dragonFloatOffset = 0.1 * Math.sin(g_seconds);
 
 		// Tail rotation along both X and Z axes for a more dynamic effect
-		g_tailAngleX = 5 * Math.sin(g_seconds * 2); // Rotate along X-axis
-		g_tailAngleZ = -6 * Math.cos(g_seconds + Math.PI / 4); // Rotate along Z-axis
+		g_tailAngleX = 5 * Math.sin(g_seconds * 2);
+		g_tailAngleZ = -6 * Math.cos(g_seconds + Math.PI / 4);
 
 		// Neck rotation: Smooth oscillating rotation
-		g_neckAngle = 10 * Math.sin(g_seconds); // Adjust amplitude (10) as needed
+		g_neckAngle = 10 * Math.sin(g_seconds);
+
 		// Body rotation:
-		g_bodyAngle = 5 * Math.sin(g_seconds); // Adjust amplitude (5) as needed
+		g_bodyAngle = 5 * Math.sin(g_seconds);
 		// Mouth angle:
-		g_mouthAngle = 15 * Math.abs(Math.sin(g_seconds * 2)); // Always negative
+		g_mouthAngle = 15 * Math.abs(Math.sin(g_seconds * 2));
 
-		g_legAngle = g_bodyAngle * 2; // Amplify a bit for natural effect
+		g_legAngle = g_bodyAngle * 2;
 	}
-
-	// if (isSneezing) {
-	// 	let sneezeTimeElapsed = g_seconds - sneezeStartTime;
-
-	// 	if (sneezeTimeElapsed < sneezeDuration) {
-	// 		// Apply sudden jerky motion
-	// 		g_neckAngle = 40 * Math.sin(sneezeTimeElapsed * 10); // Quick neck twitch
-	// 		g_bodyAngle = 15 * Math.sin(sneezeTimeElapsed * 8); // Whole body jerks
-	// 		g_legAngle = 20 * Math.sin(sneezeTimeElapsed * 8);
-	// 	} else {
-	// 		// Reset motion back to normal
-	// 		isSneezing = false;
-	// 	}
-	// }
-
+	// Sneezing logic
 	if (isSneezing) {
-		let sneezeDuration = g_seconds - sneezeStartTime;
-		if (sneezeDuration < 0.3) {
-			// Small subtle twitch instead of dramatic movement
-			g_neckAngle += Math.sin(sneezeDuration * 20) * 8;
-			g_bodyAngle += Math.sin(sneezeDuration * 15) * 3;
+		let t = g_seconds - sneezeStartTime; // Time since sneeze started
+		let phase = t / sneezeDuration; // Normalize t between 0 and 1 over sneeze duration
+
+		if (phase < 1.0) {
+			// Apply easing for smooth motion
+			let easedT = Math.sin((phase * Math.PI) / 2); // Smooth acceleration and deceleration
+
+			// Move back first, then sharply forward beyond neutral, pause, then reset
+			if (phase < 0.4) {
+				g_neckAngleX = -10 * easedT; // Move backward
+			} else if (phase < 0.6) {
+				g_neckAngleX = -10 + 30 * Math.sin((phase - 0.4) * Math.PI); // Move forward past neutral
+			} else if (phase < 0.75) {
+				g_neckAngleX = 15; // Hold forward for a pause
+			} else {
+				g_neckAngleX = 15 * (1 - (phase - 0.75) * 4); // Smoothly return to neutral
+			}
 		} else {
-			isSneezing = false;
+			g_neckAngleX = 0; // Reset neck angle after sneeze
+			if (fireBlocks.length === 0 && fireBlocksRight.length === 0) {
+				isSneezing = false; // Stop sneezing only when fire is gone
+			}
 		}
 	}
 
+	// Fire movement
 	if (isBreathingFire) {
 		fireBlocks.forEach((fire) => {
 			fire.y += fire.speed; // Move fire outward
@@ -296,11 +299,13 @@ function updateAnimationAngles() {
 			fire.lifetime -= 0.02;
 		});
 
+		// Remove fire blocks after lifetime ends
 		fireBlocks = fireBlocks.filter((fire) => fire.lifetime > 0);
 		fireBlocksRight = fireBlocksRight.filter((fire) => fire.lifetime > 0);
 
+		// Stop fire animation when all blocks disappear
 		if (fireBlocks.length === 0) {
-			isBreathingFire = false; // Stop fire animation when all blocks disappear
+			isBreathingFire = false;
 		}
 	}
 }
@@ -557,6 +562,7 @@ function renderAllShapes() {
 	neck4.matrix = new Matrix4(neck1.matrix);
 	neck4.matrix.translate(0.05, 1, 0.06);
 	neck4.matrix.rotate(g_neckAngle, 0, 1, 0.7); // Apply neck rotation
+	neck4.matrix.rotate(g_neckAngleX, 1, 0, 0);
 	neck4.matrix.scale(0.9, 0.9, 0.9);
 	neck4.render();
 
@@ -566,6 +572,8 @@ function renderAllShapes() {
 	neck5.matrix.translate(0.04, 1, 0.08);
 	// neck5.matrix.rotate(20, 0, g_neckAngle * 0.8, 0); // Smaller rotation for gradual motion
 	neck5.matrix.rotate(g_neckAngle * 0.8, 0, 1, 0.7); // Apply neck rotation
+	neck5.matrix.rotate(g_neckAngleX, 0.9, 0, 0);
+
 	neck5.matrix.scale(0.95, 0.95, 0.95);
 	neck5.matrix.rotate(20, 0.6, 0, 0);
 	neck5.render();
@@ -575,7 +583,7 @@ function renderAllShapes() {
 	neck6.matrix = new Matrix4(neck5.matrix);
 	neck6.matrix.translate(0.02, 1, 0.08);
 	neck6.matrix.rotate(g_neckAngle * 0.6, 0, 1, 0.7); // Apply neck rotation
-	// neck6.matrix.rotate(13, 0.6, 0, 0);
+	neck6.matrix.rotate(g_neckAngleX, 0.8, 0, 0);
 	neck6.matrix.scale(0.95, 0.95, 0.95);
 	neck6.render();
 
@@ -583,6 +591,8 @@ function renderAllShapes() {
 	neck7.color = [0.58, 0.0, 0.06, 1.0];
 	neck7.matrix = new Matrix4(neck6.matrix);
 	neck7.matrix.translate(0, 0.55, 0.1);
+	neck7.matrix.rotate(g_neckAngleX, 0.7, 0, 0);
+
 	neck7.matrix.rotate(-25, 0.6, 0, 0);
 	neck7.render();
 
@@ -620,7 +630,8 @@ function renderAllShapes() {
 	var nose1 = new TrianglePrism();
 	nose1.color = [0.58, 0.0, 0.06, 1.0];
 	nose1.matrix = new Matrix4(head2.matrix);
-	nose1.matrix.translate(0, 0.8, 0.16);
+	// nose1.matrix.translate(0, 0.8, 0.16);
+	nose1.matrix.translate(0, 0.81, 0.18); // Slightly moved forward (was 0.8, 0.16)
 	nose1.matrix.rotate(270, 1, 0, 0);
 	nose1.matrix.rotate(90, 0, 1, 0);
 	nose1.matrix.scale(0.87, 1.15, 1);
@@ -629,7 +640,8 @@ function renderAllShapes() {
 	var nose2 = new Cube();
 	nose2.color = [0.58, 0.0, 0.06, 1.0];
 	nose2.matrix = new Matrix4(head2.matrix);
-	nose2.matrix.translate(0, 0, -1);
+	// nose2.matrix.translate(0, 0, -1);
+	nose2.matrix.translate(0, 0.01, -1.02); // Slightly push nose backward (was -1)
 	nose2.matrix.scale(1, 0.4, 1);
 	nose2.render();
 
