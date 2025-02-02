@@ -152,7 +152,7 @@ function addControls() {
 			isBreathingFire = true;
 			generateFireBlocks(); // Generate new fire every sneeze
 		}
-		if (isSnake && event.shiftKey) {
+		if (g_dragonAnimation && isSnake && event.shiftKey) {
 			isTongueOut = true;
 			tongueStartTime = g_seconds; // Track when the tongue starts extending
 		}
@@ -187,8 +187,7 @@ function addControls() {
 	});
 
 	document.addEventListener("keydown", function (event) {
-		if (event.shiftKey && event.code === "KeyS") {
-			console.log("Shift + S pressed");
+		if (event.shiftKey && event.code === "KeyT") {
 			transformToSnake();
 		}
 	});

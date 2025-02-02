@@ -76,9 +76,23 @@
 				width: 150px;
 			}
 
-			#sneeze-text {
+			#special-animation-text {
 				margin-top: 10px;
 				font-size: 16px;
+				text-align: left; /* Ensures text alignment */
+				align-self: flex-start; /* Aligns it to the left within the flex container */
+			}
+			#transform-text {
+				margin-top: 10px;
+				font-size: 16px;
+				text-align: left; /* Ensures text alignment */
+				align-self: flex-start; /* Aligns it to the left within the flex container */
+			}
+			#instr-text {
+				margin-top: 10px;
+				font-size: 16px;
+				text-align: left; /* Ensures text alignment */
+				align-self: flex-start; /* Aligns it to the left within the flex container */
 			}
 		</style>
 	</head>
@@ -98,9 +112,10 @@
 
 				<button id="DragonAnimationOnButton">Animation ON</button>
 				<button id="DragonAnimationOffButton">Animation OFF</button>
+				<p id="instr-text">Drag mouse to rotate</p>
 
-				<p id="sneeze-text">Shift + Click to Sneeze</p>
-				<p id="sneeze-text">Drag mouse to rotate</p>
+				<p id="special-animation-text">[Shift + Click] to Sneeze</p>
+				<p id="transform-text">[Shift + T] to transform into Snake</p>
 
 				<p>Camera X</p>
 				<input type="range" id="cameraXSlide" min="-90" max="90" value="0" />
@@ -116,10 +131,6 @@
 			</div>
 		</div>
 
-		<!-- Sneeze Instructions -->
-
-		<!-- FPS Counter -->
-
 		<script src="../lib/webgl-utils.js"></script>
 		<script src="../lib/webgl-debug.js"></script>
 		<script src="../lib/cuon-utils.js"></script>
@@ -131,5 +142,55 @@
 		<script src="TrianglePrism.js"></script>
 		<script src="Cone.js"></script>
 		<script src="TruncatedCone.js"></script>
+		<script>
+			let isSnakeHTML = false;
+			// Function to update title and instructions
+			function updateMode() {
+				const titleElement = document.getElementById("goodbye-text");
+				const transformElement = document.getElementById("transform-text");
+				const specialAnimationElement = document.getElementById(
+					"special-animation-text"
+				);
+				if (titleElement) {
+					if (isSnakeHTML) {
+						titleElement.textContent = "HELLO, YEAR OF THE SNAKE!";
+					} else {
+						titleElement.textContent = "GOODBYE, YEAR OF THE DRAGON!";
+					}
+				}
+				if (transformElement) {
+					if (isSnakeHTML) {
+						transformElement.textContent =
+							"[Shift + T] to transform into Dragon";
+					} else {
+						transformElement.textContent =
+							"[Shift + T] to transform into Snake";
+					}
+				}
+				if (specialAnimationElement) {
+					if (isSnakeHTML) {
+						specialAnimationElement.textContent =
+							"[Shift + Click] to Breathe Fire";
+					} else {
+						specialAnimationElement.textContent =
+							"[Shift + Click] to Flick tongue";
+					}
+				}
+			}
+
+			// Event listener for Shift + S to toggle between modes
+			document.addEventListener("keydown", (event) => {
+				if (event.shiftKey && event.key.toLowerCase() === "t") {
+					isSnakeHTML = !isSnakeHTML; // Toggle mode
+					updateMode(); // Update the UI
+				}
+			});
+
+			// Ensure the UI updates correctly when the page loads
+			window.onload = function () {
+				updateMode();
+				main(); // Call the existing main function
+			};
+		</script>
 	</body>
 </html>
