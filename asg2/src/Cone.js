@@ -1,7 +1,7 @@
 class Cone {
 	constructor(baseRadius = 1.0, height = 2.0, numSlices = 36) {
 		this.type = "cone";
-		this.color = [1.0, 1.0, 1.0, 1.0]; // Default color
+		this.color = [0.05, 0.25, 0.05, 1]; // Default color
 		this.matrix = new Matrix4(); // Transformation matrix
 		this.baseRadius = baseRadius;
 		this.height = height;
