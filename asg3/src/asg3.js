@@ -14,8 +14,10 @@ var VSHADER_SOURCE = `
 var FSHADER_SOURCE = `
   precision mediump float;
   varying vec2 v_TexCoord;
+  uniform sampler2D u_Sampler0;
   void main() {
-    gl_FragColor = vec4(v_TexCoord, 1.0, 1.0); // Using UV as color (R = U, G = V)
+    // gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
+	gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
   }`;
 
 let canvas;
@@ -48,13 +50,13 @@ function connectVariablesToGLSL() {
 	}
 
 	a_Position = gl.getAttribLocation(gl.program, "a_Position");
-	a_TexCoord = gl.getAttribLocation(gl.program, "a_TexCoord"); // New attribute for UV coordinates
+	a_TexCoord = gl.getAttribLocation(gl.program, "a_TexCoord");
 	u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
 	u_GlobalRotateMatrix = gl.getUniformLocation(
 		gl.program,
 		"u_GlobalRotateMatrix"
 	);
-	u_Sampler = gl.getUniformLocation(gl.program, "u_Sampler"); // New uniform for texture
+	u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
 
 	gl.uniformMatrix4fv(u_ModelMatrix, false, new Matrix4().elements);
 }
@@ -122,6 +124,7 @@ function main() {
 	// Specify the color for clearing <canvas>
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
+	initTextures();
 	// // Clear <canvas>
 	renderAllShapes();
 	requestAnimationFrame(tick);
@@ -145,35 +148,47 @@ function updateAnimationAngles() {
 	}
 }
 
-var g_shapesList = [];
-let prevPoint = null; // To store the last drawn point
-let isFillingMode = false;
-
-function createShape(position) {
-	let shape;
-	if (g_selectedType == POINT) {
-		shape = new Point();
-	} else if (g_selectedType == TRIANGLE) {
-		shape = new Triangle();
-	} else if (g_selectedType == CIRCLE) {
-		shape = new Circle();
+function initTextures() {
+	var texture = gl.createTexture(); // Create a texture object
+	if (!texture) {
+		console.log("Failed to create the texture object");
+		return false;
 	}
 
-	shape.position = position;
-	shape.color = g_selectedColor.slice();
-	shape.size = g_selectedSize;
-	shape.segments = g_selectedSegments;
+	var u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
+	if (!u_Sampler0) {
+		console.log("Failed to get the storage location of u_Sampler0");
+		return false;
+	}
 
-	g_shapesList.push(shape);
+	var image = new Image(); // Create the image object
+	if (!image) {
+		console.log("Failed to create the image object");
+		return false;
+	}
+	// Register the event handler to be called on loading an image
+	image.onload = function () {
+		loadTexture(gl, texture, u_Sampler0, image);
+	};
+	image.src = "texture.png";
+	return true;
 }
 
-function drawPoint(position) {
-	// Create a new point and add it to the shapes list
-	let point = new Point();
-	point.position = position;
-	point.color = g_selectedColor.slice();
-	point.size = g_selectedSize;
-	g_shapesList.push(point);
+function loadTexture(gl, texture, u_Sampler, image) {
+	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+	// Enable texture unit0
+	gl.activeTexture(gl.TEXTURE0);
+	// Bind the texture object to the target
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+
+	// Set the texture parameters
+	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	// Set the texture image
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+	// Set the texture unit 0 to the sampler
+	gl.uniform1i(u_Sampler, 0);
+
+	console.log("texture loaded");
 }
 
 function renderAllShapes() {
@@ -201,13 +216,6 @@ function renderAllShapes() {
 
 	yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
 
-	// yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
-	// if (g_yellowAnimation) {
-	// 	yellow.matrix.rotate(45 * Math.sin(g_seconds), 0, 0, 1);
-	// 	console.log("here");
-	// } else {
-	// 	yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
-	// }
 
 	var yellowCoordinatesMat = new Matrix4(yellow.matrix);
 	yellow.matrix.scale(0.25, 0.7, 0.5);
@@ -224,16 +232,5 @@ function renderAllShapes() {
 	box.matrix.translate(-0.5, 0, -0.001);
 	box.render();
 
-	//check time
-	// var duration = performance.now() - start;
-	// sendTextToHTML("  ms: " + Math.floor(duration) + "  fps: " + Math.floor(10000 / duration));
+	
 }
-
-// function sendTextToHTML(text) {
-// 	var htmlElem = document.getElementById(htmlID);
-// 	if (!htmlElem) {
-// 		console.log("Failed to get the HTML element with id of", htmlID);
-// 		return;
-// 	}
-// 	htmlElem.innerHTML = text;
-// }
