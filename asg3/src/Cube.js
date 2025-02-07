@@ -1,12 +1,17 @@
 class Cube {
-	constructor() {
+	constructor(textureNum = 0) { // Accept textureNum
 		this.type = "cube";
 		this.color = [1.0, 1.0, 1.0, 1.0];
 		this.matrix = new Matrix4();
+		this.textureNum = textureNum; // Store texture type
 	}
 
+
 	render() {
+		var rgba = this.color;
+
 		gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+		gl.uniform1i(u_whichTexture, this.textureNum); // Pass the flag to the shader
 
 		// Define vertices & UVs for all 6 faces
 

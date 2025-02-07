@@ -14,10 +14,25 @@ var VSHADER_SOURCE = `
 var FSHADER_SOURCE = `
   precision mediump float;
   varying vec2 v_TexCoord;
+  uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
+  uniform int u_whichTexture;
   void main() {
     // gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
-	gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
+	// gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
+
+	if (u_whichTexture == -2) {					//use color
+		gl_FragColor = u_FragColor;
+	}
+	else if (u_whichTexture == -1) {			//use UV debug color
+		gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
+	}
+	else if (u_whichTexture == 0) {				//use texture0
+		gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
+	}
+	else {										//error					
+		gl_FragColor = vec4(1, 0.2, 0.2, 1);
+	}
   }`;
 
 let canvas;
@@ -57,7 +72,7 @@ function connectVariablesToGLSL() {
 		"u_GlobalRotateMatrix"
 	);
 	u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
-
+	u_whichTexture = gl.getUniformLocation(gl.program, "u_whichTexture");
 	gl.uniformMatrix4fv(u_ModelMatrix, false, new Matrix4().elements);
 }
 
@@ -212,11 +227,9 @@ function renderAllShapes() {
 	// Draw left arm
 	var yellow = new Cube();
 	yellow.color = [1.0, 1.0, 0.0, 1.0];
+	yellow.textureNum = -1;
 	yellow.matrix.setTranslate(0, -0.5, 0);
-
 	yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
-
-
 	var yellowCoordinatesMat = new Matrix4(yellow.matrix);
 	yellow.matrix.scale(0.25, 0.7, 0.5);
 	yellow.matrix.translate(-0.5, 0, 0);
@@ -225,12 +238,11 @@ function renderAllShapes() {
 	// test box
 	var box = new Cube();
 	box.color = [1.0, 0.0, 1.0, 1.0];
+	box.textureNum = 0;
 	box.matrix = yellowCoordinatesMat; //attach to yellow arm
 	box.matrix.translate(0, 0.65, 0);
 	box.matrix.rotate(g_magentaAngle, 0, 0, 1);
 	box.matrix.scale(0.3, 0.3, 0.3);
 	box.matrix.translate(-0.5, 0, -0.001);
 	box.render();
-
-	
 }
