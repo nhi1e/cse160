@@ -8,7 +8,7 @@ var VSHADER_SOURCE = `
   uniform mat4 u_ProjMatrix;
   varying vec2 v_TexCoord;
   void main() {
-    gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position * u_ViewMatrix * u_ProjMatrix;
+    gl_Position = u_ProjMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
     v_TexCoord = a_TexCoord;
   }`;
 
@@ -137,6 +137,7 @@ function main() {
 	connectVariablesToGLSL();
 	addActionsForHtmlUI();
 
+	document.onkeydown = keydown;
 	gl.enable(gl.BLEND);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -210,18 +211,28 @@ function loadTexture(gl, texture, u_Sampler, image) {
 	console.log("texture loaded");
 }
 
-var g_eye = [0, 0, 1]; // Eye position
-var g_at = [0, 0, 0]; // Look-at point
+function keydown(ev) {
+	if (ev.keyCode == 39) {
+		// The right arrow key was pressed{
+		g_eye[0] += 1;
+	} else if (ev.keyCode == 37) {
+		// The left arrow key was pressed{
+		g_eye[0] -= 1;
+	}
+	renderAllShapes();
+}
+var g_eye = [0, 0, 3]; // Eye position
+var g_at = [0, 0, -100]; // Look-at point
 var g_up = [0, 1, 0]; // Up direction
 
-g_eye = [g_eye[0], g_eye[1], g_eye[2] - 2];
-g_at = [g_at[0], g_at[1], g_at[2] - 2];
+// g_eye = [g_eye[0], g_eye[1], g_eye[2] - 2];
+// g_at = [g_at[0], g_at[1], g_at[2] - 2];
 
 function renderAllShapes() {
 	var start = performance.now();
 
 	var projMatrix = new Matrix4();
-	projMatrix.setPerspective(60, (1 * canvas.width) / canvas.height, 1, 100);
+	projMatrix.setPerspective(50, (1 * canvas.width) / canvas.height, 1, 100);
 	gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
 	var viewMatrix = new Matrix4();
