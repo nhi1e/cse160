@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Asg1 - Nhi</title>
+		<style>
+			.container {
+				display: flex;
+				align-items: flex-start;
+				gap: 20px; /* Adds space between the canvas and the image */
+			}
+
+		</style>
+	</head>
+
+	<body onload="main()">
+		<div class="container">
+			<canvas id="webgl" width="600" height="600">
+				Please use a browser that supports "canvas"
+			</canvas>
+		</div>
+		<p>
+			Yellow Animation
+			<button type="button" id="YellowAnimationOnButton">ON</button>
+			<button type="button" id="YellowAnimationOffButton">OFF</button>
+		</p>
+		<p>
+			Magenta Animation
+			<button type="button" id="MagentaAnimationOnButton">ON</button>
+			<button type="button" id="MagentaAnimationOffButton">OFF</button>
+		</p>
+		
+		<p>Camera Angle 
+			<input
+				type="range"
+				min="0"
+				max="90"
+				value="5"
+				class="slider"
+				id="angleSlide"
+			/>
+		</p>
+
+		<p>Yellow Slider
+			<input
+				type="range"
+				min="-45"
+				max="45"
+				value="0"
+				class="slider"
+				id="yellowSlide"
+			/>
+		</p>
+		<p>Magenta Slider
+			<input
+				type="range"
+				min="-45"
+				max="45"
+				value="0"
+				class="slider"
+				id="magentaSlide"
+			/>
+		</p>
+
+
+			<script src="../lib/webgl-utils.js"></script>
+			<script src="../lib/webgl-debug.js"></script>
+			<script src="../lib/cuon-utils.js"></script>
+			<script src="../lib/cuon-matrix.js"></script>
+
+			<script src="asg2.js"></script>
+			<script src="Triangle.js"></script>
+			<script src="Cube.js"></script>
+
+		</p>
+	</body>
+</html>
