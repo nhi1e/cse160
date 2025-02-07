@@ -4,9 +4,11 @@ var VSHADER_SOURCE = `
   attribute vec2 a_TexCoord;
   uniform mat4 u_ModelMatrix;
   uniform mat4 u_GlobalRotateMatrix;
+  uniform mat4 u_ViewMatrix;
+  uniform mat4 u_ProjMatrix;
   varying vec2 v_TexCoord;
   void main() {
-    gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
+    gl_Position = u_GlobalRotateMatrix * u_ModelMatrix * a_Position * u_ViewMatrix * u_ProjMatrix;
     v_TexCoord = a_TexCoord;
   }`;
 
@@ -73,6 +75,8 @@ function connectVariablesToGLSL() {
 	);
 	u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
 	u_whichTexture = gl.getUniformLocation(gl.program, "u_whichTexture");
+	u_ViewMatrix = gl.getUniformLocation(gl.program, "u_ViewMatrix");
+	u_ProjMatrix = gl.getUniformLocation(gl.program, "u_ProjMatrix");
 	gl.uniformMatrix4fv(u_ModelMatrix, false, new Matrix4().elements);
 }
 
@@ -206,8 +210,33 @@ function loadTexture(gl, texture, u_Sampler, image) {
 	console.log("texture loaded");
 }
 
+var g_eye = [0, 0, -1]; // Eye position
+var g_at = [0, 0, 0]; // Look-at point
+var g_up = [0, 1, 0]; // Up direction
+
+g_eye = [g_eye[0], g_eye[1], g_eye[2] - 1];
+g_at = [g_at[0], g_at[1], g_at[2] - 1];
+
 function renderAllShapes() {
 	var start = performance.now();
+
+	var projMatrix = new Matrix4();
+	projMatrix.setPerspective(60, (1 * canvas.width) / canvas.height, 1, 100);
+	gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
+
+	var viewMatrix = new Matrix4();
+	viewMatrix.setLookAt(
+		g_eye[0],
+		g_eye[1],
+		g_eye[2],
+		g_at[0],
+		g_at[1],
+		g_at[2],
+		g_up[0],
+		g_up[1],
+		g_up[2]
+	); //eye, lookat, up
+	gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
 
 	// pass matrix to u_ModelMatrix attribute
 	var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
