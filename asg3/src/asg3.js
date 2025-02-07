@@ -210,12 +210,12 @@ function loadTexture(gl, texture, u_Sampler, image) {
 	console.log("texture loaded");
 }
 
-var g_eye = [0, 0, -1]; // Eye position
+var g_eye = [0, 0, 1]; // Eye position
 var g_at = [0, 0, 0]; // Look-at point
 var g_up = [0, 1, 0]; // Up direction
 
-g_eye = [g_eye[0], g_eye[1], g_eye[2] - 1];
-g_at = [g_at[0], g_at[1], g_at[2] - 1];
+g_eye = [g_eye[0], g_eye[1], g_eye[2] - 2];
+g_at = [g_at[0], g_at[1], g_at[2] - 2];
 
 function renderAllShapes() {
 	var start = performance.now();
