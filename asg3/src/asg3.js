@@ -264,11 +264,6 @@ function renderAllShapes() {
 		g_camera.up.elements[2]
 	);
 
-	console.log(
-		g_camera.eye.elements[0],
-		g_camera.eye.elements[1],
-		g_camera.eye.elements[2]
-	);
 	gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
 
 	// pass matrix to u_ModelMatrix attribute
@@ -286,6 +281,15 @@ function renderAllShapes() {
 	floor.matrix.scale(10, 0, 10);
 	floor.matrix.translate(-0.5, 1, 0, -0.5);
 	floor.render();
+
+	//draw sky
+	var sky = new Cube();
+	sky.color = [0.529, 0.808, 0.98, 1.0]; // Light blue color for the sky
+	sky.textureNum = -1; // Use solid color
+
+	sky.matrix.setTranslate(-5, -3, -5);
+	sky.matrix.scale(10, 10, 10);
+	sky.render();
 
 	//Draw a cube
 	var body = new Cube();
