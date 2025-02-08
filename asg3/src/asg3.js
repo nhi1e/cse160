@@ -14,28 +14,30 @@ var VSHADER_SOURCE = `
 
 // Fragment shader program
 var FSHADER_SOURCE = `
-  precision mediump float;
-  varying vec2 v_TexCoord;
-  uniform vec4 u_FragColor;
-  uniform sampler2D u_Sampler0;
-  uniform int u_whichTexture;
-  void main() {
-    // gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
-	// gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
-
-	if (u_whichTexture == -2) {					//use color
-		gl_FragColor = u_FragColor;
+	precision mediump float;
+	varying vec2 v_TexCoord;
+	uniform vec4 u_FragColor;
+	uniform sampler2D u_Sampler0; // Default texture
+	uniform sampler2D u_Sampler1; // New floor texture
+	uniform int u_whichTexture;
+	void main() {
+		if (u_whichTexture == -2) { // Use color
+			gl_FragColor = u_FragColor;
+		} 
+		else if (u_whichTexture == -1) { // UV debug gradient color
+			gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
+		} 
+		else if (u_whichTexture == 0) { // Use texture0 (texture.png)
+			gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
+		} 
+		else if (u_whichTexture == 1) { // Use texture1 (floor.png)
+			gl_FragColor = texture2D(u_Sampler1, v_TexCoord);
+		} 
+		else { // Error texture (red)
+			gl_FragColor = vec4(1, 0.2, 0.2, 1);
+		}
 	}
-	else if (u_whichTexture == -1) {			//use UV debug color
-		gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
-	}
-	else if (u_whichTexture == 0) {				//use texture0
-		gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
-	}
-	else {										//error					
-		gl_FragColor = vec4(1, 0.2, 0.2, 1);
-	}
-  }`;
+`;
 
 let canvas;
 let gl;
@@ -74,6 +76,7 @@ function connectVariablesToGLSL() {
 		"u_GlobalRotateMatrix"
 	);
 	u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
+	u_Sampler1 = gl.getUniformLocation(gl.program, "u_Sampler1");
 	u_whichTexture = gl.getUniformLocation(gl.program, "u_whichTexture");
 	u_ViewMatrix = gl.getUniformLocation(gl.program, "u_ViewMatrix");
 	u_ProjMatrix = gl.getUniformLocation(gl.program, "u_ProjMatrix");
@@ -172,46 +175,42 @@ function updateAnimationAngles() {
 }
 
 function initTextures() {
-	var texture = gl.createTexture(); // Create a texture object
-	if (!texture) {
-		console.log("Failed to create the texture object");
-		return false;
-	}
-
-	var u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
-	if (!u_Sampler0) {
-		console.log("Failed to get the storage location of u_Sampler0");
-		return false;
-	}
-
-	var image = new Image(); // Create the image object
-	if (!image) {
-		console.log("Failed to create the image object");
-		return false;
-	}
-	// Register the event handler to be called on loading an image
-	image.onload = function () {
-		loadTexture(gl, texture, u_Sampler0, image);
+	// Load the first texture (texture.png)
+	var texture0 = gl.createTexture();
+	var image0 = new Image();
+	image0.onload = function () {
+		loadTexture(gl, texture0, gl.TEXTURE0, u_Sampler0, image0);
 	};
-	image.src = "texture.png";
+	image0.src = "texture.png";
+
+	// Load the second texture (floor.png)
+	var texture1 = gl.createTexture();
+	var image1 = new Image();
+	image1.onload = function () {
+		loadTexture(gl, texture1, gl.TEXTURE1, u_Sampler1, image1);
+	};
+	image1.src = "floor.png";
+
 	return true;
 }
 
-function loadTexture(gl, texture, u_Sampler, image) {
-	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
-	// Enable texture unit0
-	gl.activeTexture(gl.TEXTURE0);
-	// Bind the texture object to the target
-	gl.bindTexture(gl.TEXTURE_2D, texture);
+function loadTexture(gl, texture, activeTexture, u_Sampler, image) {
+	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y-axis
+	gl.activeTexture(activeTexture); // Select the correct texture unit
+	gl.bindTexture(gl.TEXTURE_2D, texture); // Bind the texture object
 
-	// Set the texture parameters
+	// Set texture parameters
 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	// Set the texture image
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
-	// Set the texture unit 0 to the sampler
-	gl.uniform1i(u_Sampler, 0);
 
-	console.log("texture loaded");
+	// Assign texture to the correct sampler
+	gl.uniform1i(u_Sampler, activeTexture === gl.TEXTURE0 ? 0 : 1);
+
+	console.log(
+		activeTexture === gl.TEXTURE0
+			? "Main texture loaded"
+			: "Floor texture loaded"
+	);
 }
 
 function keydown(ev) {
@@ -282,14 +281,16 @@ function renderAllShapes() {
 	//draw floor
 	var floor = new Cube();
 	floor.color = [0.0, 1.0, 0.0, 1.0];
-	floor.textureNum = -1;
-	floor.matrix.setTranslate(-1.5, -0.8, -0.8);
-	floor.matrix.scale(3, 0.01, 3);
+	floor.textureNum = 1;
+	floor.matrix.setTranslate(0, -0.9, -5);
+	floor.matrix.scale(10, 0, 10);
+	floor.matrix.translate(-0.5, 1, 0, -0.5);
 	floor.render();
 
 	//Draw a cube
 	var body = new Cube();
 	body.color = [1.0, 0.0, 0.0, 1.0];
+	body.textureNum = -1;
 	body.matrix.translate(-0.25, -0.75, 0.0);
 	body.matrix.rotate(-5, 1, 0, 0);
 	body.matrix.scale(0.5, 0.3, 0.5);
