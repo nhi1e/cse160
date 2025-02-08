@@ -138,6 +138,9 @@ function main() {
 	addActionsForHtmlUI();
 
 	document.onkeydown = keydown;
+
+	g_camera = new Camera();
+
 	gl.enable(gl.BLEND);
 	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
@@ -212,21 +215,24 @@ function loadTexture(gl, texture, u_Sampler, image) {
 }
 
 function keydown(ev) {
-	if (ev.keyCode == 39) {
-		// The right arrow key was pressed{
-		g_eye[0] += 1;
-	} else if (ev.keyCode == 37) {
-		// The left arrow key was pressed{
-		g_eye[0] -= 1;
+	if (ev.keyCode === 87) {
+		// 'W' key - Move Forward
+		g_camera.forward();
+	} else if (ev.keyCode === 83) {
+		// 'S' key - Move Backward
+		g_camera.back();
+	} else if (ev.keyCode === 65) {
+		// 'A' key - Move Left
+		g_camera.left();
+	} else if (ev.keyCode === 68) {
+		// 'D' key - Move Right
+		g_camera.right();
 	}
-	renderAllShapes();
+	renderAllShapes(); // Re-render scene after moving camera
 }
 var g_eye = [0, 0, 3]; // Eye position
 var g_at = [0, 0, -100]; // Look-at point
 var g_up = [0, 1, 0]; // Up direction
-
-// g_eye = [g_eye[0], g_eye[1], g_eye[2] - 2];
-// g_at = [g_at[0], g_at[1], g_at[2] - 2];
 
 function renderAllShapes() {
 	var start = performance.now();
@@ -236,17 +242,34 @@ function renderAllShapes() {
 	gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
 	var viewMatrix = new Matrix4();
+	// viewMatrix.setLookAt(
+	// 	g_eye[0],
+	// 	g_eye[1],
+	// 	g_eye[2],
+	// 	g_at[0],
+	// 	g_at[1],
+	// 	g_at[2],
+	// 	g_up[0],
+	// 	g_up[1],
+	// 	g_up[2]
+	// ); //eye, lookat, up
 	viewMatrix.setLookAt(
-		g_eye[0],
-		g_eye[1],
-		g_eye[2],
-		g_at[0],
-		g_at[1],
-		g_at[2],
-		g_up[0],
-		g_up[1],
-		g_up[2]
-	); //eye, lookat, up
+		g_camera.eye.elements[0],
+		g_camera.eye.elements[1],
+		g_camera.eye.elements[2],
+		g_camera.at.elements[0],
+		g_camera.at.elements[1],
+		g_camera.at.elements[2],
+		g_camera.up.elements[0],
+		g_camera.up.elements[1],
+		g_camera.up.elements[2]
+	);
+
+	console.log(
+		g_camera.eye.elements[0],
+		g_camera.eye.elements[1],
+		g_camera.eye.elements[2]
+	);
 	gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
 
 	// pass matrix to u_ModelMatrix attribute
@@ -255,6 +278,14 @@ function renderAllShapes() {
 
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	//draw floor
+	var floor = new Cube();
+	floor.color = [0.0, 1.0, 0.0, 1.0];
+	floor.textureNum = -1;
+	floor.matrix.setTranslate(-1.5, -0.8, -0.8);
+	floor.matrix.scale(3, 0.01, 3);
+	floor.render();
 
 	//Draw a cube
 	var body = new Cube();
