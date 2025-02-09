@@ -1,43 +1,47 @@
 // Vertex shader program
 var VSHADER_SOURCE = `
-  attribute vec4 a_Position;
-  attribute vec2 a_TexCoord;
-  uniform mat4 u_ModelMatrix;
-  uniform mat4 u_GlobalRotateMatrix;
-  uniform mat4 u_ViewMatrix;
-  uniform mat4 u_ProjMatrix;
-  varying vec2 v_TexCoord;
-  void main() {
-    gl_Position = u_ProjMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
-    v_TexCoord = a_TexCoord;
-  }`;
+		attribute vec4 a_Position;
+		attribute vec2 a_TexCoord;
+		uniform mat4 u_ModelMatrix;
+		uniform mat4 u_GlobalRotateMatrix;
+		uniform mat4 u_ViewMatrix;
+		uniform mat4 u_ProjMatrix;
+		varying vec2 v_TexCoord;
+		void main() {
+		gl_Position = u_ProjMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
+		v_TexCoord = a_TexCoord;
+	}`;
 
 // Fragment shader program
 var FSHADER_SOURCE = `
-	precision mediump float;
-	varying vec2 v_TexCoord;
-	uniform vec4 u_FragColor;
-	uniform sampler2D u_Sampler0; // Default texture
-	uniform sampler2D u_Sampler1; // New floor texture
-	uniform int u_whichTexture;
-	void main() {
-		if (u_whichTexture == -2) { // Use color
-			gl_FragColor = u_FragColor;
-		} 
-		else if (u_whichTexture == -1) { // UV debug gradient color
-			gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
-		} 
-		else if (u_whichTexture == 0) { // Use texture0 (texture.png)
-			gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
-		} 
-		else if (u_whichTexture == 1) { // Use texture1 (floor.png)
-			gl_FragColor = texture2D(u_Sampler1, v_TexCoord);
-		} 
-		else { // Error texture (red)
-			gl_FragColor = vec4(1, 0.2, 0.2, 1);
+		precision mediump float;
+		varying vec2 v_TexCoord;
+		uniform vec4 u_FragColor;
+		uniform sampler2D u_Sampler0; // Default texture
+		uniform sampler2D u_Sampler1; // New floor texture
+		uniform int u_whichTexture;
+		
+		void main() {
+			int tex = int(u_whichTexture); // Explicit cast for safety
+
+			if (tex == -2) { // Use solid color
+				gl_FragColor = u_FragColor;
+			} 
+			else if (tex == -1) { // UV debug gradient color
+				gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
+			} 
+			else if (tex == 0) { // Use texture0 (texture.png)
+				gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
+			} 
+			else if (tex == 1) { // Use texture1 (floor.png)
+				gl_FragColor = texture2D(u_Sampler1, v_TexCoord);
+			} 
+			else { // Error texture (red)
+				gl_FragColor = vec4(1, 0.2, 0.2, 1);
+			}
 		}
-	}
-`;
+
+	`;
 
 let canvas;
 let gl;
@@ -50,7 +54,6 @@ function setupWebGL() {
 	canvas = document.getElementById("webgl");
 
 	// Get the rendering context for WebGL
-	// gl = getWebGLContext(canvas);
 	gl =
 		canvas.getContext("webgl", { preserveDrawingBuffer: true }) ||
 		canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true });
@@ -75,6 +78,8 @@ function connectVariablesToGLSL() {
 		gl.program,
 		"u_GlobalRotateMatrix"
 	);
+	u_FragColor = gl.getUniformLocation(gl.program, "u_FragColor");
+
 	u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
 	u_Sampler1 = gl.getUniformLocation(gl.program, "u_Sampler1");
 	u_whichTexture = gl.getUniformLocation(gl.program, "u_whichTexture");
@@ -134,11 +139,66 @@ function addActionsForHtmlUI() {
 			renderAllShapes();
 		});
 }
+let keys = {};
 
+// Enable Mouse Look
+function enableMouseLook() {
+	canvas.addEventListener("mousemove", onMouseMove);
+	canvas.addEventListener("mousedown", () => canvas.requestPointerLock());
+	document.addEventListener("pointerlockchange", lockChange);
+}
+
+// Handle Pointer Lock
+function lockChange() {
+	if (document.pointerLockElement !== canvas) {
+		lastMouseX = null;
+		lastMouseY = null;
+	}
+}
+
+// Handle Mouse Movement
+function onMouseMove(event) {
+	if (document.pointerLockElement !== canvas) return;
+
+	const deltaX = event.movementX * g_camera.sensitivity;
+	const deltaY = event.movementY * g_camera.sensitivity;
+
+	// Adjust yaw (left/right) and pitch (up/down)
+	g_camera.yaw += deltaX;
+	g_camera.pitch -= deltaY;
+	g_camera.pitch = Math.max(-89, Math.min(89, g_camera.pitch)); // Clamp pitch
+
+	g_camera.updateRotation();
+	renderAllShapes();
+}
+
+// Handle Key Press
+function keydown(event) {
+	keys[event.key] = true;
+}
+
+// Handle Key Release
+function keyup(event) {
+	keys[event.key] = false;
+}
+
+// Update Camera Movement Each Frame
+function updateCameraMovement() {
+	if (keys["w"]) g_camera.forward();
+	if (keys["s"]) g_camera.back();
+	if (keys["a"]) g_camera.left();
+	if (keys["d"]) g_camera.right();
+	if (keys["q"]) g_camera.turnLeft();
+	if (keys["e"]) g_camera.turnRight();
+
+	renderAllShapes();
+}
 function main() {
 	setupWebGL();
 	connectVariablesToGLSL();
 	addActionsForHtmlUI();
+
+	enableMouseLook(); // Add mouse movement tracking
 
 	document.onkeydown = keydown;
 
@@ -151,7 +211,7 @@ function main() {
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
 	initTextures();
-	// // Clear <canvas>
+
 	renderAllShapes();
 	requestAnimationFrame(tick);
 }
@@ -213,6 +273,40 @@ function loadTexture(gl, texture, activeTexture, u_Sampler, image) {
 	);
 }
 
+var g_map = [
+	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+	[1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+	[1, 0, 0, 0, 0, 1, 1, 1, 0, 1],
+	[1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
+	[1, 0, 1, 0, 0, 1, 0, 1, 0, 1],
+	[1, 0, 1, 0, 0, 1, 0, 1, 0, 1],
+	[1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+	[1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+];
+var mapWidth = g_map[0].length; // Get the number of columns
+var mapHeight = g_map.length; // Get the number of rows
+function drawMap() {
+	for (let i = 0; i < mapHeight; i++) {
+		for (let j = 0; j < mapWidth; j++) {
+			if (g_map[i][j] === 1) {
+				var wall = new Cube();
+				wall.color = [0.0, 1.0, 1.0, 1.0]; // Blue walls
+				wall.textureNum = -1;
+
+				// Adjust positioning to align walls with edges
+				wall.matrix.setTranslate(
+					j - (mapWidth - 1) / 2, // Correct centering
+					-0.4, // Keep walls at ground level
+					i - (mapHeight - 1) / 2 // Correct centering
+				);
+
+				wall.matrix.scale(1, 1, 1);
+				wall.render();
+			}
+		}
+	}
+}
+
 function keydown(ev) {
 	if (ev.keyCode === 87) {
 		// 'W' key - Move Forward
@@ -237,21 +331,10 @@ function renderAllShapes() {
 	var start = performance.now();
 
 	var projMatrix = new Matrix4();
-	projMatrix.setPerspective(50, (1 * canvas.width) / canvas.height, 1, 100);
+	projMatrix.setPerspective(50, (1 * canvas.width) / canvas.height, 0.1, 100);
 	gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
 	var viewMatrix = new Matrix4();
-	// viewMatrix.setLookAt(
-	// 	g_eye[0],
-	// 	g_eye[1],
-	// 	g_eye[2],
-	// 	g_at[0],
-	// 	g_at[1],
-	// 	g_at[2],
-	// 	g_up[0],
-	// 	g_up[1],
-	// 	g_up[2]
-	// ); //eye, lookat, up
 	viewMatrix.setLookAt(
 		g_camera.eye.elements[0],
 		g_camera.eye.elements[1],
@@ -272,53 +355,29 @@ function renderAllShapes() {
 
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
+	drawMap();
 	//draw floor
+	// var floor = new Cube();
+	// floor.color = [0.0, 1.0, 0.0, 1.0];
+	// floor.textureNum = 1;
+	// floor.matrix.setTranslate(0, -0.9, -10);
+	// floor.matrix.scale(20, 0, 20);
+	// floor.matrix.translate(-0.5, 1, 0, -0.5);
+	// floor.render();
 	var floor = new Cube();
-	floor.color = [0.0, 1.0, 0.0, 1.0];
-	floor.textureNum = 1;
-	floor.matrix.setTranslate(0, -0.9, -5);
-	floor.matrix.scale(10, 0, 10);
-	floor.matrix.translate(-0.5, 1, 0, -0.5);
+	floor.color = [0.243, 0.749, 0.251, 1.0]; // Green floor
+	floor.textureNum = -2;
+	floor.matrix.setTranslate(0, -0.5, 0); // Align floor with walls
+	floor.matrix.scale(mapWidth, 0, mapHeight); // Scale to match walls
+	floor.matrix.translate(-0.45, 0, -0.5); // Center correctly
 	floor.render();
 
 	//draw sky
 	var sky = new Cube();
 	sky.color = [0.529, 0.808, 0.98, 1.0]; // Light blue color for the sky
-	sky.textureNum = -1; // Use solid color
+	sky.textureNum = -2; // Use solid color
 
-	sky.matrix.setTranslate(-5, -3, -5);
-	sky.matrix.scale(10, 10, 10);
+	sky.matrix.setTranslate(-20, -10, -10);
+	sky.matrix.scale(50, 50, 50);
 	sky.render();
-
-	//Draw a cube
-	var body = new Cube();
-	body.color = [1.0, 0.0, 0.0, 1.0];
-	body.textureNum = -1;
-	body.matrix.translate(-0.25, -0.75, 0.0);
-	body.matrix.rotate(-5, 1, 0, 0);
-	body.matrix.scale(0.5, 0.3, 0.5);
-	body.render();
-
-	// Draw left arm
-	var yellow = new Cube();
-	yellow.color = [1.0, 1.0, 0.0, 1.0];
-	yellow.textureNum = -1;
-	yellow.matrix.setTranslate(0, -0.5, 0);
-	yellow.matrix.rotate(g_yellowAngle, 0, 0, 1);
-	var yellowCoordinatesMat = new Matrix4(yellow.matrix);
-	yellow.matrix.scale(0.25, 0.7, 0.5);
-	yellow.matrix.translate(-0.5, 0, 0);
-	yellow.render();
-
-	// test box
-	var box = new Cube();
-	box.color = [1.0, 0.0, 1.0, 1.0];
-	box.textureNum = 0;
-	box.matrix = yellowCoordinatesMat; //attach to yellow arm
-	box.matrix.translate(0, 0.65, 0);
-	box.matrix.rotate(g_magentaAngle, 0, 0, 1);
-	box.matrix.scale(0.3, 0.3, 0.3);
-	box.matrix.translate(-0.5, 0, -0.001);
-	box.render();
 }

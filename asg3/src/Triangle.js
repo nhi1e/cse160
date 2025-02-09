@@ -1,73 +1,29 @@
-class Triangle {
-	constructor() {
-		this.type = "triangle";
-		this.position = [0.0, 0.0, 0.0];
-		this.color = [1.0, 1.0, 1.0, 1.0];
-		this.size = 15.0;
-	}
-	render() {
-		var xy = this.position;
-		var rgba = this.color;
-		var size = this.size;
+// Global Buffers
+let vertexBuffer = null;
+let uvBuffer = null;
 
-		// Pass the position of a point to a_Position variable
-		// gl.vertexAttrib3f(a_Position, xy[0], xy[1], 0.0);
-		// Pass the color of a point to u_FragColor variable
-		gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-		// Pass the size of a point to u_Size variable
-		gl.uniform1f(u_Size, size);
-		// Draw
-		var delta = this.size / 200.0;
-		drawTriangle([xy[0], xy[1], xy[0] + delta, xy[1], xy[0], xy[1] + delta]);
-	}
-}
-function drawTriangle(vertices) {
-	var n = 3; // The number of vertices
-
-	// Create a buffer object
-	var vertexBuffer = gl.createBuffer();
+// Initialize Buffers
+function initBuffers() {
 	if (!vertexBuffer) {
-		console.log("Failed to create the buffer object");
-		return -1;
+		vertexBuffer = gl.createBuffer();
+		if (!vertexBuffer) {
+			console.error("Failed to create vertex buffer.");
+			return;
+		}
 	}
-
-	// Bind the buffer object to target
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-	// Write date into the buffer object
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
-	// Assign the buffer object to a_Position variable
-	gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
-
-	// Enable the assignment to a_Position variable (turn back on)
-	gl.enableVertexAttribArray(a_Position);
-
-	// Draw the rectangle
-	gl.drawArrays(gl.TRIANGLES, 0, n);
+	if (!uvBuffer) {
+		uvBuffer = gl.createBuffer();
+		if (!uvBuffer) {
+			console.error("Failed to create UV buffer.");
+			return;
+		}
+	}
 }
 
-function drawTriangle3D(vertices) {
-	var n = 3; // The number of vertices
-
-	// Create a buffer object
-	var vertexBuffer = gl.createBuffer();
-	if (!vertexBuffer) {
-		console.log("Failed to create the buffer object");
-		return -1;
-	}
-
-	// Bind the buffer object to target
-	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-	// Write date into the buffer object
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
-	// Assign the buffer object to a_Position variable
-	gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
-	// Enable the assignment to a_Position variable (turn back on)
-	gl.enableVertexAttribArray(a_Position);
-	// Draw the triangle
-	gl.drawArrays(gl.TRIANGLES, 0, n);
-}
+// Function to Draw 3D Triangle with UV Mapping
 function drawTriangle3DUV(vertices, uv) {
-	var n = vertices.length / 3; // Number of vertices
+	if (!vertexBuffer || !uvBuffer) initBuffers();
+	const n = vertices.length / 3; // Number of vertices
 
 	if (uv.length / 2 !== n) {
 		console.error(
@@ -76,20 +32,51 @@ function drawTriangle3DUV(vertices, uv) {
 		return;
 	}
 
-	// Vertex Buffer
-	var vertexBuffer = gl.createBuffer();
+	// Bind and update vertex buffer
 	gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.DYNAMIC_DRAW);
 	gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(a_Position);
 
-	// UV Buffer
-	var uvBuffer = gl.createBuffer();
+	// Bind and update UV buffer
 	gl.bindBuffer(gl.ARRAY_BUFFER, uvBuffer);
 	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(uv), gl.STATIC_DRAW);
 	gl.vertexAttribPointer(a_TexCoord, 2, gl.FLOAT, false, 0, 0);
 	gl.enableVertexAttribArray(a_TexCoord);
 
-	// Draw
+	// Draw the triangle
 	gl.drawArrays(gl.TRIANGLES, 0, n);
+}
+
+// Optimized Triangle Class
+class Triangle {
+	constructor(
+		position = [0.0, 0.0, 0.0],
+		color = [1.0, 1.0, 1.0, 1.0],
+		size = 15.0
+	) {
+		this.position = position;
+		this.color = color;
+		this.size = size;
+	}
+
+	render() {
+		gl.uniform4f(u_FragColor, ...this.color);
+		gl.uniform1f(u_Size, this.size);
+
+		const delta = this.size / 200.0;
+		const vertices = [
+			this.position[0],
+			this.position[1],
+			0.0,
+			this.position[0] + delta,
+			this.position[1],
+			0.0,
+			this.position[0],
+			this.position[1] + delta,
+			0.0,
+		];
+
+		drawTriangle3DUV(vertices, [0, 0, 1, 0, 0, 1]); // Basic UV mapping
+	}
 }
