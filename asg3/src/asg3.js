@@ -249,7 +249,7 @@ function initTextures() {
 	image1.onload = function () {
 		loadTexture(gl, texture1, gl.TEXTURE1, u_Sampler1, image1);
 	};
-	image1.src = "grass.png";
+	image1.src = "floor.png";
 
 	return true;
 }
