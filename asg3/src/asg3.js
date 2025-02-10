@@ -36,11 +36,7 @@ var FSHADER_SOURCE = `
 		else if (tex == 1) { // Use texture1 (grass2.png)
 			gl_FragColor = texture2D(u_Sampler1, v_TexCoord);
 		} 
-		else if (tex == 2) { // Blend both textures (50% mix)
-			vec4 uvTex = texture2D(u_Sampler0, v_TexCoord);
-			vec4 grassTex = texture2D(u_Sampler1, v_TexCoord);
-			gl_FragColor = mix(uvTex, grassTex, 0.5);
-		}
+		
 		else { // Error texture (red)
 			gl_FragColor = vec4(1, 0.2, 0.2, 1);
 		}
@@ -352,7 +348,7 @@ function drawMap() {
 				for (let h = 0; h < height; h++) {
 					let wall = new Cube();
 					wall.color = [0.0, 1.0, 1.0, 1.0];
-					wall.textureNum = 2;
+					wall.textureNum = 1;
 					wall.matrix.scale(0.3, 0.3, 0.3);
 					wall.matrix.setTranslate(
 						j - mapWidth / 2,
