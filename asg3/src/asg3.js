@@ -249,7 +249,7 @@ function initTextures() {
 	image1.onload = function () {
 		loadTexture(gl, texture1, gl.TEXTURE1, u_Sampler1, image1);
 	};
-	image1.src = "floor.png";
+	image1.src = "grass.png";
 
 	return true;
 }
@@ -269,39 +269,94 @@ function loadTexture(gl, texture, activeTexture, u_Sampler, image) {
 	console.log(
 		activeTexture === gl.TEXTURE0
 			? "Main texture loaded"
-			: "Floor texture loaded"
+			: "Grass texture loaded"
 	);
 }
+var MAP_SIZE = 64; // Set map size to 64x64
 
-var g_map = [
-	[1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-	[1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-	[1, 0, 0, 0, 0, 1, 1, 1, 0, 1],
-	[1, 0, 1, 0, 0, 0, 0, 1, 0, 1],
-	[1, 0, 1, 0, 0, 1, 0, 1, 0, 1],
-	[1, 0, 1, 0, 0, 1, 0, 1, 0, 1],
-	[1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-	[1, 1, 0, 0, 0, 0, 0, 0, 0, 1],
-];
-var mapWidth = g_map[0].length; // Get the number of columns
-var mapHeight = g_map.length; // Get the number of rows
+var g_map = Array(MAP_SIZE)
+	.fill(0)
+	.map(() => Array(MAP_SIZE).fill(0));
+
+function getRandomInt(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+var MAP_SIZE = 64; // Set map size to 64x64
+
+var g_map = Array(MAP_SIZE)
+	.fill(0)
+	.map(() => Array(MAP_SIZE).fill(0));
+
+function getRandomInt(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+// Add outer walls (borders)
+for (let i = 0; i < MAP_SIZE; i++) {
+	g_map[0][i] = getRandomInt(1, 3); // Top border
+	g_map[MAP_SIZE - 1][i] = getRandomInt(1, 3); // Bottom border
+	g_map[i][0] = getRandomInt(1, 3); // Left border
+	g_map[i][MAP_SIZE - 1] = getRandomInt(1, 3); // Right border
+}
+
+// Create Random Mini-Walls (2-6 blocks long)
+for (let i = 2; i < MAP_SIZE - 5; i += getRandomInt(3, 7)) {
+	// Skip randomly for variety
+	for (let j = 2; j < MAP_SIZE - 5; j += getRandomInt(3, 7)) {
+		if (Math.random() < 0.2) {
+			// 20% chance to generate a mini-wall
+			let wallLength = getRandomInt(2, 6); // Random wall size (2-6 blocks)
+			let direction = Math.random() < 0.5 ? "H" : "V"; // Horizontal or Vertical
+
+			for (let k = 0; k < wallLength; k++) {
+				let x = direction === "H" ? i : i + k;
+				let y = direction === "H" ? j + k : j;
+
+				if (x < MAP_SIZE - 1 && y < MAP_SIZE - 1) {
+					g_map[x][y] = getRandomInt(1, 4); // Assign height (1-4)
+				}
+			}
+		}
+	}
+}
+
+// Add random scattered obstacles (not walls, just objects)
+for (let i = 3; i < MAP_SIZE - 3; i++) {
+	for (let j = 3; j < MAP_SIZE - 3; j++) {
+		if (Math.random() < 0.05) {
+			// 5% chance of a small object
+			g_map[i][j] = getRandomInt(2, 3); // 3-4 height objects
+		}
+	}
+}
+
+// Create a taller central structure (maze-like effect)
+for (let i = 25; i < 39; i++) {
+	for (let j = 25; j < 39; j++) {
+		g_map[i][j] = getRandomInt(2, 4); // 2-4 high
+	}
+}
+
+var mapWidth = g_map[0].length;
+var mapHeight = g_map.length;
+
 function drawMap() {
 	for (let i = 0; i < mapHeight; i++) {
 		for (let j = 0; j < mapWidth; j++) {
-			if (g_map[i][j] === 1) {
-				var wall = new Cube();
-				wall.color = [0.0, 1.0, 1.0, 1.0]; // Blue walls
-				wall.textureNum = -1;
-
-				// Adjust positioning to align walls with edges
-				wall.matrix.setTranslate(
-					j - (mapWidth - 1) / 2, // Correct centering
-					-0.4, // Keep walls at ground level
-					i - (mapHeight - 1) / 2 // Correct centering
-				);
-
-				wall.matrix.scale(1, 1, 1);
-				wall.render();
+			let height = g_map[i][j];
+			if (height > 0) {
+				for (let h = 0; h < height; h++) {
+					let wall = new Cube();
+					wall.color = [0.0, 1.0, 1.0, 1.0];
+					wall.textureNum = 1;
+					wall.matrix.scale(0.3, 0.3, 0.3);
+					wall.matrix.setTranslate(
+						j - mapWidth / 2,
+						h - 0.5,
+						i - mapHeight / 2
+					);
+					wall.render();
+				}
 			}
 		}
 	}
@@ -331,7 +386,7 @@ function renderAllShapes() {
 	var start = performance.now();
 
 	var projMatrix = new Matrix4();
-	projMatrix.setPerspective(50, (1 * canvas.width) / canvas.height, 0.1, 100);
+	projMatrix.setPerspective(50, (1 * canvas.width) / canvas.height, 0.1, 500);
 	gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
 
 	var viewMatrix = new Matrix4();
@@ -357,27 +412,19 @@ function renderAllShapes() {
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	drawMap();
 	//draw floor
-	// var floor = new Cube();
-	// floor.color = [0.0, 1.0, 0.0, 1.0];
-	// floor.textureNum = 1;
-	// floor.matrix.setTranslate(0, -0.9, -10);
-	// floor.matrix.scale(20, 0, 20);
-	// floor.matrix.translate(-0.5, 1, 0, -0.5);
-	// floor.render();
 	var floor = new Cube();
 	floor.color = [0.243, 0.749, 0.251, 1.0]; // Green floor
 	floor.textureNum = -2;
 	floor.matrix.setTranslate(0, -0.5, 0); // Align floor with walls
 	floor.matrix.scale(mapWidth, 0, mapHeight); // Scale to match walls
-	floor.matrix.translate(-0.45, 0, -0.5); // Center correctly
+	floor.matrix.translate(-0.5, 0, -0.5); // Center correctly
 	floor.render();
 
 	//draw sky
 	var sky = new Cube();
 	sky.color = [0.529, 0.808, 0.98, 1.0]; // Light blue color for the sky
 	sky.textureNum = -2; // Use solid color
-
-	sky.matrix.setTranslate(-20, -10, -10);
-	sky.matrix.scale(50, 50, 50);
+	sky.matrix.translate(-300, -300, -300);
+	sky.matrix.scale(600, 600, 600);
 	sky.render();
 }
