@@ -14,34 +14,38 @@ var VSHADER_SOURCE = `
 
 // Fragment shader program
 var FSHADER_SOURCE = `
-		precision mediump float;
-		varying vec2 v_TexCoord;
-		uniform vec4 u_FragColor;
-		uniform sampler2D u_Sampler0; // Default texture
-		uniform sampler2D u_Sampler1; // New floor texture
-		uniform int u_whichTexture;
-		
-		void main() {
-			int tex = int(u_whichTexture); // Explicit cast for safety
+	precision mediump float;
+	varying vec2 v_TexCoord;
+	uniform vec4 u_FragColor;
+	uniform sampler2D u_Sampler0; // Default texture (uv.png)
+	uniform sampler2D u_Sampler1; // New floor texture (grass2.png)
+	uniform int u_whichTexture;
+	
+	void main() {
+		int tex = int(u_whichTexture); // Explicit cast for safety
 
-			if (tex == -2) { // Use solid color
-				gl_FragColor = u_FragColor;
-			} 
-			else if (tex == -1) { // UV debug gradient color
-				gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
-			} 
-			else if (tex == 0) { // Use texture0 (texture.png)
-				gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
-			} 
-			else if (tex == 1) { // Use texture1 (floor.png)
-				gl_FragColor = texture2D(u_Sampler1, v_TexCoord);
-			} 
-			else { // Error texture (red)
-				gl_FragColor = vec4(1, 0.2, 0.2, 1);
-			}
+		if (tex == -2) { // Use solid color
+			gl_FragColor = u_FragColor;
+		} 
+		else if (tex == -1) { // UV debug gradient color
+			gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
+		} 
+		else if (tex == 0) { // Use texture0 (uv.png)
+			gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
+		} 
+		else if (tex == 1) { // Use texture1 (grass2.png)
+			gl_FragColor = texture2D(u_Sampler1, v_TexCoord);
+		} 
+		else if (tex == 2) { // Blend both textures (50% mix)
+			vec4 uvTex = texture2D(u_Sampler0, v_TexCoord);
+			vec4 grassTex = texture2D(u_Sampler1, v_TexCoord);
+			gl_FragColor = mix(uvTex, grassTex, 0.5);
 		}
-
-	`;
+		else { // Error texture (red)
+			gl_FragColor = vec4(1, 0.2, 0.2, 1);
+		}
+	}
+`;
 
 let canvas;
 let gl;
@@ -249,7 +253,7 @@ function initTextures() {
 	image1.onload = function () {
 		loadTexture(gl, texture1, gl.TEXTURE1, u_Sampler1, image1);
 	};
-	image1.src = "floor.png";
+	image1.src = "grass2.png";
 
 	return true;
 }
@@ -348,7 +352,7 @@ function drawMap() {
 				for (let h = 0; h < height; h++) {
 					let wall = new Cube();
 					wall.color = [0.0, 1.0, 1.0, 1.0];
-					wall.textureNum = 1;
+					wall.textureNum = 2;
 					wall.matrix.scale(0.3, 0.3, 0.3);
 					wall.matrix.setTranslate(
 						j - mapWidth / 2,

@@ -21,6 +21,7 @@ function initBuffers() {
 }
 
 // Function to Draw 3D Triangle with UV Mapping
+// Function to Draw 3D Triangle with UV Mapping
 function drawTriangle3DUV(vertices, uv) {
 	if (!vertexBuffer || !uvBuffer) initBuffers();
 	const n = vertices.length / 3; // Number of vertices
@@ -48,16 +49,19 @@ function drawTriangle3DUV(vertices, uv) {
 	gl.drawArrays(gl.TRIANGLES, 0, n);
 }
 
+
 // Optimized Triangle Class
 class Triangle {
 	constructor(
 		position = [0.0, 0.0, 0.0],
 		color = [1.0, 1.0, 1.0, 1.0],
-		size = 15.0
+		size = 15.0,
+		uv = [0, 0, 1, 0, 0, 1] // Default UV mapping
 	) {
 		this.position = position;
 		this.color = color;
 		this.size = size;
+		this.uv = uv;
 	}
 
 	render() {
@@ -66,17 +70,12 @@ class Triangle {
 
 		const delta = this.size / 200.0;
 		const vertices = [
-			this.position[0],
-			this.position[1],
-			0.0,
-			this.position[0] + delta,
-			this.position[1],
-			0.0,
-			this.position[0],
-			this.position[1] + delta,
-			0.0,
+			this.position[0], this.position[1], 0.0, // First vertex
+			this.position[0] + delta, this.position[1], 0.0, // Second vertex
+			this.position[0], this.position[1] + delta, 0.0, // Third vertex
 		];
 
-		drawTriangle3DUV(vertices, [0, 0, 1, 0, 0, 1]); // Basic UV mapping
+		// Pass UVs from Cube
+		drawTriangle3DUV(vertices, this.uv);
 	}
 }
