@@ -1,5 +1,31 @@
 <!doctype html>
 <html lang="en">
+	<style>
+		.container {
+			position: relative; /* Makes sure the crosshair is positioned relative to the canvas */
+			width: 600px;
+			height: 600px;
+		}
+
+		#webgl {
+			position: absolute;
+			top: 0;
+			left: 0;
+		}
+
+		#crosshair {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			font-size: 24px;
+			color: white;
+			font-weight: bold;
+			pointer-events: none; /* Prevents interaction */
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Adds slight shadow */
+		}
+
+	</style>
 	<head>
 		<meta charset="utf-8" />
 		<title>Asg3 - Nhi</title>
@@ -15,10 +41,10 @@
 
 	<body onload="main()">
 		<div class="container">
-			<canvas id="webgl" width="600" height="600">
-				Please use a browser that supports "canvas"
-			</canvas>
+			<canvas id="webgl" width="600" height="600"></canvas>
+			<div id="crosshair">+</div>
 		</div>
+
 		<div id="fpsCounter" style="position: absolute; top: 10px; left: 10px; background: rgba(0, 0, 0, 0.7); color: white; padding: 5px; font-size: 16px; font-family: Arial, sans-serif;">FPS: </div>
 
 		

@@ -46,13 +46,18 @@ var FSHADER_SOURCE = `
 let lastFrameTime = performance.now();
 let fps = 0;
 
+let lastUpdateTime = 0;
 function updateFPS() {
 	let now = performance.now();
 	let delta = now - lastFrameTime;
 	lastFrameTime = now;
 	fps = 1000 / delta;
 
-	document.getElementById("fpsCounter").innerText = `FPS: ${fps.toFixed(2)}`;
+	if (now - lastUpdateTime > 500) {
+		// Update every 500ms
+		document.getElementById("fpsCounter").innerText = `FPS: ${fps.toFixed(2)}`;
+		lastUpdateTime = now;
+	}
 }
 
 let canvas;
@@ -75,6 +80,7 @@ function setupWebGL() {
 		return;
 	}
 	gl.enable(gl.DEPTH_TEST);
+	ext = gl.getExtension("ANGLE_instanced_arrays");
 }
 
 function connectVariablesToGLSL() {
@@ -228,7 +234,8 @@ function initTextures() {
 	image0.onload = function () {
 		loadTexture(gl, texture0, gl.TEXTURE0, u_Sampler0, image0);
 	};
-	image0.src = "sky.png";
+	image0.src = "sky8.png";
+	console.log("new sky texture loaded");
 
 	// Load the second texture (floor.png)
 	var texture1 = gl.createTexture();
@@ -281,7 +288,7 @@ function getRandomInt(min, max) {
 
 var noise = new SimplexNoise();
 console.log(noise.noise2D(0.5, 0.5));
-var MAP_SIZE = 64;
+var MAP_SIZE = 32;
 var g_map = Array(MAP_SIZE)
 	.fill(0)
 	.map(() => Array(MAP_SIZE).fill(0));
@@ -343,9 +350,94 @@ function keydown(ev) {
 	} else if (ev.keyCode === 68) {
 		// 'D' key - Move Right
 		g_camera.right();
+	} else if (ev.keyCode === 70) {
+		// 'F' key - Add Block
+		addBlock();
+	} else if (ev.keyCode === 71) {
+		// 'G' key - Remove Block
+		removeBlock();
 	}
 	renderAllShapes(); // Re-render scene after moving camera
 }
+
+function getTargetBlock() {
+	let maxDistance = 5; // Maximum reach distance
+	let stepSize = 0.1; // Smaller = more precise
+
+	// Get the camera direction (normalized)
+	let direction = new Vector3([
+		g_camera.at.elements[0] - g_camera.eye.elements[0],
+		g_camera.at.elements[1] - g_camera.eye.elements[1],
+		g_camera.at.elements[2] - g_camera.eye.elements[2],
+	]);
+	direction.normalize();
+
+	// Start ray at camera position
+	let origin = new Vector3(g_camera.eye.elements);
+
+	console.log(
+		`Ray Origin: (${origin.elements[0]}, ${origin.elements[1]}, ${origin.elements[2]})`
+	);
+	console.log(
+		`Ray Direction: (${direction.elements[0]}, ${direction.elements[1]}, ${direction.elements[2]})`
+	);
+
+	// Step along the ray to detect the first block in the way
+	for (let t = 0; t < maxDistance; t += stepSize) {
+		let x = Math.round(origin.elements[0] + direction.elements[0] * t);
+		let y = Math.round(origin.elements[1] + direction.elements[1] * t);
+		let z = Math.round(origin.elements[2] + direction.elements[2] * t);
+
+		// Ensure within bounds
+		if (x >= 0 && x < MAP_SIZE && z >= 0 && z < MAP_SIZE && y >= 0) {
+			if (g_map[x][z] > 0) {
+				// Block detected!
+				console.log(`Target block found at (${x}, ${y}, ${z})`);
+				return { x, y, z };
+			}
+		}
+	}
+
+	console.log("No block found in front.");
+	return null; // No block detected
+}
+
+function addBlock() {
+	let target = getTargetBlock();
+	if (!target) {
+		console.log("No block detected, placing at front block.");
+		return;
+	}
+
+	let { x, y, z } = target;
+
+	// Ensure new block is placed on top of the detected block
+	let newY = y + 1;
+	g_map[x][z] += 1;
+
+	console.log(`Block added at (${x}, ${newY}, ${z})`);
+	renderAllShapes();
+}
+function removeBlock() {
+	let target = getTargetBlock();
+	if (!target) {
+		console.log("No block detected, cannot remove.");
+		return;
+	}
+
+	let { x, y, z } = target;
+
+	if (g_map[x][z] > 1) {
+		// Ensure the base layer isn't removed
+		g_map[x][z] -= 1;
+		console.log(`Block removed at (${x}, ${y}, ${z})`);
+	} else {
+		console.log("Cannot remove base block.");
+	}
+
+	renderAllShapes();
+}
+
 var g_eye = [0, 0, 3]; // Eye position
 var g_at = [0, 0, -100]; // Look-at point
 var g_up = [0, 1, 0]; // Up direction
