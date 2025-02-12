@@ -17,8 +17,8 @@ var FSHADER_SOURCE = `
 	precision mediump float;
 	varying vec2 v_TexCoord;
 	uniform vec4 u_FragColor;
-	uniform sampler2D u_Sampler0; // Default texture (uv.png)
-	uniform sampler2D u_Sampler1; // New floor texture (grass2.png)
+	uniform sampler2D u_Sampler0; 
+	uniform sampler2D u_Sampler1; 
 	uniform int u_whichTexture;
 	
 	void main() {
@@ -30,10 +30,10 @@ var FSHADER_SOURCE = `
 		else if (tex == -1) { // UV debug gradient color
 			gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
 		} 
-		else if (tex == 0) { // Use texture0 (uv.png)
+		else if (tex == 0) { // Use texture0 
 			gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
 		} 
-		else if (tex == 1) { // Use texture1 (grass2.png)
+		else if (tex == 1) { // Use texture1 (grass.png)
 			gl_FragColor = texture2D(u_Sampler1, v_TexCoord);
 		} 
 		
@@ -42,6 +42,18 @@ var FSHADER_SOURCE = `
 		}
 	}
 `;
+
+let lastFrameTime = performance.now();
+let fps = 0;
+
+function updateFPS() {
+	let now = performance.now();
+	let delta = now - lastFrameTime;
+	lastFrameTime = now;
+	fps = 1000 / delta;
+
+	document.getElementById("fpsCounter").innerText = `FPS: ${fps.toFixed(2)}`;
+}
 
 let canvas;
 let gl;
@@ -104,38 +116,12 @@ let g_magentaAnimation = false;
 //set up actions for html ui elements
 function addActionsForHtmlUI() {
 	//button events
-	document.getElementById("YellowAnimationOnButton").onclick = function () {
-		g_yellowAnimation = true;
-	};
-	document.getElementById("YellowAnimationOffButton").onclick = function () {
-		g_yellowAnimation = false;
-	};
-	document.getElementById("MagentaAnimationOnButton").onclick = function () {
-		g_magentaAnimation = true;
-	};
-	document.getElementById("MagentaAnimationOffButton").onclick = function () {
-		g_magentaAnimation = false;
-	};
 
 	//Size slider events
 	document
 		.getElementById("angleSlide")
 		.addEventListener("mousemove", function () {
 			g_globalAngle = this.value;
-			renderAllShapes();
-		});
-
-	document
-		.getElementById("yellowSlide")
-		.addEventListener("mousemove", function () {
-			g_yellowAngle = this.value;
-			renderAllShapes();
-		});
-
-	document
-		.getElementById("magentaSlide")
-		.addEventListener("mousemove", function () {
-			g_magentaAngle = this.value;
 			renderAllShapes();
 		});
 }
@@ -217,10 +203,11 @@ function main() {
 }
 
 var g_startTime = performance.now() / 1000.0;
-var g_seconds = performance.now() / 1000.0 - g_startTime;
+
 function tick() {
 	g_seconds = performance.now() / 1000.0 - g_startTime;
 	updateAnimationAngles();
+	updateFPS(); // Update FPS counter
 	renderAllShapes();
 	requestAnimationFrame(tick);
 }
@@ -241,7 +228,7 @@ function initTextures() {
 	image0.onload = function () {
 		loadTexture(gl, texture0, gl.TEXTURE0, u_Sampler0, image0);
 	};
-	image0.src = "texture.png";
+	image0.src = "sky.png";
 
 	// Load the second texture (floor.png)
 	var texture1 = gl.createTexture();
@@ -249,7 +236,7 @@ function initTextures() {
 	image1.onload = function () {
 		loadTexture(gl, texture1, gl.TEXTURE1, u_Sampler1, image1);
 	};
-	image1.src = "grass2.png";
+	image1.src = "grass.png";
 
 	return true;
 }
@@ -272,16 +259,7 @@ function loadTexture(gl, texture, activeTexture, u_Sampler, image) {
 			: "Grass texture loaded"
 	);
 }
-var MAP_SIZE = 64; // Set map size to 64x64
-
-var g_map = Array(MAP_SIZE)
-	.fill(0)
-	.map(() => Array(MAP_SIZE).fill(0));
-
-function getRandomInt(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-var MAP_SIZE = 64; // Set map size to 64x64
+var MAP_SIZE = 32; // Set map size to 64x64
 
 var g_map = Array(MAP_SIZE)
 	.fill(0)
@@ -291,72 +269,62 @@ function getRandomInt(min, max) {
 	return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-// Add outer walls (borders)
+var MAP_SIZE = 64; // Set map size to 64x64
+
+var g_map = Array(MAP_SIZE)
+	.fill(0)
+	.map(() => Array(MAP_SIZE).fill(0));
+
+function getRandomInt(min, max) {
+	return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+var noise = new SimplexNoise();
+console.log(noise.noise2D(0.5, 0.5));
+var MAP_SIZE = 64;
+var g_map = Array(MAP_SIZE)
+	.fill(0)
+	.map(() => Array(MAP_SIZE).fill(0));
+
+// Ensure every block is filled with at least one grass block
 for (let i = 0; i < MAP_SIZE; i++) {
-	g_map[0][i] = getRandomInt(1, 3); // Top border
-	g_map[MAP_SIZE - 1][i] = getRandomInt(1, 3); // Bottom border
-	g_map[i][0] = getRandomInt(1, 3); // Left border
-	g_map[i][MAP_SIZE - 1] = getRandomInt(1, 3); // Right border
-}
+	for (let j = 0; j < MAP_SIZE; j++) {
+		// Generate terrain height using Perlin noise and sine waves
+		let height = Math.floor(
+			1 + // Minimum height of 1
+				2 * Math.sin(i / 8) * Math.cos(j / 8) + // Rolling hills
+				3 * noise.noise2D(i / 15, j / 15) // Random terrain bumps
+		);
 
-// Create Random Mini-Walls (2-6 blocks long)
-for (let i = 2; i < MAP_SIZE - 5; i += getRandomInt(3, 7)) {
-	// Skip randomly for variety
-	for (let j = 2; j < MAP_SIZE - 5; j += getRandomInt(3, 7)) {
-		if (Math.random() < 0.2) {
-			// 20% chance to generate a mini-wall
-			let wallLength = getRandomInt(2, 6); // Random wall size (2-6 blocks)
-			let direction = Math.random() < 0.5 ? "H" : "V"; // Horizontal or Vertical
-
-			for (let k = 0; k < wallLength; k++) {
-				let x = direction === "H" ? i : i + k;
-				let y = direction === "H" ? j + k : j;
-
-				if (x < MAP_SIZE - 1 && y < MAP_SIZE - 1) {
-					g_map[x][y] = getRandomInt(1, 4); // Assign height (1-4)
-				}
-			}
-		}
-	}
-}
-
-// Add random scattered obstacles (not walls, just objects)
-for (let i = 3; i < MAP_SIZE - 3; i++) {
-	for (let j = 3; j < MAP_SIZE - 3; j++) {
-		if (Math.random() < 0.05) {
-			// 5% chance of a small object
-			g_map[i][j] = getRandomInt(2, 3); // 3-4 height objects
-		}
-	}
-}
-
-// Create a taller central structure (maze-like effect)
-for (let i = 25; i < 39; i++) {
-	for (let j = 25; j < 39; j++) {
-		g_map[i][j] = getRandomInt(2, 4); // 2-4 high
+		g_map[i][j] = Math.max(1, height); // Ensure minimum height is 1
 	}
 }
 
 var mapWidth = g_map[0].length;
 var mapHeight = g_map.length;
-
 function drawMap() {
-	for (let i = 0; i < mapHeight; i++) {
-		for (let j = 0; j < mapWidth; j++) {
+	// Draw a solid base layer at height 0
+	for (let i = 0; i < MAP_SIZE; i++) {
+		for (let j = 0; j < MAP_SIZE; j++) {
+			let block = new Cube();
+			block.color = [0.0, 1.0, 0.0, 1.0]; // Green base layer
+			block.textureNum = 1; // Grass texture
+			block.matrix.setTranslate(j - MAP_SIZE / 2, -0.5, i - MAP_SIZE / 2); // Ensure the base is at height 0
+			block.render();
+		}
+	}
+
+	// Render the terrain blocks on top
+	for (let i = 0; i < MAP_SIZE; i++) {
+		for (let j = 0; j < MAP_SIZE; j++) {
 			let height = g_map[i][j];
-			if (height > 0) {
-				for (let h = 0; h < height; h++) {
-					let wall = new Cube();
-					wall.color = [0.0, 1.0, 1.0, 1.0];
-					wall.textureNum = 1;
-					wall.matrix.scale(0.3, 0.3, 0.3);
-					wall.matrix.setTranslate(
-						j - mapWidth / 2,
-						h - 0.5,
-						i - mapHeight / 2
-					);
-					wall.render();
-				}
+
+			for (let h = 0; h < height; h++) {
+				let block = new Cube();
+				block.color = [0.0, 1.0, 0.0, 1.0]; // Green terrain
+				block.textureNum = 1; // Grass texture
+				block.matrix.setTranslate(j - MAP_SIZE / 2, h, i - MAP_SIZE / 2);
+				block.render();
 			}
 		}
 	}
@@ -411,9 +379,10 @@ function renderAllShapes() {
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	drawMap();
+
 	//draw floor
 	var floor = new Cube();
-	floor.color = [0.243, 0.749, 0.251, 1.0]; // Green floor
+	floor.color = [0.58, 0.812, 0.494, 1.0]; // Green floor
 	floor.textureNum = -2;
 	floor.matrix.setTranslate(0, -0.5, 0); // Align floor with walls
 	floor.matrix.scale(mapWidth, 0, mapHeight); // Scale to match walls
@@ -423,7 +392,7 @@ function renderAllShapes() {
 	//draw sky
 	var sky = new Cube();
 	sky.color = [0.529, 0.808, 0.98, 1.0]; // Light blue color for the sky
-	sky.textureNum = -2; // Use solid color
+	sky.textureNum = 0; // Use solid color
 	sky.matrix.translate(-300, -300, -300);
 	sky.matrix.scale(600, 600, 600);
 	sky.render();
