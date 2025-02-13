@@ -361,18 +361,18 @@ function keydown(ev) {
 }
 
 function getTargetBlock() {
-	let maxDistance = 5; // Maximum reach distance
-	let stepSize = 0.1; // Smaller = more precise
+	let maxDistance = 5.0; // Maximum interaction distance
+	let stepSize = 0.1; // Step size for ray marching
 
-	// Get the camera direction (normalized)
+	// Camera direction (normalized)
 	let direction = new Vector3([
 		g_camera.at.elements[0] - g_camera.eye.elements[0],
 		g_camera.at.elements[1] - g_camera.eye.elements[1],
 		g_camera.at.elements[2] - g_camera.eye.elements[2],
 	]);
-	direction.normalize();
+	direction.normalize(); // Ensure direction is a unit vector
 
-	// Start ray at camera position
+	// Start ray exactly at camera position (crosshair is centered)
 	let origin = new Vector3(g_camera.eye.elements);
 
 	console.log(
@@ -384,16 +384,20 @@ function getTargetBlock() {
 
 	// Step along the ray to detect the first block in the way
 	for (let t = 0; t < maxDistance; t += stepSize) {
-		let x = Math.round(origin.elements[0] + direction.elements[0] * t);
-		let y = Math.round(origin.elements[1] + direction.elements[1] * t);
-		let z = Math.round(origin.elements[2] + direction.elements[2] * t);
+		let x = Math.floor(origin.elements[0] + direction.elements[0] * t);
+		let y = Math.floor(origin.elements[1] + direction.elements[1] * t);
+		let z = Math.floor(origin.elements[2] + direction.elements[2] * t);
 
-		// Ensure within bounds
+		// Ensure within map bounds
 		if (x >= 0 && x < MAP_SIZE && z >= 0 && z < MAP_SIZE && y >= 0) {
 			if (g_map[x][z] > 0) {
-				// Block detected!
-				console.log(`Target block found at (${x}, ${y}, ${z})`);
-				return { x, y, z };
+				let blockTopY = g_map[x][z] - 1; // Top Y coordinate of the block
+
+				if (y <= blockTopY + 1) {
+					// Ensure it's on top or side of block
+					console.log(`Target block found at (${x}, ${blockTopY}, ${z})`);
+					return { x, y: blockTopY, z };
+				}
 			}
 		}
 	}
@@ -401,23 +405,31 @@ function getTargetBlock() {
 	console.log("No block found in front.");
 	return null; // No block detected
 }
-
 function addBlock() {
 	let target = getTargetBlock();
 	if (!target) {
-		console.log("No block detected, placing at front block.");
+		console.log("No block detected, cannot add.");
 		return;
 	}
 
 	let { x, y, z } = target;
 
-	// Ensure new block is placed on top of the detected block
-	let newY = y + 1;
-	g_map[x][z] += 1;
+	// Convert world (x, z) into map (i, j)
+	let i = z + MAP_SIZE / 2;
+	let j = x + MAP_SIZE / 2;
 
-	console.log(`Block added at (${x}, ${newY}, ${z})`);
+	if (i >= 0 && i < MAP_SIZE && j >= 0 && j < MAP_SIZE) {
+		g_map[i][j] += 1; // Increase height count at `(i, j)`
+		let newY = g_map[i][j] - 1; // The actual new Y position
+
+		console.log(`Block added at (${x}, ${newY}, ${z})`);
+	} else {
+		console.log("Block position out of bounds!");
+	}
+
 	renderAllShapes();
 }
+
 function removeBlock() {
 	let target = getTargetBlock();
 	if (!target) {
@@ -427,12 +439,17 @@ function removeBlock() {
 
 	let { x, y, z } = target;
 
-	if (g_map[x][z] > 1) {
-		// Ensure the base layer isn't removed
-		g_map[x][z] -= 1;
-		console.log(`Block removed at (${x}, ${y}, ${z})`);
+	// Convert world (x, z) into map (i, j)
+	let i = z + MAP_SIZE / 2;
+	let j = x + MAP_SIZE / 2;
+
+	if (i >= 0 && i < MAP_SIZE && j >= 0 && j < MAP_SIZE && g_map[i][j] > 1) {
+		g_map[i][j] -= 1; // Reduce height count
+		let newY = g_map[i][j] - 1; // The new top block Y coordinate
+
+		console.log(`Block removed at (${x}, ${newY}, ${z})`);
 	} else {
-		console.log("Cannot remove base block.");
+		console.log("Cannot remove base block or out of bounds!");
 	}
 
 	renderAllShapes();
