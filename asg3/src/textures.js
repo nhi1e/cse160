@@ -28,19 +28,49 @@ function sendTextureToGLSL(image) {
 	gl.uniform1i(u_Sampler0, 0);
 }
 
+// function initTextures2() {
+// 	var image2 = new Image();
+// 	if (!image2) {
+// 		console.log("Failed to create the image object");
+// 		return false;
+// 	}
+// 	image2.onload = function () {
+// 		sendTextureToGLSL2(image2);
+// 	};
+
+// 	image2.src = "../textures/grass4.png";
+
+// 	return true;
+// }
+function updateSeasonTexture(imageSrc) {
+	var image = new Image();
+	image.onload = function () {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+		gl.activeTexture(gl.TEXTURE1); // Grass is always in TEXTURE1
+		gl.bindTexture(gl.TEXTURE_2D, grassTexture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.uniform1i(u_Sampler1, 1);
+	};
+	image.src = imageSrc; // Load new season texture
+	renderAllShapes();
+}
+
+let grassTexture; // Store grass texture handle
+
 function initTextures2() {
 	var image2 = new Image();
-	if (!image2) {
-		console.log("Failed to create the image object");
-		return false;
-	}
 	image2.onload = function () {
-		sendTextureToGLSL2(image2);
+		grassTexture = gl.createTexture();
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+		gl.activeTexture(gl.TEXTURE1);
+		gl.bindTexture(gl.TEXTURE_2D, grassTexture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image2);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.uniform1i(u_Sampler1, 1);
 	};
 
-	image2.src = "../textures/grass.png";
-
-	return true;
+	image2.src = "../textures/grass_spring.png"; // Start with Spring
 }
 
 function sendTextureToGLSL2(image2) {
