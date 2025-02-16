@@ -53,6 +53,7 @@ function updateSeasonTexture(imageSrc) {
 		gl.uniform1i(u_Sampler1, 1);
 	};
 	image.src = imageSrc; // Load new season texture
+	console.log("Season texture updated");
 	renderAllShapes();
 }
 
@@ -207,6 +208,7 @@ function sendTextureToGLSL6(image6) {
 	gl.uniform1i(u_Sampler5, 5);
 }
 
+//tree trunk
 function initTextures7() {
 	var image7 = new Image();
 	if (!image7) {
@@ -214,29 +216,53 @@ function initTextures7() {
 		return false;
 	}
 	image7.onload = function () {
-		sendTextureToGLSL7(image7);
+		trunkTexture = gl.createTexture();
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+		gl.activeTexture(gl.TEXTURE6);
+		gl.bindTexture(gl.TEXTURE_2D, trunkTexture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image7);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.uniform1i(u_Sampler6, 6);
 	};
 
-	image7.src = "../textures/bark.png";
+	image7.src = "../textures/bark_spring.png"; // Start with Spring texture
+}
+function updateTrunkTexture(imageSrc) {
+	var image = new Image();
+	image.onload = function () {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+		gl.activeTexture(gl.TEXTURE6); // Tree trunk uses TEXTURE7
+		gl.bindTexture(gl.TEXTURE_2D, trunkTexture);
 
-	return true;
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+		gl.uniform1i(u_Sampler6, 6);
+		console.log("✅ Updated tree trunk texture:", imageSrc);
+
+		g_map.updateTrunkTextures(); // Apply the new texture to all trees
+	};
+
+	image.src = imageSrc;
 }
 
-function sendTextureToGLSL7(image7) {
-	var texture7 = gl.createTexture();
-	if (!texture7) {
-		console.log("Failed to create the texture object");
-		return false;
-	}
-	console.log("bark texture");
+// function sendTextureToGLSL7(image7) {
+// 	var texture7 = gl.createTexture();
+// 	if (!texture7) {
+// 		console.log("Failed to create the texture object");
+// 		return false;
+// 	}
+// 	console.log("bark texture");
 
-	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
-	gl.activeTexture(gl.TEXTURE6);
-	gl.bindTexture(gl.TEXTURE_2D, texture7);
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image7);
-	gl.uniform1i(u_Sampler6, 6);
-}
+// 	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+// 	gl.activeTexture(gl.TEXTURE6);
+// 	gl.bindTexture(gl.TEXTURE_2D, texture6);
+// 	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+// 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image7);
+// 	gl.uniform1i(u_Sampler6, 6);
+// }
+//end of trunk texture
 
 function initTextures8() {
 	var image8 = new Image();

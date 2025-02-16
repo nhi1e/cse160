@@ -140,6 +140,13 @@ class Map {
 			"../textures/grass_autumn.png",
 			"../textures/grass_winter.png",
 		];
+		this.seasonTrunkTextures = [
+			"../textures/bark_spring.png",
+			"../textures/bark_summer.png",
+			"../textures/bark_autumn.png",
+			"../textures/bark_winter.png",
+		];
+
 		this.createMap();
 		this.startSeasonCycle();
 	}
@@ -209,17 +216,29 @@ class Map {
 		this.placeTree(2, 23); // Place tree at row 6, column 26
 	}
 
-	/** 🔄 Automatically cycle seasons every 45 seconds */
 	startSeasonCycle() {
 		setInterval(() => {
 			this.seasonIndex = (this.seasonIndex + 1) % 4; // Cycle through seasons
-			updateSeasonTexture(this.seasonTextures[this.seasonIndex]); // Load new texture
-			this.updateSeasonTextures(); // Apply new texture to all grass blocks
+
+			let newGrassTexture = this.seasonTextures[this.seasonIndex];
+			let newTrunkTexture = this.seasonTrunkTextures[this.seasonIndex];
+
+			updateSeasonTexture(newGrassTexture); // Update Grass Texture (TEXTURE1)
+			updateTrunkTexture(newTrunkTexture); // Update Trunk Texture (TEXTURE7)
+
+			this.updateSeasonTextures(); // Apply texture update to terrain
+			this.updateTrunkTextures(); // Apply texture update to trunks
+
 			TextToHTML(
 				`🍃 Season: ${["Spring", "Summer", "Autumn", "Winter"][this.seasonIndex]}`,
 				"season-display"
 			);
-		}, 10000); // Change season every 45 seconds
+
+			console.log(
+				"🌲 Season changed:",
+				["Spring", "Summer", "Autumn", "Winter"][this.seasonIndex]
+			);
+		}, 15000);
 	}
 
 	/** 🎨 Update all grass blocks to the new season's texture */
@@ -238,25 +257,36 @@ class Map {
 			}
 		}
 	}
+	updateTrunkTextures() {
+		for (let x = 0; x < 32; x++) {
+			for (let z = 0; z < 32; z++) {
+				for (let y = 0; y < 32; y++) {
+					let block = this.cubes[x][z][y];
+
+					if (block && block.textureNum === 6) {
+						block.textureNum = 6; 
+					}
+				}
+			}
+		}
+		console.log("🌲 Updated all tree trunks to new season texture.");
+	}
 
 	placeTree(x, z) {
-		let baseY = this.heightMap[x][z]; // Get height from the height map
+		let baseY = this.heightMap[x][z]; // Get height from height map
 		let trunkHeight = 3;
 		let leafStart = baseY + trunkHeight;
 
-		// console.log(`Placing tree at (${x}, ${baseY}, ${z})`);
-
-		// --- Create Trunk (3 wood blocks) ---
+		// --- 🌳 Create Trunk (3 wood blocks) ---
 		for (let h = 0; h < trunkHeight; h++) {
 			let trunk = new Cube();
 			trunk.matrix.translate(x, baseY + h, z);
-			trunk.textureNum = 6; // Wood texture
+			trunk.textureNum = 6; // 🌲 Use TEXTURE7 for seasonal bark
 			this.cubes[x][z][baseY + h] = trunk;
-			// console.log(`Placed trunk at (${x}, ${baseY + h}, ${z})`);
 		}
 
-		// --- Create Cherry Blossom Leaves (Rounded Shape) ---
-		let radius = 2; // Controls the roundness
+		// --- 🌿 Create Leaves (Unchanged) ---
+		let radius = 3;
 		for (let dx = -radius; dx <= radius; dx++) {
 			for (let dz = -radius; dz <= radius; dz++) {
 				for (let dy = 0; dy <= radius; dy++) {
@@ -264,10 +294,7 @@ class Map {
 					let leafY = leafStart + dy;
 					let leafZ = z + dz;
 
-					// Create a rounded shape instead of a cube
 					let distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-
-					// Only place leaves within a rounded radius
 					if (distance <= radius + Math.random() * 0.5) {
 						if (
 							leafX >= 0 &&
@@ -279,10 +306,8 @@ class Map {
 						) {
 							let leaf = new Cube();
 							leaf.matrix.translate(leafX, leafY, leafZ);
-							leaf.textureNum = 7; // 🌸 Cherry blossom texture
+							leaf.textureNum = 7; // Keep leaf texture unchanged
 							this.cubes[leafX][leafZ][leafY] = leaf;
-
-							// console.log(`Placed leaf at (${leafX}, ${leafY}, ${leafZ})`);
 						}
 					}
 				}

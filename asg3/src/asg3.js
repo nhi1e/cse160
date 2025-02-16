@@ -405,7 +405,6 @@ function keydown(ev, down) {
 			ev.preventDefault();
 			break;
 		default:
-			console.log("unknown Keydown  = " + ev.keyCode);
 			break;
 	}
 }
