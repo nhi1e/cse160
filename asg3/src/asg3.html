@@ -1,78 +1,51 @@
 <!doctype html>
 <html lang="en">
-	<style>
-		.container {
-			position: relative; /* Makes sure the crosshair is positioned relative to the canvas */
-			width: 600px;
-			height: 600px;
-		}
-
-		#webgl {
-			position: absolute;
-			top: 0;
-			left: 0;
-		}
-
-		#crosshair {
-			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			font-size: 24px;
-			color: white;
-			font-weight: bold;
-			pointer-events: none; /* Prevents interaction */
-			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Adds slight shadow */
-		}
-
-	</style>
 	<head>
 		<meta charset="utf-8" />
-		<title>Asg3 - Nhi</title>
-		<style>
-			.container {
-				display: flex;
-				align-items: flex-start;
-				gap: 20px; /* Adds space between the canvas and the image */
-			}
-
-		</style>
+		<title>asg3 - nhi le</title>
 	</head>
 
 	<body onload="main()">
-		<div class="container">
-			<canvas id="webgl" width="600" height="600"></canvas>
-			<div id="crosshair">+</div>
-		</div>
+		<canvas id="webgl" width="800" height="800">
+			Please use a browser that supports "canvas"
+		</canvas>
+		<p id="fps">Temp</p>
 
-		<div id="fpsCounter" style="position: absolute; top: 10px; left: 10px; background: rgba(0, 0, 0, 0.7); color: white; padding: 5px; font-size: 16px; font-family: Arial, sans-serif;">FPS: </div>
+		Current block: <strong id="block">Wood</strong>
 
-		
-		<p>Camera Angle 
-			<input
-				type="range"
-				min="0"
-				max="90"
-				value="5"
-				class="slider"
-				id="angleSlide"
-			/>
-		</p>
+		<p></p>
+		FOV
+		<input type="range" min="20" max="120" class="slider" value="90" id="fov" />
 
-		
+		<p></p>
 
-			<script src="../lib/webgl-utils.js"></script>
-			<script src="../lib/webgl-debug.js"></script>
-			<script src="../lib/cuon-utils.js"></script>
-			<script src="../lib/cuon-matrix.js"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+		<script src="../lib/webgl-utils.js"></script>
+		<script src="../lib/webgl-debug.js"></script>
+		<script src="../lib/cuon-utils.js"></script>
+		<script src="../lib/cuon-matrix-cse160.js"></script>
+		<script src="Camera.js"></script>
+		<script src="Map.js"></script>
+		<script src="Cube.js"></script>
+		<script src="textures.js"></script>
+		<script src="asg3.js"></script>
 
-
-			<script src="asg3.js"></script>
-			<script src="Triangle.js"></script>
-			<script src="Cube.js"></script>
-			<script src="Camera.js"></script>
-
-		</p>
+		<br />
+		Controls:
+		<br />
+		Move Camera by clicking and dragging the mouse
+		<br />
+		move: W/A/S/D
+		<br />
+		up and down: space and V
+		<br />
+		break and place blocks: Q and E
+		<br />
+		1: Grass block
+		<br />
+		2: Lava block
+		<br />
+		3: Bamboo block
+		<br />
+		4: Stone block
 	</body>
 </html>

@@ -1,473 +1,552 @@
 // Vertex shader program
-var VSHADER_SOURCE = `
-		attribute vec4 a_Position;
-		attribute vec2 a_TexCoord;
-		uniform mat4 u_ModelMatrix;
-		uniform mat4 u_GlobalRotateMatrix;
-		uniform mat4 u_ViewMatrix;
-		uniform mat4 u_ProjMatrix;
-		varying vec2 v_TexCoord;
-		void main() {
-		gl_Position = u_ProjMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
-		v_TexCoord = a_TexCoord;
-	}`;
+var VSHADER_SOURCE =
+	"attribute vec4 a_Position;\n" +
+	"attribute vec2 a_UV;\n" +
+	"varying vec2 v_UV;\n" +
+	"uniform mat4 u_ModelMatrix;\n" +
+	"uniform mat4 u_GlobalRotateMatrix;\n" +
+	"uniform mat4 u_ViewMatrix;\n" +
+	"uniform mat4 u_ProjectionMatrix;\n" +
+	"void main() {\n" +
+	"  gl_Position =  u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;\n" +
+	"  v_UV = a_UV;\n" +
+	"}\n";
 
 // Fragment shader program
-var FSHADER_SOURCE = `
-	precision mediump float;
-	varying vec2 v_TexCoord;
-	uniform vec4 u_FragColor;
-	uniform sampler2D u_Sampler0; 
-	uniform sampler2D u_Sampler1; 
-	uniform int u_whichTexture;
-	
-	void main() {
-		int tex = int(u_whichTexture); // Explicit cast for safety
+var FSHADER_SOURCE =
+	"precision mediump float;\n" +
+	"varying vec2 v_UV;\n" +
+	"uniform vec4 u_FragColor;\n" +
+	"uniform sampler2D u_Sampler0;\n" +
+	"uniform sampler2D u_Sampler1;\n" +
+	"uniform sampler2D u_Sampler2;\n" +
+	"uniform sampler2D u_Sampler3;\n" +
+	"uniform sampler2D u_Sampler4;\n" +
+	"uniform sampler2D u_Sampler5;\n" +
+	"uniform sampler2D u_Sampler6;\n" +
+	"uniform sampler2D u_Sampler7;\n" +
+	"uniform int u_whichTexture;\n" +
+	"void main() {\n" +
+	"  if(u_whichTexture == -2) {\n" +
+	"     gl_FragColor = u_FragColor;\n" +
+	"  } else if (u_whichTexture == -1) {\n" +
+	"     gl_FragColor = vec4(v_UV,1.0,1.0);\n" +
+	"  } else if (u_whichTexture == 0) {\n" +
+	"     gl_FragColor = texture2D(u_Sampler0, v_UV);\n" +
+	"  } else if (u_whichTexture == 1) {\n" +
+	"     gl_FragColor = texture2D(u_Sampler1, v_UV);\n" +
+	"  } else if (u_whichTexture == 2) {\n" +
+	"     gl_FragColor = texture2D(u_Sampler2, v_UV);\n" +
+	"  } else if (u_whichTexture == 3) {\n" +
+	"     gl_FragColor = texture2D(u_Sampler3, v_UV);\n" +
+	"  } else if (u_whichTexture == 4) {\n" +
+	"     gl_FragColor = texture2D(u_Sampler4, v_UV);\n" +
+	"  } else if (u_whichTexture == 5) {\n" +
+	"     gl_FragColor = texture2D(u_Sampler5, v_UV);\n" +
+	" } else if (u_whichTexture == 6) {\n" +
+	"     gl_FragColor = texture2D(u_Sampler6, v_UV);\n" +
+	" } else if (u_whichTexture == 7) {\n" +
+	"     gl_FragColor = texture2D(u_Sampler7, v_UV);\n" +
+	"  } else {\n" +
+	"     gl_FragColor = vec4(1,.2,.2,1);\n" +
+	"  }\n" +
+	"}\n";
 
-		if (tex == -2) { // Use solid color
-			gl_FragColor = u_FragColor;
-		} 
-		else if (tex == -1) { // UV debug gradient color
-			gl_FragColor = vec4(v_TexCoord, 1.0, 1.0);
-		} 
-		else if (tex == 0) { // Use texture0 
-			gl_FragColor = texture2D(u_Sampler0, v_TexCoord);
-		} 
-		else if (tex == 1) { // Use texture1 (grass.png)
-			gl_FragColor = texture2D(u_Sampler1, v_TexCoord);
-		} 
-		
-		else { // Error texture (red)
-			gl_FragColor = vec4(1, 0.2, 0.2, 1);
-		}
-	}
-`;
-
-let lastFrameTime = performance.now();
-let fps = 0;
-
-let lastUpdateTime = 0;
-function updateFPS() {
-	let now = performance.now();
-	let delta = now - lastFrameTime;
-	lastFrameTime = now;
-	fps = 1000 / delta;
-
-	if (now - lastUpdateTime > 500) {
-		// Update every 500ms
-		document.getElementById("fpsCounter").innerText = `FPS: ${fps.toFixed(2)}`;
-		lastUpdateTime = now;
-	}
-}
+//GLOBAL VARIALBLES -----------------------
 
 let canvas;
 let gl;
+
+let g_fov = 90;
+let g_camera = new Camera();
+
 let a_Position;
+//let u_Size;
 let u_FragColor;
-let u_Size;
+let u_ModelMatrix;
+let u_GlobalRotateMatrix;
+
+let u_ViewMatrix;
+let u_ProjectionMatrix;
+
+let u_whichTexture;
+let u_Sampler0;
+let u_Sampler1;
+let u_Sampler2;
+let u_Sampler3;
+let u_Sampler4;
+let u_Sampler5;
+let u_Sampler6;
+let u_Sampler7;
+
+let a_UV;
+
+let global_angle_x = 0;
+let global_angle_y = 0;
+
+let g_yellow_ang = 0;
+let g_magenta_ang = 0;
+
+var g_selected_color = [1, 0, 0, 1];
+var g_selected_back_color = [0, 0, 0, 1];
+
+let g_animating = true;
+
+let g_walking = true;
+
+let g_map = new Map();
+
+let g_block = 0;
 
 function setupWebGL() {
 	// Retrieve <canvas> element
 	canvas = document.getElementById("webgl");
 
 	// Get the rendering context for WebGL
-	gl =
-		canvas.getContext("webgl", { preserveDrawingBuffer: true }) ||
-		canvas.getContext("experimental-webgl", { preserveDrawingBuffer: true });
-
+	gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
 	if (!gl) {
 		console.log("Failed to get the rendering context for WebGL");
 		return;
 	}
 	gl.enable(gl.DEPTH_TEST);
-	ext = gl.getExtension("ANGLE_instanced_arrays");
 }
 
 function connectVariablesToGLSL() {
+	// Initialize shaders
 	if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-		console.log("Failed to initialize shaders.");
+		console.log("Failed to intialize shaders.");
 		return;
 	}
 
+	// Get the storage location of a_Position
 	a_Position = gl.getAttribLocation(gl.program, "a_Position");
-	a_TexCoord = gl.getAttribLocation(gl.program, "a_TexCoord");
+	if (a_Position < 0) {
+		console.log("Failed to get the storage location of a_Position");
+		return;
+	}
+
+	// Get the storage location of a_Position
+	a_UV = gl.getAttribLocation(gl.program, "a_UV");
+	if (a_Position < 0) {
+		console.log("Failed to get the storage location of a_UV");
+		return;
+	}
+
+	// Get the storage location of u_FragColor
+	u_FragColor = gl.getUniformLocation(gl.program, "u_FragColor");
+	if (!u_FragColor) {
+		console.log("Failed to get the storage location of u_FragColor");
+		return;
+	}
+
+	// Get the storage location of u_whichTexture
+	u_whichTexture = gl.getUniformLocation(gl.program, "u_whichTexture");
+	if (!u_whichTexture) {
+		console.log("Failed to get the storage location of u_whichTexture");
+		return;
+	}
+
+	// Get the storage location of u_Sampler0
+	u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
+	if (!u_Sampler0) {
+		console.log("Failed to get the storage location of u_Sampler0");
+		return;
+	}
+
+	u_Sampler1 = gl.getUniformLocation(gl.program, "u_Sampler1");
+	if (!u_Sampler1) {
+		console.log("Failed to get the storage location of u_Sampler1");
+		return;
+	}
+
+	u_Sampler2 = gl.getUniformLocation(gl.program, "u_Sampler2");
+	if (!u_Sampler2) {
+		console.log("Failed to get the storage location of u_Sampler2");
+		return;
+	}
+
+	u_Sampler3 = gl.getUniformLocation(gl.program, "u_Sampler3");
+	if (!u_Sampler3) {
+		console.log("Failed to get the storage location of u_Sampler3");
+		return;
+	}
+
+	u_Sampler4 = gl.getUniformLocation(gl.program, "u_Sampler4");
+	if (!u_Sampler4) {
+		console.log("Failed to get the storage location of u_Sampler4");
+		return;
+	}
+
+	u_Sampler5 = gl.getUniformLocation(gl.program, "u_Sampler5");
+	if (!u_Sampler5) {
+		console.log("Failed to get the storage location of u_Sampler5");
+		return;
+	}
+
+	u_Sampler6 = gl.getUniformLocation(gl.program, "u_Sampler6");
+	if (!u_Sampler6) {
+		console.log("Failed to get the storage location of u_Sampler6");
+		return;
+	}
+
+	u_Sampler7 = gl.getUniformLocation(gl.program, "u_Sampler7");
+	if (!u_Sampler7) {
+		console.log("Failed to get the storage location of u_Sampler7");
+		return;
+	}
+
+	//get the storage of the size
+	u_Size = gl.getUniformLocation(gl.program, "u_Size");
+	if (!u_FragColor) {
+		console.log("Failed to get the storage location of u_FragColor");
+		return;
+	}
+
 	u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
+	if (!u_ModelMatrix) {
+		console.log("Failed to get the storage location of u_ModelMatrix");
+		return;
+	}
+
+	var identity = new Matrix4();
+	gl.uniformMatrix4fv(u_ModelMatrix, false, identity.elements);
+
 	u_GlobalRotateMatrix = gl.getUniformLocation(
 		gl.program,
 		"u_GlobalRotateMatrix"
 	);
-	u_FragColor = gl.getUniformLocation(gl.program, "u_FragColor");
-
-	u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
-	u_Sampler1 = gl.getUniformLocation(gl.program, "u_Sampler1");
-	u_whichTexture = gl.getUniformLocation(gl.program, "u_whichTexture");
-	u_ViewMatrix = gl.getUniformLocation(gl.program, "u_ViewMatrix");
-	u_ProjMatrix = gl.getUniformLocation(gl.program, "u_ProjMatrix");
-	gl.uniformMatrix4fv(u_ModelMatrix, false, new Matrix4().elements);
-}
-
-const POINT = 0;
-const TRIANGLE = 1;
-const CIRCLE = 2;
-
-let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
-let g_selectedSize = 5;
-let g_selectedType = POINT;
-let g_selectedSegments = 10;
-let g_globalAngle = 0;
-let g_yellowAngle = 0;
-let g_magentaAngle = 0;
-let g_yellowAnimation = false;
-let g_magentaAnimation = false;
-//set up actions for html ui elements
-function addActionsForHtmlUI() {
-	//button events
-
-	//Size slider events
-	document
-		.getElementById("angleSlide")
-		.addEventListener("mousemove", function () {
-			g_globalAngle = this.value;
-			renderAllShapes();
-		});
-}
-let keys = {};
-
-// Enable Mouse Look
-function enableMouseLook() {
-	canvas.addEventListener("mousemove", onMouseMove);
-	canvas.addEventListener("mousedown", () => canvas.requestPointerLock());
-	document.addEventListener("pointerlockchange", lockChange);
-}
-
-// Handle Pointer Lock
-function lockChange() {
-	if (document.pointerLockElement !== canvas) {
-		lastMouseX = null;
-		lastMouseY = null;
+	if (!u_GlobalRotateMatrix) {
+		console.log("Failed to get the storage location of u_GlobalRotateMatrix");
+		return;
 	}
+	gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, identity.elements);
+
+	u_ViewMatrix = gl.getUniformLocation(gl.program, "u_ViewMatrix");
+	if (!u_ViewMatrix) {
+		console.log("Failed to get the storage location of u_ViewMatrix");
+		return;
+	}
+	gl.uniformMatrix4fv(u_ViewMatrix, false, identity.elements);
+
+	u_ProjectionMatrix = gl.getUniformLocation(gl.program, "u_ProjectionMatrix");
+	if (!u_ProjectionMatrix) {
+		console.log("Failed to get the storage location of u_ProjectionMatrix");
+		return;
+	}
+	gl.uniformMatrix4fv(u_ProjectionMatrix, false, identity.elements);
 }
 
-// Handle Mouse Movement
-function onMouseMove(event) {
-	if (document.pointerLockElement !== canvas) return;
-
-	const deltaX = event.movementX * g_camera.sensitivity;
-	const deltaY = event.movementY * g_camera.sensitivity;
-
-	// Adjust yaw (left/right) and pitch (up/down)
-	g_camera.yaw += deltaX;
-	g_camera.pitch -= deltaY;
-	g_camera.pitch = Math.max(-89, Math.min(89, g_camera.pitch)); // Clamp pitch
-
-	g_camera.updateRotation();
-	renderAllShapes();
+function addActions() {
+	//fov slider
+	document.getElementById("fov").addEventListener("mousemove", function () {
+		g_fov = this.value;
+	});
 }
 
-// Handle Key Press
-function keydown(event) {
-	keys[event.key] = true;
+function changeBack() {
+	gl.clearColor(
+		g_selected_back_color[0],
+		g_selected_back_color[1],
+		g_selected_back_color[2],
+		1.0
+	);
+	//renderAllShapes();
 }
 
-// Handle Key Release
-function keyup(event) {
-	keys[event.key] = false;
-}
-
-// Update Camera Movement Each Frame
-function updateCameraMovement() {
-	if (keys["w"]) g_camera.forward();
-	if (keys["s"]) g_camera.back();
-	if (keys["a"]) g_camera.left();
-	if (keys["d"]) g_camera.right();
-	if (keys["q"]) g_camera.turnLeft();
-	if (keys["e"]) g_camera.turnRight();
-
-	renderAllShapes();
-}
 function main() {
 	setupWebGL();
+
 	connectVariablesToGLSL();
-	addActionsForHtmlUI();
 
-	enableMouseLook(); // Add mouse movement tracking
+	//make the buttons do the thing they need to do
+	addActions();
 
-	document.onkeydown = keydown;
+	document.onkeydown = function (ev) {
+		keydown(ev, true);
+	};
+	document.onkeyup = function (ev) {
+		keydown(ev, false);
+	};
 
-	g_camera = new Camera();
+	// Register function (event handler) to be called on a mouse press
+	canvas.onclick = function (ev) {
+		if (ev.shiftKey) {
+			g_walking = !g_walking;
+		}
+	};
 
-	gl.enable(gl.BLEND);
-	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-	// Specify the color for clearing <canvas>
-	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	canvas.onmousemove = function (ev) {
+		if (ev.buttons == 1) {
+			click(ev);
+		} else {
+			pre_mouse_pos = null;
+		}
+	};
 
 	initTextures();
+	initTextures2(); //im so sorry about this janky code
+	initTextures3();
+	initTextures4();
+	initTextures5();
+	initTextures6();
+	initTextures7();
+	initTextures8();
 
-	renderAllShapes();
+	// Specify the color for clearing <canvas>
+	gl.clearColor(0.3, 1.0, 1.0, 1.0);
+
+	// Clear <canvas>
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+	//renderAllShapes();
+
 	requestAnimationFrame(tick);
+}
+
+//var g_points = [];  // The array for the position of a mouse press
+//var g_colors = [];  // The array to store the color of a point
+//var g_sizes = [];
+
+var pre_mouse_pos;
+
+function click(ev) {
+	//get the cordinates of ev and convert to webgl space and then place into x,y
+	let [x, y] = convertToGLSpace(ev);
+
+	let x_sens = 10;
+	let y_sense = 10;
+
+	let curent_mouse_pos = [ev.clientX, ev.clientY];
+
+	if (pre_mouse_pos != null) {
+		//console.log("current = "+ curent_mouse_pos)
+		//console.log("pre = "+ pre_mouse_pos)
+		//console.log("movement = "+ (curent_mouse_pos[0] - pre_mouse_pos[0]))
+
+		let movement_x = curent_mouse_pos[0] - pre_mouse_pos[0];
+		let movement_y = (curent_mouse_pos[1] - pre_mouse_pos[1]) / 2;
+
+		global_angle_y -= movement_y;
+
+		global_angle_x -= movement_x;
+
+		//console.log("movement = "+movement_x)
+		//console.log("global_angle_x = "+global_angle_x)
+	}
+
+	if (ev.buttons == 1) {
+		pre_mouse_pos = curent_mouse_pos;
+	} else {
+		pre_mouse_pos = null;
+	}
+
+	//renderAllShapes();
+}
+
+function undo() {
+	//console.log(gl_undolist)
+	let x = gl_undolist.pop();
+	if (x == 1) {
+		gl_shapelist.pop();
+	} else {
+		gl_shapelist = gl_shapelist.slice(0, gl_shapelist.length - (x + 1));
+	}
+	renderAllShapes();
+}
+
+function convertToGLSpace(ev) {
+	var x = ev.clientX; // x coordinate of a mouse pointer
+	var y = ev.clientY; // y coordinate of a mouse pointer
+	var rect = ev.target.getBoundingClientRect();
+
+	x = (x - rect.left - canvas.width / 2) / (canvas.width / 2);
+	y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
+
+	//return both variables
+	return [x, y];
 }
 
 var g_startTime = performance.now() / 1000.0;
+var g_seconds = performance.now() / 1000.0 - g_startTime;
+var g_pauseTime = 0;
+
+var delta_update = performance.now() / 1000.0;
+var delta_time = 0;
 
 function tick() {
-	g_seconds = performance.now() / 1000.0 - g_startTime;
-	updateAnimationAngles();
-	updateFPS(); // Update FPS counter
+	//console.log("performance.now = " + performance.now())
+
 	renderAllShapes();
+	//console.log("delta = " + delta);
+
+	//console.log(delta_time)
+
+	delta_time = performance.now() / 1000.0 - delta_update;
+	delta_update = performance.now() / 1000.0;
+
+	if (g_animating) {
+		g_seconds = performance.now() / 1000.0 - g_startTime - g_pauseTime;
+	} else {
+		g_pauseTime = performance.now() / 1000.0 - g_startTime - g_seconds;
+		//delta_time = 0;//specific for grass
+	}
+
+	if (!g_walking || !g_animating) {
+		//delta_time = 0;//specific for grass
+	}
+
+	//console.log(delta_time);
+
 	requestAnimationFrame(tick);
 }
 
-function updateAnimationAngles() {
-	if (g_yellowAnimation) {
-		g_yellowAngle = 45 * Math.sin(g_seconds);
-	}
-	if (g_magentaAnimation) {
-		g_magentaAngle = 45 * Math.sin(3 * g_seconds);
-	}
-}
+//global keybinds
+let g_w = false;
+let g_a = false;
+let g_s = false;
+let g_d = false;
 
-function initTextures() {
-	// Load the first texture (texture.png)
-	var texture0 = gl.createTexture();
-	var image0 = new Image();
-	image0.onload = function () {
-		loadTexture(gl, texture0, gl.TEXTURE0, u_Sampler0, image0);
-	};
-	image0.src = "sky8.png";
-	console.log("new sky texture loaded");
+let g_space = false;
+let g_v = false;
 
-	// Load the second texture (floor.png)
-	var texture1 = gl.createTexture();
-	var image1 = new Image();
-	image1.onload = function () {
-		loadTexture(gl, texture1, gl.TEXTURE1, u_Sampler1, image1);
-	};
-	image1.src = "grass.png";
+let g_e = false;
+let g_q = false;
 
-	return true;
-}
+function keydown(ev, down) {
+	//gets the key down and if its up or not
+	//console.log("ev = " + ev);
+	switch (ev.keyCode) {
+		case 87: //w key
+			//console.log("w = " + down)
+			g_w = down;
+			break;
 
-function loadTexture(gl, texture, activeTexture, u_Sampler, image) {
-	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y-axis
-	gl.activeTexture(activeTexture); // Select the correct texture unit
-	gl.bindTexture(gl.TEXTURE_2D, texture); // Bind the texture object
+		case 65: //a key
+			//console.log("a = " + down)
+			g_a = down;
+			break;
 
-	// Set texture parameters
-	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+		case 83: //s key
+			//console.log("s = " + down)
+			g_s = down;
+			break;
 
-	// Assign texture to the correct sampler
-	gl.uniform1i(u_Sampler, activeTexture === gl.TEXTURE0 ? 0 : 1);
+		case 68: //d key
+			//console.log("d = " + down)
+			g_d = down;
+			break;
 
-	console.log(
-		activeTexture === gl.TEXTURE0
-			? "Main texture loaded"
-			: "Grass texture loaded"
-	);
-}
-var MAP_SIZE = 32; // Set map size to 64x64
+		case 86: //v key
+			//console.log("v = " + down)
+			g_v = down;
+			break;
 
-var g_map = Array(MAP_SIZE)
-	.fill(0)
-	.map(() => Array(MAP_SIZE).fill(0));
-
-function getRandomInt(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-var MAP_SIZE = 64; // Set map size to 64x64
-
-var g_map = Array(MAP_SIZE)
-	.fill(0)
-	.map(() => Array(MAP_SIZE).fill(0));
-
-function getRandomInt(min, max) {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-var noise = new SimplexNoise();
-console.log(noise.noise2D(0.5, 0.5));
-var MAP_SIZE = 32;
-var g_map = Array(MAP_SIZE)
-	.fill(0)
-	.map(() => Array(MAP_SIZE).fill(0));
-
-// Ensure every block is filled with at least one grass block
-for (let i = 0; i < MAP_SIZE; i++) {
-	for (let j = 0; j < MAP_SIZE; j++) {
-		// Generate terrain height using Perlin noise and sine waves
-		let height = Math.floor(
-			1 + // Minimum height of 1
-				2 * Math.sin(i / 8) * Math.cos(j / 8) + // Rolling hills
-				3 * noise.noise2D(i / 15, j / 15) // Random terrain bumps
-		);
-
-		g_map[i][j] = Math.max(1, height); // Ensure minimum height is 1
-	}
-}
-
-var mapWidth = g_map[0].length;
-var mapHeight = g_map.length;
-function drawMap() {
-	// Draw a solid base layer at height 0
-	for (let i = 0; i < MAP_SIZE; i++) {
-		for (let j = 0; j < MAP_SIZE; j++) {
-			let block = new Cube();
-			block.color = [0.0, 1.0, 0.0, 1.0]; // Green base layer
-			block.textureNum = 1; // Grass texture
-			block.matrix.setTranslate(j - MAP_SIZE / 2, -0.5, i - MAP_SIZE / 2); // Ensure the base is at height 0
-			block.render();
-		}
-	}
-
-	// Render the terrain blocks on top
-	for (let i = 0; i < MAP_SIZE; i++) {
-		for (let j = 0; j < MAP_SIZE; j++) {
-			let height = g_map[i][j];
-
-			for (let h = 0; h < height; h++) {
-				let block = new Cube();
-				block.color = [0.0, 1.0, 0.0, 1.0]; // Green terrain
-				block.textureNum = 1; // Grass texture
-				block.matrix.setTranslate(j - MAP_SIZE / 2, h, i - MAP_SIZE / 2);
-				block.render();
+		case 69: //e key
+			if (down && !g_e && g_camera.placeCube !== null) {
+				//place cube... yeah
+				g_map.cubes[g_camera.placeCube[0]][g_camera.placeCube[2]][
+					g_camera.placeCube[1]
+				] = new Cube();
+				g_map.cubes[g_camera.placeCube[0]][g_camera.placeCube[2]][
+					g_camera.placeCube[1]
+				].matrix.translate(
+					g_camera.placeCube[0],
+					g_camera.placeCube[1],
+					g_camera.placeCube[2]
+				);
+				g_map.cubes[g_camera.placeCube[0]][g_camera.placeCube[2]][
+					g_camera.placeCube[1]
+				].textureNum = g_block;
 			}
-		}
-	}
-}
+			g_e = down;
+			break;
 
-function keydown(ev) {
-	if (ev.keyCode === 87) {
-		// 'W' key - Move Forward
-		g_camera.forward();
-	} else if (ev.keyCode === 83) {
-		// 'S' key - Move Backward
-		g_camera.back();
-	} else if (ev.keyCode === 65) {
-		// 'A' key - Move Left
-		g_camera.left();
-	} else if (ev.keyCode === 68) {
-		// 'D' key - Move Right
-		g_camera.right();
-	} else if (ev.keyCode === 70) {
-		// 'F' key - Add Block
-		addBlock();
-	} else if (ev.keyCode === 71) {
-		// 'G' key - Remove Block
-		removeBlock();
-	}
-	renderAllShapes(); // Re-render scene after moving camera
-}
-
-function getTargetBlock() {
-	let maxDistance = 5.0; // Maximum interaction distance
-	let stepSize = 0.1; // Step size for ray marching
-
-	// Camera direction (normalized)
-	let direction = new Vector3([
-		g_camera.at.elements[0] - g_camera.eye.elements[0],
-		g_camera.at.elements[1] - g_camera.eye.elements[1],
-		g_camera.at.elements[2] - g_camera.eye.elements[2],
-	]);
-	direction.normalize(); // Ensure direction is a unit vector
-
-	// Start ray exactly at camera position (crosshair is centered)
-	let origin = new Vector3(g_camera.eye.elements);
-
-	console.log(
-		`Ray Origin: (${origin.elements[0]}, ${origin.elements[1]}, ${origin.elements[2]})`
-	);
-	console.log(
-		`Ray Direction: (${direction.elements[0]}, ${direction.elements[1]}, ${direction.elements[2]})`
-	);
-
-	// Step along the ray to detect the first block in the way
-	for (let t = 0; t < maxDistance; t += stepSize) {
-		let x = Math.floor(origin.elements[0] + direction.elements[0] * t);
-		let y = Math.floor(origin.elements[1] + direction.elements[1] * t);
-		let z = Math.floor(origin.elements[2] + direction.elements[2] * t);
-
-		// Ensure within map bounds
-		if (x >= 0 && x < MAP_SIZE && z >= 0 && z < MAP_SIZE && y >= 0) {
-			if (g_map[x][z] > 0) {
-				let blockTopY = g_map[x][z] - 1; // Top Y coordinate of the block
-
-				if (y <= blockTopY + 1) {
-					// Ensure it's on top or side of block
-					console.log(`Target block found at (${x}, ${blockTopY}, ${z})`);
-					return { x, y: blockTopY, z };
-				}
+		case 81: //q key
+			if (down && !g_q && g_camera.RemoveCube !== null) {
+				//place cube... yeah
+				g_map.cubes[g_camera.RemoveCube[0]][g_camera.RemoveCube[2]][
+					g_camera.RemoveCube[1]
+				] = null;
 			}
-		}
-	}
+			g_q = down;
+			break;
+		case 49: //1 key
+			g_block = 1;
+			TextToHTML("Grass", "block"); //grass
+			break;
+		case 50: //2 key
+			g_block = 0;
+			TextToHTML("Wood", "block"); //lava
+			break;
 
-	console.log("No block found in front.");
-	return null; // No block detected
+		case 51: //3 key
+			g_block = 3;
+			TextToHTML("Cobblestone", "block"); //bamboo
+			break;
+		case 52: //4 key
+			g_block = 4;
+			TextToHTML("Sand", "block"); //stone
+			break;
+		case 32: //spacebar
+			//console.log("spacebar =" + down)
+			g_space = down;
+			ev.preventDefault(); //prevents spacebar from scrolling on the page
+			// found on stack overflow https://stackoverflow.com/questions/22559830/html-prevent-space-bar-from-scrolling-page
+			break;
+		default:
+			console.log("unknown Keydown  = " + ev.keyCode);
+			break;
+	}
 }
-function addBlock() {
-	let target = getTargetBlock();
-	if (!target) {
-		console.log("No block detected, cannot add.");
-		return;
-	}
+let g_skybox = new Cube();
+g_skybox.textureNum = 2;
 
-	let { x, y, z } = target;
+function drawIndicator() {
+	if (!g_camera.RemoveCube) return; // Ensure there's a selected cube
 
-	// Convert world (x, z) into map (i, j)
-	let i = z + MAP_SIZE / 2;
-	let j = x + MAP_SIZE / 2;
+	let indicator = new Cube();
+	indicator.color = [1.0, 1.0, 1.0, 0.4]; // Yellow, semi-transparent
+	indicator.textureNum = -2; // No texture (uses solid color shader)
 
-	if (i >= 0 && i < MAP_SIZE && j >= 0 && j < MAP_SIZE) {
-		g_map[i][j] += 1; // Increase height count at `(i, j)`
-		let newY = g_map[i][j] - 1; // The actual new Y position
+	indicator.matrix.translate(
+		g_camera.RemoveCube[0],
+		g_camera.RemoveCube[1] + 1.01,
+		g_camera.RemoveCube[2]
+	);
+	indicator.matrix.scale(1, 0, 1); // Slightly larger for visibility
+	// indicator.matrix.translate(0, 2.5, 0);
+	gl.enable(gl.BLEND);
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-		console.log(`Block added at (${x}, ${newY}, ${z})`);
-	} else {
-		console.log("Block position out of bounds!");
-	}
+	indicator.render();
 
-	renderAllShapes();
+	// Disable blending after rendering
+	gl.disable(gl.BLEND);
 }
-
-function removeBlock() {
-	let target = getTargetBlock();
-	if (!target) {
-		console.log("No block detected, cannot remove.");
-		return;
-	}
-
-	let { x, y, z } = target;
-
-	// Convert world (x, z) into map (i, j)
-	let i = z + MAP_SIZE / 2;
-	let j = x + MAP_SIZE / 2;
-
-	if (i >= 0 && i < MAP_SIZE && j >= 0 && j < MAP_SIZE && g_map[i][j] > 1) {
-		g_map[i][j] -= 1; // Reduce height count
-		let newY = g_map[i][j] - 1; // The new top block Y coordinate
-
-		console.log(`Block removed at (${x}, ${newY}, ${z})`);
-	} else {
-		console.log("Cannot remove base block or out of bounds!");
-	}
-
-	renderAllShapes();
-}
-
-var g_eye = [0, 0, 3]; // Eye position
-var g_at = [0, 0, -100]; // Look-at point
-var g_up = [0, 1, 0]; // Up direction
 
 function renderAllShapes() {
-	var start = performance.now();
+	//start timer for performance tracking
+	var start_time = performance.now();
 
-	var projMatrix = new Matrix4();
-	projMatrix.setPerspective(50, (1 * canvas.width) / canvas.height, 0.1, 500);
-	gl.uniformMatrix4fv(u_ProjMatrix, false, projMatrix.elements);
+	// Clear <canvas>
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	var viewMatrix = new Matrix4();
-	viewMatrix.setLookAt(
+	var projMat = new Matrix4();
+	projMat.setPerspective(g_fov, canvas.width / canvas.height, 0.1, 100);
+	//projMat.rotate((- global_angle_y)*3, 1, 0, 0);
+	//projMat.rotate(-global_angle_x, 0, 1, 0);
+	gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
+
+	var viewMat = new Matrix4();
+
+	//handle camera movement
+
+	g_camera.rotate(global_angle_y, global_angle_x);
+	// movement code here using delta time please
+	g_camera.handle_movement(g_w, g_s, g_d, g_a, g_space, g_v, delta_time);
+
+	//set up camera matrix
+	viewMat.setLookAt(
 		g_camera.eye.elements[0],
 		g_camera.eye.elements[1],
 		g_camera.eye.elements[2],
@@ -477,32 +556,62 @@ function renderAllShapes() {
 		g_camera.up.elements[0],
 		g_camera.up.elements[1],
 		g_camera.up.elements[2]
+	); // eye / at / up
+
+	//viewMat.rotate(-10 + global_angle_y, 1, 0, 0);
+	//viewMat.rotate(-global_angle_x, 0, 1, 0);
+	gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
+
+	var globalRotMax = new Matrix4();
+	//globalRotMax.rotate(-10 + global_angle_y, 1, 0, 0);
+	//globalRotMax.rotate(-global_angle_x, 0, 1, 0);
+
+	gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMax.elements);
+
+	g_map.render();
+
+	// if (g_camera.RemoveCube) {
+	// 	drawIndicator(gl, globalShaderProgram, camera.RemoveCube);
+	// }
+
+	g_skybox.matrix.setTranslate(
+		g_camera.eye.elements[0],
+		g_camera.eye.elements[1],
+		g_camera.eye.elements[2]
 	);
+	g_skybox.matrix.scale(100, 100, 100);
+	g_skybox.matrix.rotate(g_seconds, 0, 1, 0);
+	g_skybox.matrix.translate(-0.5, -0.5, -0.5);
 
-	gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix.elements);
+	g_skybox.render();
 
-	// pass matrix to u_ModelMatrix attribute
-	var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
-	gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
+	drawIndicator();
 
-	// Clear <canvas>
-	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-	drawMap();
+	g_camera.castRay();
 
-	//draw floor
-	var floor = new Cube();
-	floor.color = [0.58, 0.812, 0.494, 1.0]; // Green floor
-	floor.textureNum = -2;
-	floor.matrix.setTranslate(0, -0.5, 0); // Align floor with walls
-	floor.matrix.scale(mapWidth, 0, mapHeight); // Scale to match walls
-	floor.matrix.translate(-0.5, 0, -0.5); // Center correctly
-	floor.render();
+	//floor stuff
 
-	//draw sky
-	var sky = new Cube();
-	sky.color = [0.529, 0.808, 0.98, 1.0]; // Light blue color for the sky
-	sky.textureNum = 0; // Use solid color
-	sky.matrix.translate(-300, -300, -300);
-	sky.matrix.scale(600, 600, 600);
-	sky.render();
+	//floorObs.render(delta_time);
+
+	//console.log(body)
+
+	var identity = new Matrix4();
+	gl.uniformMatrix4fv(u_ModelMatrix, false, identity.elements);
+
+	//check end of performance and put on the page
+	var duration = performance.now() - start_time;
+	TextToHTML(
+		"ms: " + Math.floor(duration) + " fps: " + Math.floor(10000 / duration),
+		"fps"
+	);
+}
+
+function TextToHTML(string, htmlID) {
+	let html = document.getElementById(htmlID);
+
+	if (!html) {
+		console.log("Failed to retrive" + htmlID + "from HTML page");
+	}
+
+	html.innerHTML = string;
 }
