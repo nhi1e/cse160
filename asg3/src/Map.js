@@ -146,6 +146,12 @@ class Map {
 			"../textures/bark_autumn.png",
 			"../textures/bark_winter.png",
 		];
+		this.seasonLeafTextures = [
+			"../textures/leaf_spring.png",
+			"../textures/leaf_summer.png",
+			"../textures/leaf_autumn.png",
+			"../textures/leaf_winter.png",
+		];
 
 		this.createMap();
 		this.startSeasonCycle();
@@ -222,12 +228,15 @@ class Map {
 
 			let newGrassTexture = this.seasonTextures[this.seasonIndex];
 			let newTrunkTexture = this.seasonTrunkTextures[this.seasonIndex];
+			let newLeafTexture = this.seasonLeafTextures[this.seasonIndex];
 
 			updateSeasonTexture(newGrassTexture); // Update Grass Texture (TEXTURE1)
 			updateTrunkTexture(newTrunkTexture); // Update Trunk Texture (TEXTURE7)
+			updateLeafTexture(newLeafTexture); // ✅ Update Leaf Texture (TEXTURE7)
 
 			this.updateSeasonTextures(); // Apply texture update to terrain
 			this.updateTrunkTextures(); // Apply texture update to trunks
+			this.updateLeafTextures(); // Apply texture update to leaves
 
 			TextToHTML(
 				`🍃 Season: ${["Spring", "Summer", "Autumn", "Winter"][this.seasonIndex]}`,
@@ -257,6 +266,23 @@ class Map {
 			}
 		}
 	}
+
+	updateLeafTextures() {
+		for (let x = 0; x < 32; x++) {
+			for (let z = 0; z < 32; z++) {
+				for (let y = 0; y < 32; y++) {
+					let block = this.cubes[x][z][y];
+
+					if (block && block.textureNum === 7) {
+						// ✅ Only update leaves
+						block.textureNum = 7; // ✅ Keep using TEXTURE7
+					}
+				}
+			}
+		}
+		console.log("🍂 Updated all leaves to new season texture.");
+	}
+
 	updateTrunkTextures() {
 		for (let x = 0; x < 32; x++) {
 			for (let z = 0; z < 32; z++) {
@@ -264,7 +290,7 @@ class Map {
 					let block = this.cubes[x][z][y];
 
 					if (block && block.textureNum === 6) {
-						block.textureNum = 6; 
+						block.textureNum = 6;
 					}
 				}
 			}
@@ -281,11 +307,11 @@ class Map {
 		for (let h = 0; h < trunkHeight; h++) {
 			let trunk = new Cube();
 			trunk.matrix.translate(x, baseY + h, z);
-			trunk.textureNum = 6; // 🌲 Use TEXTURE7 for seasonal bark
+			trunk.textureNum = 6; // ✅ TEXTURE6 for Trunk (Seasonal)
 			this.cubes[x][z][baseY + h] = trunk;
 		}
 
-		// --- 🌿 Create Leaves (Unchanged) ---
+		// --- 🍂 Create Leaves ---
 		let radius = 3;
 		for (let dx = -radius; dx <= radius; dx++) {
 			for (let dz = -radius; dz <= radius; dz++) {
@@ -306,7 +332,7 @@ class Map {
 						) {
 							let leaf = new Cube();
 							leaf.matrix.translate(leafX, leafY, leafZ);
-							leaf.textureNum = 7; // Keep leaf texture unchanged
+							leaf.textureNum = 7; // ✅ TEXTURE7 for Leaves
 							this.cubes[leafX][leafZ][leafY] = leaf;
 						}
 					}

@@ -264,6 +264,7 @@ function updateTrunkTexture(imageSrc) {
 // }
 //end of trunk texture
 
+//leaf texture
 function initTextures8() {
 	var image8 = new Image();
 	if (!image8) {
@@ -271,12 +272,36 @@ function initTextures8() {
 		return false;
 	}
 	image8.onload = function () {
-		sendTextureToGLSL8(image8);
+		leafTexture = gl.createTexture();
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+		gl.activeTexture(gl.TEXTURE7);
+		gl.bindTexture(gl.TEXTURE_2D, leafTexture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image8);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.uniform1i(u_Sampler7, 7);
 	};
 
-	image8.src = "../textures/cherry.png";
+	image8.src = "../textures/leaf_spring.png"; // ✅ Start with Spring Leaves
+}
 
-	return true;
+function updateLeafTexture(imageSrc) {
+	var image = new Image();
+	image.onload = function () {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+		gl.activeTexture(gl.TEXTURE7); // Leaves use TEXTURE7
+		gl.bindTexture(gl.TEXTURE_2D, leafTexture);
+
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+		gl.uniform1i(u_Sampler7, 7);
+		console.log("✅ Updated leaf texture:", imageSrc);
+
+		g_map.updateLeafTextures(); // Apply the new texture to all trees
+	};
+
+	image.src = imageSrc;
 }
 
 function sendTextureToGLSL8(image8) {
@@ -294,3 +319,5 @@ function sendTextureToGLSL8(image8) {
 	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image8);
 	gl.uniform1i(u_Sampler7, 7);
 }
+
+//end of leaf texture
