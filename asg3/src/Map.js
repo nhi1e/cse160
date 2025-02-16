@@ -157,38 +157,6 @@ class Map {
 		this.startSeasonCycle();
 	}
 
-	// createMap() {
-	// 	for (let i = 0; i < 32; i++) {
-	// 		let x = this.heightMap[i];
-	// 		let x_array = [];
-
-	// 		for (let j = 0; j < 32; j++) {
-	// 			let y = x[j];
-	// 			let y_array = [];
-
-	// 			for (let k = 0; k < 32; k++) {
-	// 				let ground = null;
-
-	// 				if (k < y) {
-	// 					// Solid ground cube
-	// 					ground = new Cube();
-	// 					ground.matrix.translate(i, k, j);
-	// 					ground.textureNum = 1; // Ground texture
-	// 				} else if (y === 1 && k === y) {
-	// 					// Place water cube at level 1
-	// 					ground = new Cube();
-	// 					ground.matrix.translate(i, k, j);
-	// 					ground.textureNum = 5; // Water texture
-	// 				}
-
-	// 				y_array.push(ground);
-	// 			}
-
-	// 			x_array.push(y_array);
-	// 		}
-
-	// 		this.cubes.push(x_array);
-	// 	}
 	createMap() {
 		for (let x = 0; x < 32; x++) {
 			let x_array = [];

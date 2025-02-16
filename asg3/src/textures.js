@@ -100,6 +100,7 @@ function initTextures3() {
 	};
 
 	image3.src = "../textures/sky.png";
+	console.log("sky texture");
 
 	return true;
 }
