@@ -1,6 +1,6 @@
 class Map {
 	constructor() {
-		this.hightMap = [
+		this.heightMap = [
 			[
 				4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 4, 4,
 				4, 4, 5, 5, 5, 5, 5, 5,
@@ -137,7 +137,7 @@ class Map {
 
 	createMap() {
 		for (let i = 0; i < 32; i++) {
-			let x = this.hightMap[i];
+			let x = this.heightMap[i];
 			let x_array = [];
 
 			for (let j = 0; j < 32; j++) {
@@ -145,21 +145,21 @@ class Map {
 				let y_array = [];
 
 				for (let k = 0; k < 32; k++) {
-					let obj = null;
+					let ground = null;
 
 					if (k < y) {
 						// Solid ground cube
-						obj = new Cube();
-						obj.matrix.translate(i, k, j);
-						obj.textureNum = 1; // Ground texture
+						ground = new Cube();
+						ground.matrix.translate(i, k, j);
+						ground.textureNum = 1; // Ground texture
 					} else if (y === 1 && k === y) {
 						// Place water cube at level 1
-						obj = new Cube();
-						obj.matrix.translate(i, k, j);
-						obj.textureNum = 5; // Water texture
+						ground = new Cube();
+						ground.matrix.translate(i, k, j);
+						ground.textureNum = 5; // Water texture
 					}
 
-					y_array.push(obj);
+					y_array.push(ground);
 				}
 
 				x_array.push(y_array);
@@ -171,7 +171,7 @@ class Map {
 	}
 
 	placeTree(x, z) {
-		let baseY = this.hightMap[x][z]; // Get height from the height map
+		let baseY = this.heightMap[x][z]; // Get height from the height map
 		let trunkHeight = 3;
 		let leafStart = baseY + trunkHeight;
 

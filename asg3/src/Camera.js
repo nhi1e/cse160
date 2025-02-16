@@ -1,189 +1,195 @@
 class Camera {
 	constructor() {
-		this.eye = new Vector3([16, 4, 10]);
-		this.at = new Vector3([16, 4, 11]);
-		this.up = new Vector3([0, 1, 0]);
+		// Camera position and orientation
+		this.position = new Vector3([16, 4, 10]);
+		this.target = new Vector3([16, 4, 11]);
+		this.upVector = new Vector3([0, 1, 0]);
 
-		this.angle_x = 0;
-		this.angle_y = 0;
+		// Rotation angles
+		this.rotationX = 0;
+		this.rotationY = 0;
 
-		this.speed = 7.0;
+		// Movement settings
+		this.movementSpeed = 7.0;
+		this.selectionDistance = 15;
 
-		this.select_dist = 15;
-
-		this.placeCube = null;
-		this.RemoveCube = null;
-
-		// this.selectObj = new Custom("./select/select.obj", "./select/select.mtl");
+		// Cube placement/removal tracking
+		this.placementPosition = null;
+		this.removalPosition = null;
 	}
 
 	rotateX(angle) {
-		let delta_ang = angle - this.angle_x;
-		this.angle_x = angle;
-		this.at.sub(this.eye);
-		var matrix = new Matrix4().setRotate(delta_ang, 1, 0, 0);
-		this.at = matrix.multiplyVector3(this.at);
-		this.at.add(this.eye);
+		let deltaAngle = angle - this.rotationX;
+		this.rotationX = angle;
+
+		this.target.sub(this.position);
+		let rotationMatrix = new Matrix4().setRotate(deltaAngle, 1, 0, 0);
+		this.target = rotationMatrix.multiplyVector3(this.target);
+		this.target.add(this.position);
 	}
 
 	rotateY(angle) {
-		let delta_ang = angle - this.angle_y;
-		this.angle_y = angle;
-		this.at.sub(this.eye);
-		var matrix = new Matrix4().setRotate(delta_ang, 0, 1, 0);
-		this.at = matrix.multiplyVector3(this.at);
-		this.at.add(this.eye);
+		let deltaAngle = angle - this.rotationY;
+		this.rotationY = angle;
+
+		this.target.sub(this.position);
+		let rotationMatrix = new Matrix4().setRotate(deltaAngle, 0, 1, 0);
+		this.target = rotationMatrix.multiplyVector3(this.target);
+		this.target.add(this.position);
 	}
 
-	rotate(xAng, yAng) {
-		let delta_ang_y = yAng - this.angle_y;
-		this.angle_y = yAng;
-		let delta_ang_x = xAng - this.angle_x;
-		this.angle_x = xAng;
-		this.at.sub(this.eye);
+	rotate(xAngle, yAngle) {
+		let deltaAngleY = yAngle - this.rotationY;
+		this.rotationY = yAngle;
 
-		var x_vector = Vector3.cross(this.at, this.up).normalize();
+		let deltaAngleX = xAngle - this.rotationX;
+		this.rotationX = xAngle;
 
-		var matrix = new Matrix4().rotate(delta_ang_y, 0, 1, 0);
-		this.at = matrix.multiplyVector3(this.at);
+		this.target.sub(this.position);
 
-		matrix = new Matrix4().rotate(
-			delta_ang_x,
-			x_vector.elements[0],
-			x_vector.elements[1],
-			x_vector.elements[2]
+		// Compute the horizontal axis for rotation
+		let horizontalAxis = Vector3.cross(this.target, this.upVector).normalize();
+
+		// Apply Y-axis rotation
+		let rotationMatrix = new Matrix4().rotate(deltaAngleY, 0, 1, 0);
+		this.target = rotationMatrix.multiplyVector3(this.target);
+
+		// Apply X-axis rotation around the computed horizontal axis
+		rotationMatrix = new Matrix4().rotate(
+			deltaAngleX,
+			horizontalAxis.elements[0],
+			horizontalAxis.elements[1],
+			horizontalAxis.elements[2]
 		);
-		this.at = matrix.multiplyVector3(this.at);
-
-		this.at.add(this.eye);
+		this.target = rotationMatrix.multiplyVector3(this.target);
+		this.target.add(this.position);
 	}
 
-	handle_movement(forward, back, right, left, up, down, delta_time) {
-		if (!forward && !back && !right && !left && !up && !down) {
+	handleMovement(forward, backward, right, left, upward, downward, deltaTime) {
+		if (!(forward || backward || right || left || upward || downward)) {
 			return;
 		}
 
-		var wanted_vector = new Vector3();
-		var forward_vect = new Vector3().set(this.at).sub(this.eye);
-		var LR_vector = Vector3.cross(forward_vect, this.up).normalize();
+		let movementVector = new Vector3();
+		let forwardVector = new Vector3().set(this.target).sub(this.position);
+		let strafeVector = Vector3.cross(forwardVector, this.upVector).normalize();
 
-		if (forward) wanted_vector.add(forward_vect);
-		if (back) wanted_vector.sub(forward_vect);
-		if (right) wanted_vector.add(LR_vector);
-		if (left) wanted_vector.sub(LR_vector);
-		if (up) wanted_vector.add(this.up);
-		if (down) wanted_vector.sub(this.up);
+		if (forward) movementVector.add(forwardVector);
+		if (backward) movementVector.sub(forwardVector);
+		if (right) movementVector.add(strafeVector);
+		if (left) movementVector.sub(strafeVector);
+		if (upward) movementVector.add(this.upVector);
+		if (downward) movementVector.sub(this.upVector);
 
-		if (wanted_vector.magnitude() == 0) return;
+		if (movementVector.magnitude() === 0) return;
 
-		wanted_vector.normalize().mul(delta_time * this.speed);
-		this.eye.add(wanted_vector);
-		this.at.add(wanted_vector);
+		// Normalize movement and apply speed
+		movementVector.normalize().mul(deltaTime * this.movementSpeed);
+		this.position.add(movementVector);
+		this.target.add(movementVector);
 	}
 
 	castRay() {
-		if (
-			this.eye.elements[0] < 0 ||
-			this.eye.elements[0] > 32 ||
-			this.eye.elements[1] < 0 ||
-			this.eye.elements[1] > 32 ||
-			this.eye.elements[2] < 0 ||
-			this.eye.elements[2] > 32
-		) {
-			this.placeCube = null;
-			this.RemoveCube = null;
+		if (this.position.elements.some((coord) => coord < 0 || coord > 32)) {
+			this.placementPosition = null;
+			this.removalPosition = null;
 			return;
 		}
 
-		let direction_vect = new Vector3().set(this.at).sub(this.eye).normalize();
-		let mapX = Math.floor(this.eye.elements[0]);
-		let mapY = Math.floor(this.eye.elements[1]);
-		let mapZ = Math.floor(this.eye.elements[2]);
+		let direction = new Vector3()
+			.set(this.target)
+			.sub(this.position)
+			.normalize();
 
-		let deltDistX =
-			direction_vect.elements[0] === 0
-				? Infinity
-				: Math.abs(1 / direction_vect.elements[0]);
-		let deltDistY =
-			direction_vect.elements[1] === 0
-				? Infinity
-				: Math.abs(1 / direction_vect.elements[1]);
-		let deltDistZ =
-			direction_vect.elements[2] === 0
-				? Infinity
-				: Math.abs(1 / direction_vect.elements[2]);
+		let mapX = Math.floor(this.position.elements[0]);
+		let mapY = Math.floor(this.position.elements[1]);
+		let mapZ = Math.floor(this.position.elements[2]);
 
-		let stepX = direction_vect.elements[0] < 0 ? -1 : 1;
+		let deltaDistX =
+			direction.elements[0] === 0
+				? Infinity
+				: Math.abs(1 / direction.elements[0]);
+		let deltaDistY =
+			direction.elements[1] === 0
+				? Infinity
+				: Math.abs(1 / direction.elements[1]);
+		let deltaDistZ =
+			direction.elements[2] === 0
+				? Infinity
+				: Math.abs(1 / direction.elements[2]);
+
+		let stepX = direction.elements[0] < 0 ? -1 : 1;
 		let sideDistX =
-			direction_vect.elements[0] < 0
-				? (this.eye.elements[0] - mapX) * deltDistX
-				: (mapX + 1 - this.eye.elements[0]) * deltDistX;
-		let stepY = direction_vect.elements[1] < 0 ? -1 : 1;
+			direction.elements[0] < 0
+				? (this.position.elements[0] - mapX) * deltaDistX
+				: (mapX + 1 - this.position.elements[0]) * deltaDistX;
+
+		let stepY = direction.elements[1] < 0 ? -1 : 1;
 		let sideDistY =
-			direction_vect.elements[1] < 0
-				? (this.eye.elements[1] - mapY) * deltDistY
-				: (mapY + 1 - this.eye.elements[1]) * deltDistY;
-		let stepZ = direction_vect.elements[2] < 0 ? -1 : 1;
+			direction.elements[1] < 0
+				? (this.position.elements[1] - mapY) * deltaDistY
+				: (mapY + 1 - this.position.elements[1]) * deltaDistY;
+
+		let stepZ = direction.elements[2] < 0 ? -1 : 1;
 		let sideDistZ =
-			direction_vect.elements[2] < 0
-				? (this.eye.elements[2] - mapZ) * deltDistZ
-				: (mapZ + 1 - this.eye.elements[2]) * deltDistZ;
+			direction.elements[2] < 0
+				? (this.position.elements[2] - mapZ) * deltaDistZ
+				: (mapZ + 1 - this.position.elements[2]) * deltaDistZ;
 
-		let hit = 0;
-		let side = 0;
+		let hit = false;
+		let hitSide = 0;
 
-		while (hit == 0) {
+		while (!hit) {
 			if (sideDistX < sideDistY && sideDistX < sideDistZ) {
-				sideDistX += deltDistX;
+				sideDistX += deltaDistX;
 				mapX += stepX;
-				side = 0;
+				hitSide = 0;
 			} else if (sideDistY < sideDistZ) {
-				sideDistY += deltDistY;
+				sideDistY += deltaDistY;
 				mapY += stepY;
-				side = 1;
+				hitSide = 1;
 			} else {
-				sideDistZ += deltDistZ;
+				sideDistZ += deltaDistZ;
 				mapZ += stepZ;
-				side = 2;
+				hitSide = 2;
 			}
 
+			// Check if out of bounds
 			if (
 				mapX < 0 ||
 				mapX > 31 ||
-				mapZ < 0 ||
-				mapZ > 31 ||
 				mapY < 0 ||
-				mapY > 31
+				mapY > 31 ||
+				mapZ < 0 ||
+				mapZ > 31
 			) {
-				this.placeCube = null;
-				this.RemoveCube = null;
+				this.placementPosition = null;
+				this.removalPosition = null;
 				return;
 			}
 
+			// If a block is hit
 			if (g_map.cubes[mapX][mapZ][mapY] !== null) {
-				hit = 1;
+				hit = true;
 			}
 		}
 
-		switch (side) {
+		// Determine placement position based on hit side
+		switch (hitSide) {
 			case 0:
-				this.placeCube = [mapX - stepX, mapY, mapZ];
+				this.placementPosition = [mapX - stepX, mapY, mapZ];
 				break;
 			case 1:
-				this.placeCube = [mapX, mapY - stepY, mapZ];
+				this.placementPosition = [mapX, mapY - stepY, mapZ];
 				break;
 			case 2:
-				this.placeCube = [mapX, mapY, mapZ - stepZ];
+				this.placementPosition = [mapX, mapY, mapZ - stepZ];
 				break;
 			default:
-				this.placeCube = null;
+				this.placementPosition = null;
 				break;
 		}
 
-		this.RemoveCube = [mapX, mapY, mapZ];
-
-		// if (this.selectObj.finished_making_objs) {
-		// 	this.selectObj.render();
-		// }
+		this.removalPosition = [mapX, mapY, mapZ];
 	}
 }
