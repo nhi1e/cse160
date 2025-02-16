@@ -52,8 +52,6 @@ var FSHADER_SOURCE =
 	"  }\n" +
 	"}\n";
 
-//GLOBAL VARIALBLES -----------------------
-
 let canvas;
 let gl;
 
@@ -61,13 +59,11 @@ let g_fov = 90;
 let g_camera = new Camera();
 
 let a_Position;
-//let u_Size;
 let u_FragColor;
-let u_ModelMatrix;
 let u_GlobalRotateMatrix;
-
 let u_ViewMatrix;
 let u_ProjectionMatrix;
+let u_ModelMatrix;
 
 let u_whichTexture;
 let u_Sampler0;
@@ -84,25 +80,14 @@ let a_UV;
 let global_angle_x = 0;
 let global_angle_y = 0;
 
-let g_yellow_ang = 0;
-let g_magenta_ang = 0;
-
-var g_selected_color = [1, 0, 0, 1];
-var g_selected_back_color = [0, 0, 0, 1];
-
 let g_animating = true;
-
-let g_walking = true;
-
 let g_map = new Map();
-
+let g_walking = true;
 let g_block = 0;
 
 function setupWebGL() {
 	// Retrieve <canvas> element
 	canvas = document.getElementById("webgl");
-
-	// Get the rendering context for WebGL
 	gl = canvas.getContext("webgl", { preserveDrawingBuffer: true });
 	if (!gl) {
 		console.log("Failed to get the rendering context for WebGL");
@@ -197,10 +182,6 @@ function connectVariablesToGLSL() {
 
 	//get the storage of the size
 	u_Size = gl.getUniformLocation(gl.program, "u_Size");
-	if (!u_FragColor) {
-		console.log("Failed to get the storage location of u_FragColor");
-		return;
-	}
 
 	u_ModelMatrix = gl.getUniformLocation(gl.program, "u_ModelMatrix");
 	if (!u_ModelMatrix) {
@@ -237,7 +218,6 @@ function connectVariablesToGLSL() {
 }
 
 function addActions() {
-	//fov slider
 	document.getElementById("fov").addEventListener("mousemove", function () {
 		g_fov = this.value;
 	});
@@ -250,15 +230,11 @@ function changeBack() {
 		g_selected_back_color[2],
 		1.0
 	);
-	//renderAllShapes();
 }
 
 function main() {
 	setupWebGL();
-
 	connectVariablesToGLSL();
-
-	//make the buttons do the thing they need to do
 	addActions();
 
 	document.onkeydown = function (ev) {
@@ -268,7 +244,6 @@ function main() {
 		keydown(ev, false);
 	};
 
-	// Register function (event handler) to be called on a mouse press
 	canvas.onclick = function (ev) {
 		if (ev.shiftKey) {
 			g_walking = !g_walking;
@@ -284,7 +259,7 @@ function main() {
 	};
 
 	initTextures();
-	initTextures2(); //im so sorry about this janky code
+	initTextures2();
 	initTextures3();
 	initTextures4();
 	initTextures5();
@@ -298,53 +273,27 @@ function main() {
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	//renderAllShapes();
-
 	requestAnimationFrame(tick);
 }
-
-//var g_points = [];  // The array for the position of a mouse press
-//var g_colors = [];  // The array to store the color of a point
-//var g_sizes = [];
 
 var pre_mouse_pos;
 
 function click(ev) {
-	//get the cordinates of ev and convert to webgl space and then place into x,y
-	let [x, y] = convertToGLSpace(ev);
-
-	let x_sens = 10;
-	let y_sense = 10;
-
 	let curent_mouse_pos = [ev.clientX, ev.clientY];
-
 	if (pre_mouse_pos != null) {
-		//console.log("current = "+ curent_mouse_pos)
-		//console.log("pre = "+ pre_mouse_pos)
-		//console.log("movement = "+ (curent_mouse_pos[0] - pre_mouse_pos[0]))
-
 		let movement_x = curent_mouse_pos[0] - pre_mouse_pos[0];
 		let movement_y = (curent_mouse_pos[1] - pre_mouse_pos[1]) / 2;
-
 		global_angle_y -= movement_y;
-
 		global_angle_x -= movement_x;
-
-		//console.log("movement = "+movement_x)
-		//console.log("global_angle_x = "+global_angle_x)
 	}
-
 	if (ev.buttons == 1) {
 		pre_mouse_pos = curent_mouse_pos;
 	} else {
 		pre_mouse_pos = null;
 	}
-
-	//renderAllShapes();
 }
 
 function undo() {
-	//console.log(gl_undolist)
 	let x = gl_undolist.pop();
 	if (x == 1) {
 		gl_shapelist.pop();
@@ -352,18 +301,6 @@ function undo() {
 		gl_shapelist = gl_shapelist.slice(0, gl_shapelist.length - (x + 1));
 	}
 	renderAllShapes();
-}
-
-function convertToGLSpace(ev) {
-	var x = ev.clientX; // x coordinate of a mouse pointer
-	var y = ev.clientY; // y coordinate of a mouse pointer
-	var rect = ev.target.getBoundingClientRect();
-
-	x = (x - rect.left - canvas.width / 2) / (canvas.width / 2);
-	y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
-
-	//return both variables
-	return [x, y];
 }
 
 var g_startTime = performance.now() / 1000.0;
@@ -374,13 +311,7 @@ var delta_update = performance.now() / 1000.0;
 var delta_time = 0;
 
 function tick() {
-	//console.log("performance.now = " + performance.now())
-
 	renderAllShapes();
-	//console.log("delta = " + delta);
-
-	//console.log(delta_time)
-
 	delta_time = performance.now() / 1000.0 - delta_update;
 	delta_update = performance.now() / 1000.0;
 
@@ -388,15 +319,7 @@ function tick() {
 		g_seconds = performance.now() / 1000.0 - g_startTime - g_pauseTime;
 	} else {
 		g_pauseTime = performance.now() / 1000.0 - g_startTime - g_seconds;
-		//delta_time = 0;//specific for grass
 	}
-
-	if (!g_walking || !g_animating) {
-		//delta_time = 0;//specific for grass
-	}
-
-	//console.log(delta_time);
-
 	requestAnimationFrame(tick);
 }
 
@@ -413,37 +336,29 @@ let g_e = false;
 let g_q = false;
 
 function keydown(ev, down) {
-	//gets the key down and if its up or not
-	//console.log("ev = " + ev);
 	switch (ev.keyCode) {
 		case 87: //w key
-			//console.log("w = " + down)
 			g_w = down;
 			break;
 
 		case 65: //a key
-			//console.log("a = " + down)
 			g_a = down;
 			break;
 
 		case 83: //s key
-			//console.log("s = " + down)
 			g_s = down;
 			break;
 
 		case 68: //d key
-			//console.log("d = " + down)
 			g_d = down;
 			break;
 
 		case 86: //v key
-			//console.log("v = " + down)
 			g_v = down;
 			break;
 
 		case 69: //e key
 			if (down && !g_e && g_camera.placeCube !== null) {
-				//place cube... yeah
 				g_map.cubes[g_camera.placeCube[0]][g_camera.placeCube[2]][
 					g_camera.placeCube[1]
 				] = new Cube();
@@ -463,7 +378,6 @@ function keydown(ev, down) {
 
 		case 81: //q key
 			if (down && !g_q && g_camera.RemoveCube !== null) {
-				//place cube... yeah
 				g_map.cubes[g_camera.RemoveCube[0]][g_camera.RemoveCube[2]][
 					g_camera.RemoveCube[1]
 				] = null;
@@ -472,26 +386,23 @@ function keydown(ev, down) {
 			break;
 		case 49: //1 key
 			g_block = 1;
-			TextToHTML("Grass", "block"); //grass
+			TextToHTML("Grass", "block");
 			break;
 		case 50: //2 key
 			g_block = 0;
-			TextToHTML("Wood", "block"); //lava
+			TextToHTML("Lava", "block");
 			break;
-
 		case 51: //3 key
 			g_block = 3;
-			TextToHTML("Cobblestone", "block"); //bamboo
+			TextToHTML("Bamboo", "block");
 			break;
 		case 52: //4 key
 			g_block = 4;
-			TextToHTML("Sand", "block"); //stone
+			TextToHTML("Stone", "block");
 			break;
 		case 32: //spacebar
-			//console.log("spacebar =" + down)
 			g_space = down;
-			ev.preventDefault(); //prevents spacebar from scrolling on the page
-			// found on stack overflow https://stackoverflow.com/questions/22559830/html-prevent-space-bar-from-scrolling-page
+			ev.preventDefault();
 			break;
 		default:
 			console.log("unknown Keydown  = " + ev.keyCode);
@@ -505,8 +416,8 @@ function drawIndicator() {
 	if (!g_camera.RemoveCube) return; // Ensure there's a selected cube
 
 	let indicator = new Cube();
-	indicator.color = [1.0, 1.0, 1.0, 0.4]; // Yellow, semi-transparent
-	indicator.textureNum = -2; // No texture (uses solid color shader)
+	indicator.color = [1.0, 1.0, 1.0, 0.4];
+	indicator.textureNum = -2;
 
 	indicator.matrix.translate(
 		g_camera.RemoveCube[0],
@@ -533,13 +444,9 @@ function renderAllShapes() {
 
 	var projMat = new Matrix4();
 	projMat.setPerspective(g_fov, canvas.width / canvas.height, 0.1, 100);
-	//projMat.rotate((- global_angle_y)*3, 1, 0, 0);
-	//projMat.rotate(-global_angle_x, 0, 1, 0);
 	gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
 
 	var viewMat = new Matrix4();
-
-	//handle camera movement
 
 	g_camera.rotate(global_angle_y, global_angle_x);
 	// movement code here using delta time please
@@ -558,21 +465,13 @@ function renderAllShapes() {
 		g_camera.up.elements[2]
 	); // eye / at / up
 
-	//viewMat.rotate(-10 + global_angle_y, 1, 0, 0);
-	//viewMat.rotate(-global_angle_x, 0, 1, 0);
 	gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
 
 	var globalRotMax = new Matrix4();
-	//globalRotMax.rotate(-10 + global_angle_y, 1, 0, 0);
-	//globalRotMax.rotate(-global_angle_x, 0, 1, 0);
 
 	gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMax.elements);
 
 	g_map.render();
-
-	// if (g_camera.RemoveCube) {
-	// 	drawIndicator(gl, globalShaderProgram, camera.RemoveCube);
-	// }
 
 	g_skybox.matrix.setTranslate(
 		g_camera.eye.elements[0],
@@ -588,12 +487,6 @@ function renderAllShapes() {
 	drawIndicator();
 
 	g_camera.castRay();
-
-	//floor stuff
-
-	//floorObs.render(delta_time);
-
-	//console.log(body)
 
 	var identity = new Matrix4();
 	gl.uniformMatrix4fv(u_ModelMatrix, false, identity.elements);
