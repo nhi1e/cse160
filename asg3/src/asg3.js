@@ -83,7 +83,7 @@ let global_angle_y = 0;
 let g_animating = true;
 let g_map = new Map();
 let g_walking = true;
-let g_block = 0;
+let g_block = 1;
 
 function setupWebGL() {
 	// Retrieve <canvas> element
