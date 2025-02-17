@@ -205,10 +205,10 @@ class Map {
 			let newLeafTexture = this.seasonLeafTextures[this.seasonIndex];
 			let newSkyTexture = this.seasonSkyTextures[this.seasonIndex];
 
-			updateSeasonTexture(newGrassTexture); // ✅ Update Grass Texture (TEXTURE1)
-			updateTrunkTexture(newTrunkTexture); // ✅ Update Trunk Texture (TEXTURE6)
-			updateLeafTexture(newLeafTexture); // ✅ Update Leaf Texture (TEXTURE7)
-			updateSkyTexture(newSkyTexture); // ✅ Update Sky Texture (TEXTURE2)
+			updateSeasonTexture(newGrassTexture); //   Update Grass Texture (TEXTURE1)
+			updateTrunkTexture(newTrunkTexture); //   Update Trunk Texture (TEXTURE6)
+			updateLeafTexture(newLeafTexture); //   Update Leaf Texture (TEXTURE7)
+			updateSkyTexture(newSkyTexture); //   Update Sky Texture (TEXTURE2)
 
 			this.updateSeasonTextures(); // Apply texture update to terrain
 			this.updateTrunkTextures(); // Apply texture update to trunks
@@ -251,13 +251,11 @@ class Map {
 					let block = this.cubes[x][z][y];
 
 					if (block && block.textureNum === 7) {
-						// ✅ Only update leaves
-						block.textureNum = 7; // ✅ Keep using TEXTURE7
+						block.textureNum = 7; // Keep using TEXTURE7
 					}
 				}
 			}
 		}
-		console.log("🍂 Updated all leaves to new season texture.");
 	}
 
 	updateTrunkTextures() {
@@ -288,7 +286,7 @@ class Map {
 		for (let h = 0; h < trunkHeight; h++) {
 			let trunk = new Cube();
 			trunk.matrix.translate(x, baseY + h, z);
-			trunk.textureNum = 6; // ✅ TEXTURE6 for Trunk (Seasonal)
+			trunk.textureNum = 6; //  TEXTURE6 for Trunk (Seasonal)
 			this.cubes[x][z][baseY + h] = trunk;
 		}
 
@@ -313,7 +311,7 @@ class Map {
 						) {
 							let leaf = new Cube();
 							leaf.matrix.translate(leafX, leafY, leafZ);
-							leaf.textureNum = 7; // ✅ TEXTURE7 for Leaves
+							leaf.textureNum = 7; 
 							this.cubes[leafX][leafZ][leafY] = leaf;
 						}
 					}

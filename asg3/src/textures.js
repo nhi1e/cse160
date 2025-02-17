@@ -103,7 +103,7 @@ function initTextures3() {
 		gl.uniform1i(u_Sampler2, 2);
 	};
 
-	image3.src = "../textures/sky_spring.png"; // ✅ Start with Spring Sky
+	image3.src = "../textures/sky_spring.png"; //    Start with Spring Sky
 }
 
 function updateSkyTexture(imageSrc) {
@@ -118,7 +118,7 @@ function updateSkyTexture(imageSrc) {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
 		gl.uniform1i(u_Sampler2, 2);
-		console.log("✅ Updated sky texture:", imageSrc);
+		console.log("   Updated sky texture:", imageSrc);
 
 		g_map.updateSkyTextures(); // Apply the new texture to the sky
 	};
@@ -261,7 +261,7 @@ function updateTrunkTexture(imageSrc) {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
 		gl.uniform1i(u_Sampler6, 6);
-		console.log("✅ Updated tree trunk texture:", imageSrc);
+		console.log("   Updated tree trunk texture:", imageSrc);
 
 		g_map.updateTrunkTextures(); // Apply the new texture to all trees
 	};
@@ -303,7 +303,7 @@ function initTextures8() {
 		gl.uniform1i(u_Sampler7, 7);
 	};
 
-	image8.src = "../textures/leaf_spring.png"; // ✅ Start with Spring Leaves
+	image8.src = "../textures/leaf_spring.png"; //    Start with Spring Leaves
 }
 
 function updateLeafTexture(imageSrc) {
@@ -318,7 +318,7 @@ function updateLeafTexture(imageSrc) {
 		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
 		gl.uniform1i(u_Sampler7, 7);
-		console.log("✅ Updated leaf texture:", imageSrc);
+		console.log("   Updated leaf texture:", imageSrc);
 
 		g_map.updateLeafTextures(); // Apply the new texture to all trees
 	};
