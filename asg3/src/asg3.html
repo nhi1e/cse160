@@ -164,6 +164,50 @@
 		<script src="asg3.js"></script>
 
 		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				// Function to update block selection
+				function setBlock(blockType) {
+					g_block = blockType;
+					const blockNames = { 1: "Grass", 0: "Lava", 3: "Bamboo", 4: "Stone" };
+
+					// Update the displayed block type
+					const blockText = document.getElementById("block");
+					if (blockText) {
+						blockText.textContent = blockNames[blockType];
+					}
+
+					// Remove active class from all buttons
+					document
+						.querySelectorAll("#block-selector button")
+						.forEach((btn) => btn.classList.remove("active"));
+
+					// Add active class to the selected button
+					const selectedButton = document.getElementById(
+						`btn-${blockNames[blockType].toLowerCase()}`
+					);
+					if (selectedButton) {
+						selectedButton.classList.add("active");
+					}
+				}
+
+				// Attach event listeners to each button
+				document
+					.getElementById("btn-grass")
+					.addEventListener("click", () => setBlock(1));
+				document
+					.getElementById("btn-lava")
+					.addEventListener("click", () => setBlock(0));
+				document
+					.getElementById("btn-bamboo")
+					.addEventListener("click", () => setBlock(3));
+				document
+					.getElementById("btn-stone")
+					.addEventListener("click", () => setBlock(4));
+
+				// Set initial selection to Grass
+				setBlock(1);
+			});
+
 			// Function to update block selection
 			function setBlock(blockType) {
 				g_block = blockType;

@@ -1,196 +1,153 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<title>Asg2 - Nhi</title>
-		<link
-			href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap"
-			rel="stylesheet"
-		/>
-		<style>
-			body {
-				background-color: #652e37;
-				text-align: center;
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				justify-content: center;
-				min-height: 100vh;
-				margin: 0;
-				font-family: "Courier Prime", monospace;
-				color: white;
-			}
+<head>
+	<meta charset="utf-8">
+	<title>Interactive WebGL Terrain - Nhi Le</title>
 
-			#goodbye-text {
-				font-size: 24px;
-				margin-bottom: 10px;
-				text-align: left; /* Ensures text alignment */
-				align-self: flex-start; /* Aligns it to the left within the flex container */
-			}
+	<!-- Google Font: Courier Prime -->
+	<link href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap" rel="stylesheet">
 
-			#main-container {
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				width: 100%;
-			}
+	<style>
+		body {
+			background-color: #222;
+			color: white;
+			font-family: 'Courier Prime', monospace;
+			text-align: center;
+			margin: 0;
+		}
+		
+		#container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+			height: 100vh;
+			padding-top: 30px; /* Added padding above the canvas */
+		}
 
-			#canvas-container {
-				display: flex;
-				justify-content: center;
-				align-items: center;
-			}
+		canvas {
+			border: 2px solid white;
+		}
 
-			canvas {
-				display: block;
-				border: 3px solid white;
-			}
+		#controls {
+			margin-top: 10px;
+			padding: 15px;
+			width: 90%;
+			max-width: 600px;
+			text-align: left;
+		}
 
-			#controls {
-				display: flex;
-				flex-direction: column;
-				align-items: flex-start;
-				margin-left: 20px;
-				width: 20%;
-			}
+		#block-selector button {
+			margin: 5px;
+			padding: 8px 10px;
+			border: 2px solid white;
+			border-radius: 2px; /* Made the buttons more square */
+			cursor: pointer;
+			font-size: 14px;
+			background: transparent;
+			color: white;
+			transition: 0.3s;
+		}
 
-			button {
-				background-color: #ffffff;
-				border: none;
-				padding: 10px;
-				margin: 5px;
-				font-size: 14px;
-				cursor: pointer;
-				font-family: "Courier Prime", monospace;
-			}
+		#block-selector button.active, #block-selector button:hover {
+			background-color: #ffcc00;
+			color: black;
+		}
 
-			button:hover {
-				background-color: #ddd;
-			}
+		#season-display {
+			position: absolute;
+			top: 10px;
+			left: 10px;
+			color: white;
+			font-size: 20px;
+		}
 
-			p {
-				margin: 5px 0;
-			}
+		.slider {
+			width: 300px;
+		}
 
-			input[type="range"] {
-				width: 150px;
-			}
+		h3 {
+			border-bottom: 1px solid white;
+			padding-bottom: 5px;
+			margin-bottom: 10px;
+		}
 
-			#special-animation-text {
-				margin-top: 10px;
-				font-size: 16px;
-				text-align: left; /* Ensures text alignment */
-				align-self: flex-start; /* Aligns it to the left within the flex container */
-			}
-			#transform-text {
-				margin-top: 10px;
-				font-size: 16px;
-				text-align: left; /* Ensures text alignment */
-				align-self: flex-start; /* Aligns it to the left within the flex container */
-			}
-			#instr-text {
-				margin-top: 10px;
-				font-size: 16px;
-				text-align: left; /* Ensures text alignment */
-				align-self: flex-start; /* Aligns it to the left within the flex container */
-			}
-		</style>
-	</head>
+		ul {
+			padding-left: 20px;
+		}
 
-	<body onload="main()">
-		<div id="main-container">
-			<!-- Canvas on the left -->
-			<div id="canvas-container">
-				<canvas id="webgl" width="800" height="800">
-					Please use a browser that supports "canvas"
-				</canvas>
+		li {
+			list-style: none;
+			padding: 5px 0;
+		}
+	</style>
+</head>
+
+<body onload="main()">
+	<div id="container">
+		<!-- WebGL Canvas -->
+		<canvas id="webgl" width="800" height="800">
+			Your browser does not support WebGL.
+		</canvas>
+
+		<!-- FPS Counter -->
+		<p id="fps">Loading...</p>
+
+		<!-- Season Display -->
+		<div id="season-display">Season: Spring</div>
+
+		<!-- Block Selection -->
+		<div id="controls">
+			<h3>🧱 Block Selection</h3>
+			<p>Current Block: <strong id="block">Lava</strong></p>
+			<div id="block-selector">
+				<button onclick="setBlock(1)" id="btn-grass">🌿 Grass</button>
+				<button onclick="setBlock(0)" id="btn-lava">🔥 Lava</button>
+				<button onclick="setBlock(3)" id="btn-bamboo">🎋 Bamboo</button>
+				<button onclick="setBlock(4)" id="btn-stone">🪨 Stone</button>
 			</div>
 
-			<!-- Controls on the right -->
-			<div id="controls">
-				<h1 id="goodbye-text">GOODBYE,YEAR OF THE DRAGON!</h1>
+			<!-- FOV Control -->
+			<h3>🎥 Camera FOV</h3>
+			<input type="range" min="20" max="120" class="slider" value="90" id="fov" />
 
-				<button id="DragonAnimationOnButton">Animation ON</button>
-				<button id="DragonAnimationOffButton">Animation OFF</button>
-				<p id="instr-text">Drag mouse to rotate</p>
-
-				<p id="special-animation-text">[Shift + Click] to Sneeze</p>
-				<p id="transform-text">[Shift + T] to transform into Snake</p>
-
-				<p>Camera X</p>
-				<input type="range" id="cameraXSlide" min="-90" max="90" value="0" />
-
-				<p>Camera Y</p>
-				<input type="range" id="cameraYSlide" min="0" max="360" value="0" />
-				<div
-					id="fpsCounter"
-					style="color: white; background: black; padding: 5px; font-size: 14px"
-				>
-					FPS: <span id="fpsValue">0</span>
-				</div>
-			</div>
+			<!-- Controls Info -->
+			<h3>🎮 Controls</h3>
+			<ul>
+				<li><strong>Move:</strong> W, A, S, D</li>
+				<li><strong>Up/Down:</strong> Space, V</li>
+				<li><strong>Break/Place Blocks:</strong> Q, E</li>
+				<li><strong>Look Around:</strong> Click + Drag</li>
+				<li><strong>Seasons change every 15 seconds 🌤️</strong></li>
+			</ul>
 		</div>
+	</div>
 
-		<script src="../lib/webgl-utils.js"></script>
-		<script src="../lib/webgl-debug.js"></script>
-		<script src="../lib/cuon-utils.js"></script>
-		<script src="../lib/cuon-matrix.js"></script>
+	<!-- Scripts -->
+	<script src="../lib/webgl-utils.js"></script>
+	<script src="../lib/webgl-debug.js"></script>
+	<script src="../lib/cuon-utils.js"></script>
+	<script src="../lib/cuon-matrix-cse160.js"></script>
+	<script src="Camera.js"></script>
+	<script src="Map.js"></script>
+	<script src="Cube.js"></script>
+	<script src="Textures.js"></script>
+	<script src="asg3.js"></script>
 
-		<script src="asg2.js"></script>
-		<script src="Triangle.js"></script>
-		<script src="Cube.js"></script>
-		<script src="TrianglePrism.js"></script>
-		<script src="Cone.js"></script>
-		<script src="TruncatedCone.js"></script>
-		<script>
-			let isSnakeHTML = false;
-			// Function to update title and instructions
-			function updateMode() {
-				const titleElement = document.getElementById("goodbye-text");
-				const transformElement = document.getElementById("transform-text");
-				const specialAnimationElement = document.getElementById(
-					"special-animation-text"
-				);
-				if (titleElement) {
-					if (isSnakeHTML) {
-						titleElement.textContent = "HELLO, YEAR OF THE SNAKE!";
-					} else {
-						titleElement.textContent = "GOODBYE, YEAR OF THE DRAGON!";
-					}
-				}
-				if (transformElement) {
-					if (isSnakeHTML) {
-						transformElement.textContent =
-							"[Shift + T] to transform into Dragon";
-					} else {
-						transformElement.textContent =
-							"[Shift + T] to transform into Snake";
-					}
-				}
-				if (specialAnimationElement) {
-					if (isSnakeHTML) {
-						specialAnimationElement.textContent =
-							"[Shift + Click] to Flick Tongue";
-					} else {
-						specialAnimationElement.textContent =
-							"[Shift + Click] to Breathe Fire";
-					}
-				}
-			}
+	<script>
+		// Function to update block selection
+		function setBlock(blockType) {
+			g_block = blockType;
+			const blockNames = {1: "Grass", 0: "Lava", 3: "Bamboo", 4: "Stone"};
+			document.getElementById("block").textContent = blockNames[blockType];
 
-			// Event listener for Shift + S to toggle between modes
-			document.addEventListener("keydown", (event) => {
-				if (event.shiftKey && event.key.toLowerCase() === "t") {
-					isSnakeHTML = !isSnakeHTML; // Toggle mode
-					updateMode(); // Update the UI
-				}
-			});
+			// Highlight active button
+			document.querySelectorAll("#block-selector button").forEach(btn => btn.classList.remove("active"));
+			document.getElementById(`btn-${blockNames[blockType].toLowerCase()}`).classList.add("active");
+		}
 
-			// Ensure the UI updates correctly when the page loads
-			window.onload = function () {
-				updateMode();
-				main(); // Call the existing main function
-			};
-		</script>
-	</body>
+		// Initialize the Grass block as default
+		document.getElementById("btn-grass").classList.add("active");
+	</script>
+</body>
 </html>
