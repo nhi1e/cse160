@@ -106,6 +106,26 @@ function initTextures3() {
 	image3.src = "../textures/sky_spring.png"; // ✅ Start with Spring Sky
 }
 
+function updateSkyTexture(imageSrc) {
+	var image = new Image();
+	image.onload = function () {
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+		gl.activeTexture(gl.TEXTURE2); // Sky uses TEXTURE2
+		gl.bindTexture(gl.TEXTURE_2D, skyTexture);
+
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+		gl.uniform1i(u_Sampler2, 2);
+		console.log("✅ Updated sky texture:", imageSrc);
+
+		g_map.updateSkyTextures(); // Apply the new texture to the sky
+	};
+
+	image.src = imageSrc;
+}
+
 function sendTextureToGLSL3(image3) {
 	var texture3 = gl.createTexture();
 	if (!texture3) {
