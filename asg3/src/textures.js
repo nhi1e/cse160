@@ -89,20 +89,21 @@ function sendTextureToGLSL2(image2) {
 	gl.uniform1i(u_Sampler1, 1);
 }
 
+let skyTexture; // Store sky texture handle
+
 function initTextures3() {
 	var image3 = new Image();
-	if (!image3) {
-		console.log("Failed to create the image object");
-		return false;
-	}
 	image3.onload = function () {
-		sendTextureToGLSL3(image3);
+		skyTexture = gl.createTexture();
+		gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
+		gl.activeTexture(gl.TEXTURE2);
+		gl.bindTexture(gl.TEXTURE_2D, skyTexture);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image3);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+		gl.uniform1i(u_Sampler2, 2);
 	};
 
-	image3.src = "../textures/sky.png";
-	console.log("sky texture");
-
-	return true;
+	image3.src = "../textures/sky_spring.png"; // ✅ Start with Spring Sky
 }
 
 function sendTextureToGLSL3(image3) {

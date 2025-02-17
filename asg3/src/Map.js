@@ -152,6 +152,12 @@ class Map {
 			"../textures/leaf_autumn.png",
 			"../textures/leaf_winter.png",
 		];
+		this.seasonSkyTextures = [
+			"../textures/sky_spring.png",
+			"../textures/sky_summer.png",
+			"../textures/sky_autumn.png",
+			"../textures/sky_winter.png",
+		];
 
 		this.createMap();
 		this.startSeasonCycle();
@@ -197,22 +203,25 @@ class Map {
 			let newGrassTexture = this.seasonTextures[this.seasonIndex];
 			let newTrunkTexture = this.seasonTrunkTextures[this.seasonIndex];
 			let newLeafTexture = this.seasonLeafTextures[this.seasonIndex];
+			let newSkyTexture = this.seasonSkyTextures[this.seasonIndex];
 
-			updateSeasonTexture(newGrassTexture); // Update Grass Texture (TEXTURE1)
-			updateTrunkTexture(newTrunkTexture); // Update Trunk Texture (TEXTURE7)
+			updateSeasonTexture(newGrassTexture); // ✅ Update Grass Texture (TEXTURE1)
+			updateTrunkTexture(newTrunkTexture); // ✅ Update Trunk Texture (TEXTURE6)
 			updateLeafTexture(newLeafTexture); // ✅ Update Leaf Texture (TEXTURE7)
+			updateSkyTexture(newSkyTexture); // ✅ Update Sky Texture (TEXTURE2)
 
 			this.updateSeasonTextures(); // Apply texture update to terrain
 			this.updateTrunkTextures(); // Apply texture update to trunks
 			this.updateLeafTextures(); // Apply texture update to leaves
+			this.updateSkyTextures(); // Apply texture update to sky
 
 			TextToHTML(
-				`🍃 Season: ${["Spring", "Summer", "Autumn", "Winter"][this.seasonIndex]}`,
+				`🌤️ Season: ${["Spring", "Summer", "Autumn", "Winter"][this.seasonIndex]}`,
 				"season-display"
 			);
 
 			console.log(
-				"🌲 Season changed:",
+				"🌤️ Season changed:",
 				["Spring", "Summer", "Autumn", "Winter"][this.seasonIndex]
 			);
 		}, 15000);
@@ -264,6 +273,10 @@ class Map {
 			}
 		}
 		console.log("🌲 Updated all tree trunks to new season texture.");
+	}
+	updateSkyTextures() {
+		g_skybox.textureNum = 2; // Keep using TEXTURE2 for skybox
+		console.log("🌤️ Updated sky to new season texture.");
 	}
 
 	placeTree(x, z) {
