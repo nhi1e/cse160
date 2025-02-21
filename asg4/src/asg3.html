@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>Asg3 - Nhi Le</title>
+
+		<!-- Google Font: Courier Prime -->
+		<link
+			href="https://fonts.googleapis.com/css2?family=Courier+Prime&display=swap"
+			rel="stylesheet"
+		/>
+
+		<style>
+			body {
+				background-color: #222;
+				color: white;
+				font-family: "Courier Prime", monospace;
+				margin: 0;
+				display: flex;
+				/* justify-content: center; */
+				align-items: center;
+				height: 100vh;
+				overflow: hidden;
+			}
+
+			#container {
+				display: flex;
+				position: relative;
+			}
+
+			#canvas-container {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				margin-left: 10px;
+				margin-top: 10px;
+			}
+
+			canvas {
+				border: 2px solid white;
+			}
+
+			#left-panel {
+				/* position: absolute; */
+				margin-left: 30px;
+				top: 10px;
+				width: 500px;
+				padding: 10px;
+				text-align: left;
+			}
+
+			#season-display {
+				font-size: 20px;
+				margin-bottom: 10px;
+			}
+
+			#fov-container {
+				margin-top: 20px;
+			}
+
+			.slider {
+				width: 70%;
+			}
+
+			#controls {
+				margin-top: 30px;
+				/* width: 500px; */
+			}
+
+			#block-selector button {
+				margin: 5px;
+				padding: 8px 10px;
+				border: 2px solid white;
+				border-radius: 2px;
+				cursor: pointer;
+				font-size: 14px;
+				background: transparent;
+				color: white;
+				transition: 0.3s;
+			}
+
+			#block-selector button.active,
+			#block-selector button:hover {
+				background-color: #d3d3d3;
+				color: black;
+			}
+
+			h3 {
+				padding-bottom: 5px;
+				margin-bottom: 10px;
+			}
+
+			ul {
+				padding-left: 20px;
+			}
+
+			li {
+				list-style: none;
+				padding: 5px 0;
+			}
+		</style>
+	</head>
+
+	<body onload="main()">
+		<div id="container">
+			<!-- Left Panel (Season, FOV, Controls) -->
+			<div id="left-panel">
+				<!-- Season Display -->
+				<div id="season-display">🌤️ Current Season: Spring</div>
+
+				<!-- FOV Control -->
+				<div id="fov-container">
+					<h3>🎥 Camera FOV</h3>
+					<input
+						type="range"
+						min="20"
+						max="120"
+						class="slider"
+						value="90"
+						id="fov"
+					/>
+				</div>
+
+				<!-- Controls Info -->
+				<h3>🎮 Controls</h3>
+				<ul>
+					<li><strong>Move:</strong> W, A, S, D</li>
+					<li><strong>Up/Down:</strong> Space, V</li>
+					<li><strong>Break/Place Blocks:</strong> Q, E</li>
+					<li><strong>Look Around:</strong> Click + Drag</li>
+					<li><strong>Seasons change every 15 seconds 🌤️</strong></li>
+				</ul>
+				<!-- Block Selection -->
+				<div id="controls">
+					<h3>🧱 Block Selection</h3>
+					<div id="block-selector">
+						<button onclick="setBlock(1)" id="btn-grass">Grass</button>
+						<button onclick="setBlock(0)" id="btn-lava">Obsidian</button>
+						<button onclick="setBlock(3)" id="btn-bamboo">Bamboo</button>
+						<button onclick="setBlock(4)" id="btn-stone">Stone</button>
+					</div>
+				</div>
+				<h3>🔧 Render Options</h3>
+				<button id="toggle-normals">Toggle Normals</button>
+			</div>
+
+			<!-- WebGL Canvas Centered -->
+			<div id="canvas-container">
+				<canvas id="webgl" width="800" height="600">
+					Your browser does not support WebGL.
+				</canvas>
+				<p id="fps">Loading...</p>
+			</div>
+		</div>
+
+		<!-- Scripts -->
+		<script src="../lib/webgl-utils.js"></script>
+		<script src="../lib/webgl-debug.js"></script>
+		<script src="../lib/cuon-utils.js"></script>
+		<script src="../lib/cuon-matrix-cse160.js"></script>
+		<script src="Camera.js"></script>
+		<script src="Map.js"></script>
+		<script src="Cube.js"></script>
+		<script src="textures.js"></script>
+		<script src="asg3.js"></script>
+
+		<script>
+			document.addEventListener("DOMContentLoaded", function () {
+				// Function to update block selection
+				function setBlock(blockType) {
+					g_block = blockType;
+					const blockNames = { 1: "Grass", 0: "Lava", 3: "Bamboo", 4: "Stone" };
+
+					// Update the displayed block type
+					const blockText = document.getElementById("block");
+					if (blockText) {
+						blockText.textContent = blockNames[blockType];
+					}
+
+					// Remove active class from all buttons
+					document
+						.querySelectorAll("#block-selector button")
+						.forEach((btn) => btn.classList.remove("active"));
+
+					// Add active class to the selected button
+					const selectedButton = document.getElementById(
+						`btn-${blockNames[blockType].toLowerCase()}`
+					);
+					if (selectedButton) {
+						selectedButton.classList.add("active");
+					}
+				}
+
+				// Attach event listeners to each button
+				document
+					.getElementById("btn-grass")
+					.addEventListener("click", () => setBlock(1));
+				document
+					.getElementById("btn-lava")
+					.addEventListener("click", () => setBlock(0));
+				document
+					.getElementById("btn-bamboo")
+					.addEventListener("click", () => setBlock(3));
+				document
+					.getElementById("btn-stone")
+					.addEventListener("click", () => setBlock(4));
+
+				// Set initial selection to Grass
+				setBlock(1);
+			});
+
+			// Function to update block selection
+			function setBlock(blockType) {
+				g_block = blockType;
+				const blockNames = { 1: "Grass", 0: "Lava", 3: "Bamboo", 4: "Stone" };
+				document.getElementById("block").textContent = blockNames[blockType];
+
+				// Highlight active button
+				document
+					.querySelectorAll("#block-selector button")
+					.forEach((btn) => btn.classList.remove("active"));
+				document
+					.getElementById(`btn-${blockNames[blockType].toLowerCase()}`)
+					.classList.add("active");
+			}
+
+			// Initialize the Grass block as default
+			document.getElementById("btn-grass").classList.add("active");
+		</script>
+	</body>
+</html>
