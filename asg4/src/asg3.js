@@ -512,6 +512,11 @@ function renderAllShapes() {
 
 	g_skybox.render();
 
+	let mySphere = new Sphere(20);
+	mySphere.matrix.scale(4, 4, 4);
+	mySphere.matrix.translate(6, 2, 6); // Move it closer to the camera
+	mySphere.render();
+
 	drawIndicator();
 
 	g_camera.castRay();
