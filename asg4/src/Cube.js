@@ -268,33 +268,33 @@ class Cube {
 			}
 		}
 
-		//position data
-
+		// Bind and pass position data
 		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
-
 		gl.bufferData(gl.ARRAY_BUFFER, this.verts, gl.DYNAMIC_DRAW);
-
 		gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
-
 		gl.enableVertexAttribArray(a_Position);
 
-		//uv data
-		// gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+		if (g_showNormals) {
+			// Bind and pass normal data (enable normals)
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.DYNAMIC_DRAW);
+			gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(a_Normal);
 
-		// gl.bufferData(gl.ARRAY_BUFFER, this.UVs, gl.DYNAMIC_DRAW);
+			// Disable UV attributes since normals are used
+			gl.disableVertexAttribArray(a_UV);
+		} else {
+			// Bind and pass UV data (enable textures)
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, this.UVs, gl.DYNAMIC_DRAW);
+			gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(a_UV);
 
-		// gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
+			// Disable normals since textures are used
+			gl.disableVertexAttribArray(a_Normal);
+		}
 
-		// gl.enableVertexAttribArray(a_UV);
-
-		// Bind and send normal data
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.DYNAMIC_DRAW);
-		gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
-		gl.enableVertexAttribArray(a_Normal);
-
-		//draw triangles
-
+		// Draw triangles
 		gl.drawArrays(gl.TRIANGLES, 0, this.verts.length / 3);
 	}
 }
