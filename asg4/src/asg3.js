@@ -1,62 +1,69 @@
 // Vertex shader program
-var VSHADER_SOURCE =
-	"attribute vec4 a_Position;\n" +
-	"attribute vec2 a_UV;\n" +
-	"attribute vec3 a_Normal;\n" +
-	"varying vec2 v_UV;\n" +
-	"varying vec3 v_Normal;\n" +
-	"uniform mat4 u_ModelMatrix;\n" +
-	"uniform mat4 u_GlobalRotateMatrix;\n" +
-	"uniform mat4 u_ViewMatrix;\n" +
-	"uniform mat4 u_ProjectionMatrix;\n" +
-	"void main() {\n" +
-	"  gl_Position =  u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;\n" +
-	"  v_UV = a_UV;\n" +
-	"  v_Normal = a_Normal;\n" +
-	"}\n";
+var VSHADER_SOURCE = `
+	attribute vec4 a_Position;
+	attribute vec2 a_UV;
+	attribute vec3 a_Normal;
 
+	varying vec2 v_UV;
+	varying vec3 v_Normal;
+	varying vec4 v_VertPos;
+
+	uniform mat4 u_ModelMatrix;
+	uniform mat4 u_GlobalRotateMatrix;
+	uniform mat4 u_ViewMatrix;
+	uniform mat4 u_ProjectionMatrix;
+
+	void main() {
+		gl_Position = u_ProjectionMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
+		v_UV = a_UV;
+		v_Normal = normalize(mat3(u_ModelMatrix) * a_Normal); // Normalize normal after transformation
+		v_VertPos = u_ModelMatrix * a_Position;
+	}
+`;
 // Fragment shader program
-var FSHADER_SOURCE =
-	"precision mediump float;\n" +
-	"varying vec2 v_UV;\n" +
-	"varying vec3 v_Normal;\n" +
-	"uniform vec4 u_FragColor;\n" +
-	"uniform sampler2D u_Sampler0;\n" +
-	"uniform sampler2D u_Sampler1;\n" +
-	"uniform sampler2D u_Sampler2;\n" +
-	"uniform sampler2D u_Sampler3;\n" +
-	"uniform sampler2D u_Sampler4;\n" +
-	"uniform sampler2D u_Sampler5;\n" +
-	"uniform sampler2D u_Sampler6;\n" +
-	"uniform sampler2D u_Sampler7;\n" +
-	"uniform int u_whichTexture;\n" +
-	"void main() {\n" +
-	"  if(u_whichTexture == -3) {\n" +
-	"     gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0);\n" +
-	"  } else if(u_whichTexture == -2) {\n" +
-	"     gl_FragColor = u_FragColor;\n" +
-	"  } else if (u_whichTexture == -1) {\n" +
-	"     gl_FragColor = vec4(v_UV,1.0,1.0);\n" +
-	"  } else if (u_whichTexture == 0) {\n" +
-	"     gl_FragColor = texture2D(u_Sampler0, v_UV);\n" +
-	"  } else if (u_whichTexture == 1) {\n" +
-	"     gl_FragColor = texture2D(u_Sampler1, v_UV);\n" +
-	"  } else if (u_whichTexture == 2) {\n" +
-	"     gl_FragColor = texture2D(u_Sampler2, v_UV);\n" +
-	"  } else if (u_whichTexture == 3) {\n" +
-	"     gl_FragColor = texture2D(u_Sampler3, v_UV);\n" +
-	"  } else if (u_whichTexture == 4) {\n" +
-	"     gl_FragColor = texture2D(u_Sampler4, v_UV);\n" +
-	"  } else if (u_whichTexture == 5) {\n" +
-	"     gl_FragColor = texture2D(u_Sampler5, v_UV);\n" +
-	" } else if (u_whichTexture == 6) {\n" +
-	"     gl_FragColor = texture2D(u_Sampler6, v_UV);\n" +
-	" } else if (u_whichTexture == 7) {\n" +
-	"     gl_FragColor = texture2D(u_Sampler7, v_UV);\n" +
-	"  } else {\n" +
-	"     gl_FragColor = vec4(1,.2,.2,1);\n" +
-	"  }\n" +
-	"}\n";
+var FSHADER_SOURCE = `
+	precision mediump float;
+
+	varying vec2 v_UV;
+	varying vec3 v_Normal;
+	varying vec4 v_VertPos;
+
+	uniform vec4 u_FragColor;
+	uniform vec3 u_lightPos;
+	uniform sampler2D u_Sampler0;
+
+	uniform int u_whichTexture;
+
+	void main() {
+
+		gl_FragColor = vec4(0.71, 0.898, 1, 1.0); 
+
+		if (u_whichTexture == -3) {
+			gl_FragColor = vec4((v_Normal + 1.0) / 2.0, 1.0);
+		} else if (u_whichTexture == -2) {
+			gl_FragColor = u_FragColor;
+		} else if (u_whichTexture == -1) {
+			gl_FragColor = vec4(v_UV, 1.0, 1.0);
+		} else if (u_whichTexture == 0) {
+			gl_FragColor = texture2D(u_Sampler0, v_UV);
+		} 
+
+		// Calculate distance from light
+		vec3 lightVector = vec3(v_VertPos) - u_lightPos;
+		float r = length(lightVector);
+
+		// Assign color based on distance from the light source
+		if (r < 2.0) {
+			gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); // Red for close
+		}else if (r < 3.0) {
+			gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0); // Green for mid-range
+		}
+
+		//gl_FragColor = vec4(vec3(gl_FragColor)/(r*r), 1.0);
+
+	}
+
+`;
 
 let canvas;
 let gl;
@@ -84,6 +91,7 @@ let u_Sampler7;
 let a_UV;
 
 let g_showNormals = false; // Default to false (normals off)
+let g_lightPos = [15, 15, 10];
 
 let global_angle_x = 0;
 let global_angle_y = 0;
@@ -138,59 +146,25 @@ function connectVariablesToGLSL() {
 		return;
 	}
 
+	// Get the storage location of u_lightPos
+	u_lightPos = gl.getUniformLocation(gl.program, "u_lightPos");
+	if (!u_lightPos) {
+		console.log("Failed to get the storage location of u_lightPos");
+		return;
+	}
+
 	// Get the storage location of u_whichTexture
 	u_whichTexture = gl.getUniformLocation(gl.program, "u_whichTexture");
 	if (!u_whichTexture) {
 		console.log("Failed to get the storage location of u_whichTexture");
 		return;
 	}
+	gl.uniform1i(u_whichTexture, -2); // Ensure default is set
 
 	// Get the storage location of u_Sampler0
 	u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
 	if (!u_Sampler0) {
 		console.log("Failed to get the storage location of u_Sampler0");
-		return;
-	}
-
-	u_Sampler1 = gl.getUniformLocation(gl.program, "u_Sampler1");
-	if (!u_Sampler1) {
-		console.log("Failed to get the storage location of u_Sampler1");
-		return;
-	}
-
-	u_Sampler2 = gl.getUniformLocation(gl.program, "u_Sampler2");
-	if (!u_Sampler2) {
-		console.log("Failed to get the storage location of u_Sampler2");
-		return;
-	}
-
-	u_Sampler3 = gl.getUniformLocation(gl.program, "u_Sampler3");
-	if (!u_Sampler3) {
-		console.log("Failed to get the storage location of u_Sampler3");
-		return;
-	}
-
-	u_Sampler4 = gl.getUniformLocation(gl.program, "u_Sampler4");
-	if (!u_Sampler4) {
-		console.log("Failed to get the storage location of u_Sampler4");
-		return;
-	}
-
-	u_Sampler5 = gl.getUniformLocation(gl.program, "u_Sampler5");
-	if (!u_Sampler5) {
-		console.log("Failed to get the storage location of u_Sampler5");
-		return;
-	}
-
-	u_Sampler6 = gl.getUniformLocation(gl.program, "u_Sampler6");
-	if (!u_Sampler6) {
-		console.log("Failed to get the storage location of u_Sampler6");
-		return;
-	}
-
-	u_Sampler7 = gl.getUniformLocation(gl.program, "u_Sampler7");
-	if (!u_Sampler7) {
-		console.log("Failed to get the storage location of u_Sampler7");
 		return;
 	}
 
@@ -235,6 +209,33 @@ function addActions() {
 	document.getElementById("fov").addEventListener("mousemove", function () {
 		g_fov = this.value;
 	});
+
+	document
+		.getElementById("lightSlideX")
+		.addEventListener("mousemove", function (ev) {
+			if (ev.buttons == 1) {
+				g_lightPos[0] = this.value / 100;
+				renderAllShapes();
+			}
+		});
+
+	document
+		.getElementById("lightSlideY")
+		.addEventListener("mousemove", function (ev) {
+			if (ev.buttons == 1) {
+				g_lightPos[1] = this.value / 100;
+				renderAllShapes();
+			}
+		});
+
+	document
+		.getElementById("lightSlideZ")
+		.addEventListener("mousemove", function (ev) {
+			if (ev.buttons == 1) {
+				g_lightPos[2] = this.value / 100;
+				renderAllShapes();
+			}
+		});
 
 	document
 		.getElementById("toggle-normals")
@@ -288,13 +289,6 @@ function main() {
 	};
 
 	initTextures();
-	initTextures2();
-	initTextures3();
-	initTextures4();
-	initTextures5();
-	initTextures6();
-	initTextures7();
-	initTextures8();
 
 	// Specify the color for clearing <canvas>
 	gl.clearColor(0.3, 1.0, 1.0, 1.0);
@@ -340,6 +334,8 @@ var delta_update = performance.now() / 1000.0;
 var delta_time = 0;
 
 function tick() {
+	animateLight();
+
 	renderAllShapes();
 	delta_time = performance.now() / 1000.0 - delta_update;
 	delta_update = performance.now() / 1000.0;
@@ -466,6 +462,7 @@ function drawIndicator() {
 function renderAllShapes() {
 	//start timer for performance tracking
 	var start_time = performance.now();
+	gl.uniform3fv(u_lightPos, g_lightPos);
 
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -506,16 +503,26 @@ function renderAllShapes() {
 		g_camera.eye.elements[1],
 		g_camera.eye.elements[2]
 	);
-	g_skybox.matrix.scale(100, 100, 100);
-	g_skybox.matrix.rotate(g_seconds, 0, 1, 0);
+	g_skybox.matrix.scale(40, 40, 40);
+	// g_skybox.matrix.rotate(g_seconds, 0, 1, 0);
 	g_skybox.matrix.translate(-0.5, -0.5, -0.5);
 
 	g_skybox.render();
 
+	//draw sphere
 	let mySphere = new Sphere(20);
 	mySphere.matrix.scale(4, 4, 4);
-	mySphere.matrix.translate(6, 2, 6); // Move it closer to the camera
+	mySphere.matrix.translate(3, 2, 2.5); // Move it closer to the camera
 	mySphere.render();
+
+	//draw light
+	var light = new Cube();
+	light.color = [1, 0, 1, 1];
+	light.matrix.translate(g_lightPos[0], g_lightPos[1], g_lightPos[2]);
+	light.matrix.scale(2, 2, 2);
+	gl.uniform1i(u_whichTexture, -2); // Ensure u_FragColor is used
+	gl.uniform4f(u_FragColor, 1.0, 0.0, 1.0, 1.0); // Set light color
+	light.render();
 
 	drawIndicator();
 
@@ -530,6 +537,15 @@ function renderAllShapes() {
 		"ms: " + Math.floor(duration) + " fps: " + Math.floor(10000 / duration),
 		"fps"
 	);
+}
+function animateLight() {
+	const radius = 5.0; // How far from the center the light moves
+	const centerX = 15; // Center position X
+	const centerZ = 10; // Center position Z
+
+	// Use g_seconds to get a smoothly increasing time value
+	g_lightPos[0] = centerX + radius * Math.cos(g_seconds);
+	g_lightPos[2] = centerZ + radius * Math.sin(g_seconds);
 }
 
 function TextToHTML(string, htmlID) {

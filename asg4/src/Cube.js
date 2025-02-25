@@ -3,7 +3,7 @@ class Cube {
 		this.type = "cube";
 		this.color = [1.0, 0.0, 0.0, 1];
 		this.matrix = new Matrix4();
-		this.textureNum = 0;
+		this.textureNum = -2;
 
 		//1x1 cube origin in corner
 		this.verts = new Float32Array([
