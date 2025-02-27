@@ -80,7 +80,7 @@ class Sphere {
 		var rgba = this.color;
 
 		// Pass texture mode (normals or texture)
-		gl.uniform1i(u_whichTexture, this.textureNum);
+		gl.uniform1i(u_whichTexture, g_showNormals ? -3 : this.textureNum);
 		gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
 
 		// Pass the model matrix
@@ -103,12 +103,22 @@ class Sphere {
 		gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(a_Position);
 
-		// Use UV mapping for texture
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, this.UVs, gl.DYNAMIC_DRAW);
-		gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
-		gl.enableVertexAttribArray(a_UV);
-		gl.disableVertexAttribArray(a_Normal);
+		if (g_showNormals) {
+			// Use normal visualization
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.DYNAMIC_DRAW);
+			gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(a_Normal);
+			gl.disableVertexAttribArray(a_UV);
+			console.log("show normals");
+		} else {
+			// Use UV mapping for texture
+			gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+			gl.bufferData(gl.ARRAY_BUFFER, this.UVs, gl.DYNAMIC_DRAW);
+			gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
+			gl.enableVertexAttribArray(a_UV);
+			gl.disableVertexAttribArray(a_Normal);
+		}
 
 		// Draw triangles
 		gl.drawArrays(gl.TRIANGLES, 0, this.verts.length / 3);

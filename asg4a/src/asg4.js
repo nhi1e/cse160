@@ -338,14 +338,6 @@ function renderAllShapes() {
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-	// var floor = new Cube();
-	// floor.color = [0.243, 0.749, 0.251, 1.0]; // Green floor
-	// floor.textureNum = -2;
-	// floor.matrix.setTranslate(0, -0.5, 0); // Align floor with walls
-	// floor.matrix.scale(mapWidth, 0, mapHeight); // Scale to match walls
-	// floor.matrix.translate(-0.45, 0, -0.5); // Center correctly
-	// floor.render();
-
 	//draw sky
 	var sky = new Cube();
 	sky.color = [0.529, 0.808, 0.98, 1.0]; // Light blue color for the sky
@@ -356,7 +348,9 @@ function renderAllShapes() {
 	sky.render();
 
 	//draw sphere
-	// var sphere = new Sphere(20);
-	// sky.matrix.setTranslate(-20, -7, -10);
-	// sphere.render();
+	var sphere = new Sphere(20);
+	sphere.textureNum = -1;
+	sphere.matrix.scale(3, 3, 3);
+	sphere.matrix.translate(0, -2, 0);
+	sphere.render();
 }
