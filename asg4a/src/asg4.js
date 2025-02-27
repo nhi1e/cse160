@@ -1,64 +1,68 @@
 // Vertex shader program
 var VSHADER_SOURCE = `
-		precision mediump float;
-		attribute vec4 a_Position;
-		attribute vec2 a_UV;
-		attribute vec3 a_Normal;
-		varying vec2 v_UV;
-		varying vec3 v_Normal;
-		uniform mat4 u_ModelMatrix;
-		uniform mat4 u_GlobalRotateMatrix;
-		uniform mat4 u_ViewMatrix;
-		uniform mat4 u_ProjMatrix;
-		
+	precision mediump float;
+	attribute vec4 a_Position;
+	attribute vec2 a_UV;
+	attribute vec3 a_Normal;
+	varying vec2 v_UV;
+	varying vec3 v_Normal;
+	uniform mat4 u_ModelMatrix;
+	uniform mat4 u_GlobalRotateMatrix;
+	uniform mat4 u_ViewMatrix;
+	uniform mat4 u_ProjMatrix;
+	
 
-		void main() {
+	void main() {
 		gl_Position = u_ProjMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
 		v_UV = a_UV;
 		v_Normal = a_Normal;
-	}`;
+	}
+`;
 
 // Fragment shader program
 var FSHADER_SOURCE = `
-		precision mediump float;
-		varying vec2 v_UV;
-		varying vec3 v_Normal;
-		uniform vec4 u_FragColor;
-		uniform sampler2D u_Sampler0; 
-		uniform sampler2D u_Sampler1; 
-		uniform int u_whichTexture;
-		
-		void main() {
-			int tex = int(u_whichTexture); // Explicit cast for safety
+	precision mediump float;
+	varying vec2 v_UV;
+	varying vec3 v_Normal;
+	uniform vec4 u_FragColor;
+	uniform sampler2D u_Sampler0; 
+	uniform sampler2D u_Sampler1; 
+	uniform int u_whichTexture;
+	
+	void main() {
+		int tex = int(u_whichTexture); // Explicit cast for safety
 
-			if (tex == -3) { // Use normal map
-				gl_FragColor = vec4((v_Normal + 1.0) / 2.0, 1.0);
-			}
-			else if (tex == -2) { // Use solid color
-				gl_FragColor = u_FragColor;
-			} 
-			else if (tex == -1) { // UV debug gradient color
-				gl_FragColor = vec4(v_UV, 1.0, 1.0);
-			} 
-			else if (tex == 0) { // Use texture0 (texture.png)
-				gl_FragColor = texture2D(u_Sampler0, v_UV);
-			} 
-			else if (tex == 1) { // Use texture1 (floor.png)
-				gl_FragColor = texture2D(u_Sampler1, v_UV);
-			} 
-			else { // Error texture (red)
-				gl_FragColor = vec4(1, 0.2, 0.2, 1);
-			}
+		if (tex == -3) { // Use normal map
+			gl_FragColor = vec4((v_Normal + 1.0) / 2.0, 1.0);
 		}
+		else if (tex == -2) { // Use solid color
+			gl_FragColor = u_FragColor;
+		} 
+		else if (tex == -1) { // UV debug gradient color
+			gl_FragColor = vec4(v_UV, 1.0, 1.0);
+		} 
+		else if (tex == 0) { // Use texture0 (texture.png)
+			gl_FragColor = texture2D(u_Sampler0, v_UV);
+		} 
+		else if (tex == 1) { // Use texture1 (floor.png)
+			gl_FragColor = texture2D(u_Sampler1, v_UV);
+		} 
+		else { // Error texture (red)
+			gl_FragColor = vec4(1, 0.2, 0.2, 1);
+		}
+	}
 
-	`;
+`;
 
 let canvas;
 let gl;
+let keys = {};
 let a_Position;
 let u_FragColor;
 let u_Size;
 let g_showNormals = false;
+let g_globalAngle = 0;
+let g_lightPos = [0, 2, -2];
 
 function setupWebGL() {
 	// Retrieve <canvas> element
@@ -100,21 +104,6 @@ function connectVariablesToGLSL() {
 	gl.uniformMatrix4fv(u_ModelMatrix, false, new Matrix4().elements);
 }
 
-const POINT = 0;
-const TRIANGLE = 1;
-const CIRCLE = 2;
-
-let keys = {};
-let g_selectedColor = [1.0, 1.0, 1.0, 1.0];
-let g_selectedSize = 5;
-let g_selectedType = POINT;
-let g_selectedSegments = 10;
-let g_globalAngle = 0;
-let g_yellowAngle = 0;
-let g_magentaAngle = 0;
-let g_yellowAnimation = false;
-let g_magentaAnimation = false;
-//set up actions for html ui elements
 function addActionsForHtmlUI() {
 	document
 		.getElementById("angleSlide")
@@ -127,6 +116,30 @@ function addActionsForHtmlUI() {
 		g_showNormals = !g_showNormals;
 		renderAllShapes();
 	};
+	document
+		.getElementById("lightSlideX")
+		.addEventListener("mousemove", function (ev) {
+			if (ev.buttons == 1) {
+				g_lightPos[0] = this.value / 100;
+				renderAllShapes();
+			}
+		});
+	document
+		.getElementById("lightSlideY")
+		.addEventListener("mousemove", function (ev) {
+			if (ev.buttons == 1) {
+				g_lightPos[1] = this.value / 100;
+				renderAllShapes();
+			}
+		});
+	document
+		.getElementById("lightSlideZ")
+		.addEventListener("mousemove", function (ev) {
+			if (ev.buttons == 1) {
+				g_lightPos[2] = this.value / 100;
+				renderAllShapes();
+			}
+		});
 }
 
 // Enable Mouse Look
@@ -236,18 +249,8 @@ var g_startTime = performance.now() / 1000.0;
 var g_seconds = performance.now() / 1000.0 - g_startTime;
 function tick() {
 	g_seconds = performance.now() / 1000.0 - g_startTime;
-	updateAnimationAngles();
 	renderAllShapes();
 	requestAnimationFrame(tick);
-}
-
-function updateAnimationAngles() {
-	if (g_yellowAnimation) {
-		g_yellowAngle = 45 * Math.sin(g_seconds);
-	}
-	if (g_magentaAnimation) {
-		g_magentaAngle = 45 * Math.sin(3 * g_seconds);
-	}
 }
 
 function initTextures() {
@@ -338,6 +341,13 @@ function renderAllShapes() {
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+	//draw light
+	var light = new Cube();
+	light.color = [1, 1, 0, 1]; // Yellow color for the light
+	light.matrix.translate(g_lightPos[0], g_lightPos[1], g_lightPos[2]);
+	light.matrix.scale(0.4, 0.4, 0.4);
+	light.render();
+
 	//draw sky
 	var sky = new Cube();
 	sky.color = [0.529, 0.808, 0.98, 1.0]; // Light blue color for the sky
@@ -349,7 +359,7 @@ function renderAllShapes() {
 
 	//draw sphere
 	var sphere = new Sphere(20);
-	sphere.textureNum = -1;
+	sphere.textureNum = 1;
 	sphere.matrix.scale(3, 3, 3);
 	sphere.matrix.translate(0, -2, 0);
 	sphere.render();
