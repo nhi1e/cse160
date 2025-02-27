@@ -56,9 +56,9 @@ var FSHADER_SOURCE = `
 
 		vec3 lightVector = vec3(v_VertPos) - u_lightPos;
 		float r = length(lightVector);
-		if (r<2.0){
+		if (r<3.0){
 			gl_FragColor = vec4(1,0,0,1);
-		} else if (r<3.0){
+		} else if (r<4.0){
 		 	gl_FragColor = vec4(0,1,0,1);
 		}		
 	}
@@ -72,7 +72,7 @@ let u_FragColor;
 let u_Size;
 let g_showNormals = false;
 let g_globalAngle = 0;
-let g_lightPos = [0, 2, -2];
+let g_lightPos = [0, -1.7, -2];
 
 function setupWebGL() {
 	// Retrieve <canvas> element
@@ -260,6 +260,7 @@ var g_startTime = performance.now() / 1000.0;
 var g_seconds = performance.now() / 1000.0 - g_startTime;
 function tick() {
 	g_seconds = performance.now() / 1000.0 - g_startTime;
+	updateLightAngle();
 	renderAllShapes();
 	requestAnimationFrame(tick);
 }
@@ -322,6 +323,15 @@ function keydown(ev) {
 // var g_eye = [0, 0, 20]; // Eye position
 // var g_at = [0, 0, -100]; // Look-at point
 // var g_up = [0, 1, 0]; // Up direction
+
+function updateLightAngle() {
+	let radius = 10.0; // Radius of the circular motion
+	let speed = 1.0; // Speed of rotation
+
+	g_lightPos[0] = radius * Math.cos(speed * g_seconds);
+	// g_lightPos[2] = radius * Math.sin(speed * g_seconds);
+	renderAllShapes(); // Re-render scene with updated light position
+}
 
 function renderAllShapes() {
 	var start = performance.now();
