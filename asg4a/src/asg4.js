@@ -6,16 +6,17 @@ var VSHADER_SOURCE = `
 	attribute vec3 a_Normal;
 	varying vec2 v_UV;
 	varying vec3 v_Normal;
+	varying vec4 v_VertPos;
 	uniform mat4 u_ModelMatrix;
 	uniform mat4 u_GlobalRotateMatrix;
 	uniform mat4 u_ViewMatrix;
 	uniform mat4 u_ProjMatrix;
 	
-
 	void main() {
 		gl_Position = u_ProjMatrix * u_ViewMatrix * u_GlobalRotateMatrix * u_ModelMatrix * a_Position;
 		v_UV = a_UV;
 		v_Normal = a_Normal;
+		v_VertPos = u_ModelMatrix * a_Position;
 	}
 `;
 
@@ -28,6 +29,8 @@ var FSHADER_SOURCE = `
 	uniform sampler2D u_Sampler0; 
 	uniform sampler2D u_Sampler1; 
 	uniform int u_whichTexture;
+	uniform vec3 u_lightPos;
+	varying vec4 v_VertPos;
 	
 	void main() {
 		int tex = int(u_whichTexture); // Explicit cast for safety
@@ -50,8 +53,15 @@ var FSHADER_SOURCE = `
 		else { // Error texture (red)
 			gl_FragColor = vec4(1, 0.2, 0.2, 1);
 		}
-	}
 
+		vec3 lightVector = vec3(v_VertPos) - u_lightPos;
+		float r = length(lightVector);
+		if (r<2.0){
+			gl_FragColor = vec4(1,0,0,1);
+		} else if (r<3.0){
+		 	gl_FragColor = vec4(0,1,0,1);
+		}		
+	}
 `;
 
 let canvas;
@@ -95,12 +105,13 @@ function connectVariablesToGLSL() {
 		"u_GlobalRotateMatrix"
 	);
 	u_FragColor = gl.getUniformLocation(gl.program, "u_FragColor");
-
 	u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
 	u_Sampler1 = gl.getUniformLocation(gl.program, "u_Sampler1");
 	u_whichTexture = gl.getUniformLocation(gl.program, "u_whichTexture");
 	u_ViewMatrix = gl.getUniformLocation(gl.program, "u_ViewMatrix");
 	u_ProjMatrix = gl.getUniformLocation(gl.program, "u_ProjMatrix");
+	u_lightPos = gl.getUniformLocation(gl.program, "u_lightPos");
+
 	gl.uniformMatrix4fv(u_ModelMatrix, false, new Matrix4().elements);
 }
 
@@ -341,6 +352,7 @@ function renderAllShapes() {
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+	gl.uniform3f(u_lightPos, g_lightPos[0], g_lightPos[1], g_lightPos[2]);
 	//draw light
 	var light = new Cube();
 	light.color = [1, 1, 0, 1]; // Yellow color for the light
@@ -352,9 +364,9 @@ function renderAllShapes() {
 	var sky = new Cube();
 	sky.color = [0.529, 0.808, 0.98, 1.0]; // Light blue color for the sky
 	sky.textureNum = 0;
-	sky.matrix.setTranslate(-20, -10, -5);
-	sky.matrix.rotate(45, 0, 1, 0);
-	sky.matrix.scale(30, 30, 30);
+	sky.matrix.setTranslate(-15, -10, -8);
+	sky.matrix.rotate(10, 0, 1, 0);
+	sky.matrix.scale(24, 24, 24);
 	sky.render();
 
 	//draw sphere
