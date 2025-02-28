@@ -21,7 +21,14 @@
 			value="0"
 			class="slider"
 		/><br />
-		<label for="joint">Light X</label>
+		
+		<label for="normal_on">Normal: </label>
+		<button type="button" id="normal_on">ON</button>
+		<button type="button" id="normal_off">OFF</button><br />
+		<label for="light_on">Main Light: </label>
+		<button type="button" id="light_on">ON</button>
+		<button type="button" id="light_off">OFF</button>
+		<label for="lightx">Light X</label>
 		<input
 			type="range"
 			id="lightx"
@@ -40,7 +47,6 @@
 			max="250"
 			value="60"
 			class="slider"
-		/><br />
 		<label for="lightz">Light Z</label>
 		<input
 			type="range"
@@ -51,15 +57,38 @@
 			value="100"
 			class="slider"
 		/><br />
-		<label for="normal_on">Normal: </label>
-		<button type="button" id="normal_on">ON</button>
-		<button type="button" id="normal_off">OFF</button><br />
-		<label for="light_on">Light: </label>
-		<button type="button" id="light_on">ON</button>
-		<button type="button" id="light_off">OFF</button><br />
-
-		<button id="spotlight_on">Spotlight On</button>
-		<button id="spotlight_off">Spotlight Off</button>
+		<label for="spotlight_on">Spotlight: </label>
+		<button id="spotlight_on">ON</button>
+		<button id="spotlight_off">OFF</button>
+		<label for="lightx">Spotlight X</label>
+		<input
+			type="range"
+			id="spotlightx"
+			name="lightx"
+			min="-375"
+			max="375"
+			value="0"
+			class="slider"
+		/>
+		<label for="lighty">Spotlight Y</label>
+		<input
+			type="range"
+			id="spotlighty"
+			name="lighty"
+			min="1"
+			max="950"
+			value="60"
+			class="slider"
+		<label for="lightz">Spotlight Z</label>
+		<input
+			type="range"
+			id="spotlightz"
+			name="lightz"
+			min="-400"
+			max="450"
+			value="100"
+			class="slider"
+		/><br />
 
 		<p>
 			WASD / Arrow Keys to move. <br />

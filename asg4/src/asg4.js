@@ -144,6 +144,7 @@ var g_Animation = false; // Joint 2
 var g_normalOn = false;
 var g_lightOn = true;
 var g_lightPos = [0, 0.6, 0];
+var g_spotlightPos = [0.5, 1.0, -2.5]; // Default spotlight position
 
 // Animation
 var g_startTime = performance.now() / 1000.0;
@@ -205,6 +206,30 @@ function addActionsForHtmlUI() {
 		g_spotlightOn = false;
 		renderScene();
 	};
+	document
+		.getElementById("spotlightx")
+		.addEventListener("mousemove", function (ev) {
+			if (ev.buttons == 1) {
+				g_spotlightPos[0] = parseFloat(this.value) / 100;
+				renderScene();
+			}
+		});
+	document
+		.getElementById("spotlighty")
+		.addEventListener("mousemove", function (ev) {
+			if (ev.buttons == 1) {
+				g_spotlightPos[1] = parseFloat(this.value) / 100;
+				renderScene();
+			}
+		});
+	document
+		.getElementById("spotlightz")
+		.addEventListener("mousemove", function (ev) {
+			if (ev.buttons == 1) {
+				g_spotlightPos[2] = parseFloat(this.value) / 100;
+				renderScene();
+			}
+		});
 }
 
 // Get Canvas and GL Context ======================================
@@ -494,7 +519,7 @@ function renderScene() {
 	gl.uniform1i(u_spotlightOn, g_spotlightOn);
 
 	// Set spotlight properties
-	gl.uniform3fv(u_spotPosition, new Float32Array([0.5, 1.0, -2.5]));
+	gl.uniform3fv(u_spotPosition, new Float32Array(g_spotlightPos));
 	gl.uniform3fv(u_spotDirection, new Float32Array([0.0, -1.0, 0.0]));
 	gl.uniform1f(u_spotCutoff, 30.0); // Cutoff angle in degrees
 	gl.uniform1f(u_spotExponent, 10.0); // Spot intensity falloff
