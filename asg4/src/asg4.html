@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>Asg4 - Nhi Le</title>
+		<link rel="shortcut icon" href="" />
+	</head>
+
+	<body onload="main()">
+		<canvas id="asg4" width="800" height="600">
+			Please use a browser that supports "canvas"
+		</canvas>
+		<br /><br />
+		<label for="camera">Camera Angle:</label>
+		<input
+			type="range"
+			id="camera"
+			name="camera"
+			min="0"
+			max="360"
+			value="0"
+			class="slider"
+		/><br />
+		<label for="joint">Light X</label>
+		<input
+			type="range"
+			id="lightx"
+			name="lightx"
+			min="-375"
+			max="375"
+			value="0"
+			class="slider"
+		/>
+		<label for="lighty">Light Y</label>
+		<input
+			type="range"
+			id="lighty"
+			name="lighty"
+			min="1"
+			max="250"
+			value="60"
+			class="slider"
+		/><br />
+		<label for="lightz">Light Z</label>
+		<input
+			type="range"
+			id="lightz"
+			name="lightz"
+			min="-400"
+			max="250"
+			value="100"
+			class="slider"
+		/><br />
+		<label for="normal_on">Normal: </label>
+		<button type="button" id="normal_on">ON</button>
+		<button type="button" id="normal_off">OFF</button><br />
+		<label for="light_on">Light: </label>
+		<button type="button" id="light_on">ON</button>
+		<button type="button" id="light_off">OFF</button><br />
+
+		<p>
+			WASD / Arrow Keys to move. <br />
+			Q/E to rotate right.<br />
+		</p>
+
+		<!-- javascript files containing functions for WebGL -->
+		<script src="../lib/webgl-utils.js"></script>
+		<script src="../lib/webgl-debug.js"></script>
+		<script src="../lib/cuon-utils.js"></script>
+		<script src="../lib/cuon-matrix-cse160.js"></script>
+
+		<!-- Add our asg js file -->
+		<script src="Cube.js"></script>
+		<script src="Sphere.js"></script>
+		<script src="asg4.js"></script>
+		<script src="renderAllShapes.js"></script>
+		<script src="Camera.js"></script>
+	</body>
+</html>

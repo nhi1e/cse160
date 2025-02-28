@@ -1,300 +1,91 @@
 class Cube {
 	constructor() {
-		this.type = "cube";
-		this.color = [1.0, 0.0, 0.0, 1];
+		this.color = [1.0, 1.0, 1.0, 1.0];
 		this.matrix = new Matrix4();
+		this.normalMatrix = new Matrix4();
 		this.textureNum = -2;
 
-		//1x1 cube origin in corner
-		this.verts = new Float32Array([
-			0,
-			0,
-			1,
-			1,
-			0,
-			1,
-			1,
-			1,
-			1, //back
-			0,
-			0,
-			1,
-			1,
-			1,
-			1,
-			0,
-			1,
-			1,
+		// Create buffers
+		this.vertexBuffer = gl.createBuffer();
+		this.uvBuffer = gl.createBuffer();
+		this.normalBuffer = gl.createBuffer();
 
-			1,
-			0,
-			1,
-			1,
-			0,
-			0,
-			1,
-			1,
-			0, //right
-			1,
-			0,
-			1,
-			1,
-			1,
-			0,
-			1,
-			1,
-			1,
-
-			1,
-			0,
-			0,
-			0,
-			0,
-			0,
-			0,
-			1,
-			0, //front
-			1,
-			0,
-			0,
-			0,
-			1,
-			0,
-			1,
-			1,
-			0,
-
-			0,
-			0,
-			0,
-			0,
-			0,
-			1,
-			0,
-			1,
-			1, //left
-			0,
-			0,
-			0,
-			0,
-			1,
-			1,
-			0,
-			1,
-			0,
-
-			0,
-			1,
-			1,
-			1,
-			1,
-			1,
-			1,
-			1,
-			0, //top
-			0,
-			1,
-			1,
-			1,
-			1,
-			0,
-			0,
-			1,
-			0,
-
-			1,
-			0,
-			1,
-			0,
-			0,
-			1,
-			0,
-			0,
-			0, //bottom
-			1,
-			0,
-			1,
-			0,
-			0,
-			0,
-			1,
-			0,
-			0,
+		// Define cube data (same as before)
+		this.vertices = new Float32Array([
+			// Front face
+			0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0,
+			// Back face
+			1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1,
+			// Top face
+			1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0,
+			// Bottom face
+			0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1,
+			// Left face
+			0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 1, 1,
+			// Right face
+			1, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 1,
 		]);
 
-		this.UVs = new Float32Array([
-			0.75,
-			0.25,
-			1.0,
-			0.25,
-			1.0,
-			0.5, //back
-			0.75,
-			0.25,
-			1.0,
-			0.5,
-			0.75,
-			0.5,
-
-			0.5,
-			0.25,
-			0.75,
-			0.25,
-			0.75,
-			0.5, //right
-			0.5,
-			0.25,
-			0.75,
-			0.5,
-			0.5,
-			0.5,
-
-			0.25,
-			0.25,
-			0.5,
-			0.25,
-			0.5,
-			0.5, //front
-			0.25,
-			0.25,
-			0.5,
-			0.5,
-			0.25,
-			0.5,
-
-			0.0,
-			0.25,
-			0.25,
-			0.25,
-			0.25,
-			0.5, //left
-			0.0,
-			0.25,
-			0.25,
-			0.5,
-			0.0,
-			0.5,
-
-			0.25,
-			0.5,
-			0.5,
-			0.5,
-			0.5,
-			0.75, //top
-			0.25,
-			0.5,
-			0.5,
-			0.75,
-			0.25,
-			0.75,
-
-			0.25,
-			0.0,
-			0.5,
-			0,
-			0.5,
-			0.25, //bottom
-			0.25,
-			0.0,
-			0.5,
-			0.25,
-			0.25,
-			0.25,
+		this.uvs = new Float32Array([
+			0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1,
+			0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0,
+			0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1,
 		]);
 
 		this.normals = new Float32Array([
-			// Back Face
-			0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1,
-
-			// Right Face
-			1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
-
-			// Front Face
-			0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
-
-			// Left Face
-			-1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
-
-			// Top Face
-			0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
-
-			// Bottom Face
-			0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
+			0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0,
+			1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0,
+			0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+			0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, 1, 0, 0, 1,
+			0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0,
 		]);
 
-		this.vertBuffer = null;
-		this.uvBuffer = null;
-		this.normalBuffer = null;
+		this.initBuffers();
+	}
+
+	initBuffers() {
+		// Bind and upload vertex data
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
+
+		// Bind and upload UV data
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, this.uvs, gl.STATIC_DRAW);
+
+		// Bind and upload normal data
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.STATIC_DRAW);
 	}
 
 	render() {
-		//console.log(this.textureNum)
-		//var xy = this.position
-		var rgba = this.color;
-		//var size = this.size
-
-		//pass texture number
-		// gl.uniform1i(u_whichTexture, this.textureNum);
-		gl.uniform1i(u_whichTexture, g_showNormals ? -3 : this.textureNum);
-
-		gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-
-		// pass the model matrix
+		// Set uniforms
+		gl.uniform1i(u_whichTexture, this.textureNum);
+		gl.uniform4f(
+			u_FragColor,
+			this.color[0],
+			this.color[1],
+			this.color[2],
+			this.color[3]
+		);
 		gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
+		gl.uniformMatrix4fv(u_NormalMatrix, false, this.normalMatrix.elements);
 
-		//new render code
-
-		if (this.vertBuffer === null) {
-			this.vertBuffer = gl.createBuffer();
-			if (!this.vertBuffer) {
-				console.log("Failed to create the buffer object");
-				return -1;
-			}
-		}
-
-		if (this.uvBuffer === null) {
-			this.uvBuffer = gl.createBuffer();
-			if (!this.uvBuffer) {
-				console.log("Failed to create the buffer object");
-				return -1;
-			}
-		}
-
-		if (this.normalBuffer === null) {
-			this.normalBuffer = gl.createBuffer();
-			if (!this.normalBuffer) {
-				console.log("Failed to create the buffer object");
-				return -1;
-			}
-		}
-
-		// Bind and pass position data
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, this.verts, gl.DYNAMIC_DRAW);
+		// Bind vertex buffer
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 		gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(a_Position);
 
-		if (g_showNormals) {
-			// Bind and pass normal data (enable normals)
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.DYNAMIC_DRAW);
-			gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(a_Normal);
+		// Bind UV buffer
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+		gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(a_UV);
 
-			// Disable UV attributes since normals are used
-			gl.disableVertexAttribArray(a_UV);
-		} else {
-			// Bind and pass UV data (enable textures)
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, this.UVs, gl.DYNAMIC_DRAW);
-			gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(a_UV);
+		// Bind Normal buffer
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+		gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(a_Normal);
 
-			// Disable normals since textures are used
-			gl.disableVertexAttribArray(a_Normal);
-		}
-
-		// Draw triangles
-		gl.drawArrays(gl.TRIANGLES, 0, this.verts.length / 3);
+		// Draw the cube using `gl.drawArrays`
+		gl.drawArrays(gl.TRIANGLES, 0, this.vertices.length / 3);
 	}
 }

@@ -1,125 +1,101 @@
+function cos(x) {
+	return Math.cos(x);
+}
+
+function sin(x) {
+	return Math.sin(x);
+}
+
 class Sphere {
-	constructor(subdivisions = 20) {
-		this.type = "sphere";
-		this.color = [1.0, 0.0, 0.0, 1];
+	constructor() {
+		this.color = [1.0, 1.0, 1.0, 1.0];
 		this.matrix = new Matrix4();
-		this.textureNum = 0;
-		this.subdivisions = subdivisions;
-
-		this.verts = [];
+		this.textureNum = -2;
+		this.vertices = [];
+		this.uvs = [];
 		this.normals = [];
-		this.UVs = [];
-
-		this.generateSphere();
-
-		// Create buffers
-		this.vertBuffer = null;
-		this.normalBuffer = null;
-		this.uvBuffer = null;
+		this.initSphere();
+		this.initBuffers();
 	}
 
-	generateSphere() {
-		let d = Math.PI / this.subdivisions; // Increment for latitude
-		let dLon = (2 * Math.PI) / this.subdivisions; // Increment for longitude
+	initSphere() {
+		const d = Math.PI / 10;
+		const dd = Math.PI / 10;
 
 		for (let t = 0; t < Math.PI; t += d) {
-			for (let r = 0; r < 2 * Math.PI; r += dLon) {
-				// Define four vertices of the sphere segment
-				let p1 = [
-					Math.sin(t) * Math.cos(r),
-					Math.sin(t) * Math.sin(r),
-					Math.cos(t),
-				];
-				let p2 = [
-					Math.sin(t + d) * Math.cos(r),
-					Math.sin(t + d) * Math.sin(r),
-					Math.cos(t + d),
-				];
-				let p3 = [
-					Math.sin(t) * Math.cos(r + dLon),
-					Math.sin(t) * Math.sin(r + dLon),
-					Math.cos(t),
-				];
+			for (let r = 0; r < 2 * Math.PI; r += d) {
+				let p1 = [sin(t) * cos(r), sin(t) * sin(r), cos(t)];
+				let p2 = [sin(t + dd) * cos(r), sin(t + dd) * sin(r), cos(t + dd)];
+				let p3 = [sin(t) * cos(r + dd), sin(t) * sin(r + dd), cos(t)];
 				let p4 = [
-					Math.sin(t + d) * Math.cos(r + dLon),
-					Math.sin(t + d) * Math.sin(r + dLon),
-					Math.cos(t + d),
+					sin(t + dd) * cos(r + dd),
+					sin(t + dd) * sin(r + dd),
+					cos(t + dd),
 				];
 
-				// Compute normals (same as position for unit sphere)
-				let n1 = [...p1];
-				let n2 = [...p2];
-				let n3 = [...p3];
-				let n4 = [...p4];
+				let uv1 = [t / Math.PI, r / (2 * Math.PI)];
+				let uv2 = [(t + dd) / Math.PI, r / (2 * Math.PI)];
+				let uv3 = [t / Math.PI, (r + dd) / (2 * Math.PI)];
+				let uv4 = [(t + dd) / Math.PI, (r + dd) / (2 * Math.PI)];
 
-				// UV Coordinates (basic spherical mapping)
-				let uv1 = [r / (2 * Math.PI), t / Math.PI];
-				let uv2 = [r / (2 * Math.PI), (t + d) / Math.PI];
-				let uv3 = [(r + dLon) / (2 * Math.PI), t / Math.PI];
-				let uv4 = [(r + dLon) / (2 * Math.PI), (t + d) / Math.PI];
-
-				// First triangle
-				this.verts.push(...p1, ...p2, ...p4);
-				this.normals.push(...n1, ...n2, ...n4);
-				this.UVs.push(...uv1, ...uv2, ...uv4);
-
-				// Second triangle
-				this.verts.push(...p1, ...p4, ...p3);
-				this.normals.push(...n1, ...n4, ...n3);
-				this.UVs.push(...uv1, ...uv4, ...uv3);
+				this.addTriangle(p1, p2, p4, uv1, uv2, uv4);
+				this.addTriangle(p1, p4, p3, uv1, uv4, uv3);
 			}
 		}
+	}
 
-		// Convert arrays to Float32Array for WebGL
-		this.verts = new Float32Array(this.verts);
-		this.normals = new Float32Array(this.normals);
-		this.UVs = new Float32Array(this.UVs);
+	addTriangle(p1, p2, p3, uv1, uv2, uv3) {
+		this.vertices.push(...p1, ...p2, ...p3);
+		this.uvs.push(...uv1, ...uv2, ...uv3);
+
+		// Normals (same as position for a sphere)
+		this.normals.push(...p1, ...p2, ...p3);
+	}
+
+	initBuffers() {
+		this.vertexBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+		gl.bufferData(
+			gl.ARRAY_BUFFER,
+			new Float32Array(this.vertices),
+			gl.STATIC_DRAW
+		);
+
+		this.uvBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uvs), gl.STATIC_DRAW);
+
+		this.normalBuffer = gl.createBuffer();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+		gl.bufferData(
+			gl.ARRAY_BUFFER,
+			new Float32Array(this.normals),
+			gl.STATIC_DRAW
+		);
 	}
 
 	render() {
-		var rgba = this.color;
+		gl.uniform1i(u_whichTexture, this.textureNum);
+		gl.uniform4f(u_FragColor, ...this.color);
 
-		// Pass texture mode (normals or texture)
-		gl.uniform1i(u_whichTexture, g_showNormals ? -3 : this.textureNum);
-		gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
-
-		// Pass the model matrix
 		gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
 
-		// Create buffers if they don't exist
-		if (this.vertBuffer === null) {
-			this.vertBuffer = gl.createBuffer();
-		}
-		if (this.uvBuffer === null) {
-			this.uvBuffer = gl.createBuffer();
-		}
-		if (this.normalBuffer === null) {
-			this.normalBuffer = gl.createBuffer();
-		}
-
-		// Bind and pass position data
-		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertBuffer);
-		gl.bufferData(gl.ARRAY_BUFFER, this.verts, gl.DYNAMIC_DRAW);
+		// Enable and bind vertex positions
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
 		gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
 		gl.enableVertexAttribArray(a_Position);
 
-		if (g_showNormals) {
-			// Use normal visualization
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, this.normals, gl.DYNAMIC_DRAW);
-			gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(a_Normal);
-			gl.disableVertexAttribArray(a_UV);
-		} else {
-			// Use UV mapping for texture
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, this.UVs, gl.DYNAMIC_DRAW);
-			gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
-			gl.enableVertexAttribArray(a_UV);
-			gl.disableVertexAttribArray(a_Normal);
-		}
+		// Enable and bind UV coordinates
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
+		gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(a_UV);
 
-		// Draw triangles
-		gl.drawArrays(gl.TRIANGLES, 0, this.verts.length / 3);
+		// Enable and bind normals
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer);
+		gl.vertexAttribPointer(a_Normal, 3, gl.FLOAT, false, 0, 0);
+		gl.enableVertexAttribArray(a_Normal);
+
+		// Draw the sphere using TRIANGLES
+		gl.drawArrays(gl.TRIANGLES, 0, this.vertices.length / 3);
 	}
 }
