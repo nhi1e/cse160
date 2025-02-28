@@ -21,64 +21,91 @@ var VSHADER_SOURCE = `
 
 // Fragment shader program ========================================
 var FSHADER_SOURCE = `
-    precision mediump float;
-    varying vec2 v_UV;
-    varying vec3 v_Normal;
-    uniform vec4 u_FragColor;
-    uniform sampler2D u_Sampler0;
-    // uniform sampler2D u_Sampler1;
-    uniform int u_whichTexture;
-    uniform vec3 u_lightPos;
-    uniform vec3 u_cameraPos;
-    varying vec4 v_VertPos;
-    uniform bool u_lightOn;
+precision mediump float;
+	varying vec2 v_UV;
+	varying vec3 v_Normal;
+	uniform vec4 u_FragColor;
+	uniform sampler2D u_Sampler0;
+	uniform int u_whichTexture;
+	uniform vec3 u_lightPos;
+	uniform vec3 u_cameraPos;
+	varying vec4 v_VertPos;
+	uniform bool u_lightOn;
 
-    void main() {
-      if(u_whichTexture == -3){
-         gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0); // Use normal
-      } else if(u_whichTexture == -2){
-         gl_FragColor = u_FragColor;                  // Use color
-      } else if (u_whichTexture == -1){
-         gl_FragColor = vec4(v_UV, 1.0, 1.0);         // Use UV debug color
-      } else if(u_whichTexture == 0){
-         gl_FragColor = texture2D(u_Sampler0, v_UV);  // Use texture0
-      } else {
-         gl_FragColor = vec4(1,.2,.2,1);              // Error, Red
-      }
+	// Spotlight uniforms
+	uniform vec3 u_spotPosition;
+	uniform vec3 u_spotDirection;
+	uniform float u_spotCutoff;
+	uniform float u_spotExponent;
+	uniform bool u_spotlightOn;
+	uniform vec3 u_spotColor; // Added: Spotlight color
 
-      vec3 lightVector = u_lightPos-vec3(v_VertPos);
-      float r = length(lightVector);
 
-      // Red/Green Distance Visualization
-      // if(r<1.0){
-      //    gl_FragColor = vec4(1,0,0,1);
-      // } else if (r<2.0){
-      //    gl_FragColor = vec4(0,1,0,1);
-      // }
 
-      // Light Falloff Visualization 1/r^2
-      // gl_FragColor = vec4(vec3(gl_FragColor)/(r*r),1);
+	void main() {
+		if(u_whichTexture == -3){
+			gl_FragColor = vec4((v_Normal+1.0)/2.0, 1.0); // Use normal
+		} else if(u_whichTexture == -2){
+			gl_FragColor = u_FragColor;                  // Use color
+		} else if (u_whichTexture == -1){
+			gl_FragColor = vec4(v_UV, 1.0, 1.0);         // Use UV debug color
+		} else if(u_whichTexture == 0){
+			gl_FragColor = texture2D(u_Sampler0, v_UV);  // Use texture0
+		} else {
+			gl_FragColor = vec4(1,.2,.2,1);              // Error, Red
+		}
 
-      // N dot L
-      vec3 L = normalize(lightVector);
-      vec3 N = normalize(v_Normal);
-      float nDotL = max(dot(N,L), 0.0);
+		vec3 lightVector = u_lightPos-vec3(v_VertPos);
+		float r = length(lightVector);
 
-      // Reflection
-      vec3 R = reflect(-L,N);
+		// Red/Green Distance Visualization
+		// if(r<1.0){
+		//    gl_FragColor = vec4(1,0,0,1);
+		// } else if (r<2.0){
+		//    gl_FragColor = vec4(0,1,0,1);
+		// }
 
-      // eye
-      vec3 E = normalize(u_cameraPos-vec3(v_VertPos));
+		// Light Falloff Visualization 1/r^2
+		// gl_FragColor = vec4(vec3(gl_FragColor)/(r*r),1);
 
-      // Specular
-      float specular = pow(max(dot(E,R), 0.0), 10.0)* 0.7;
+		// N dot L
+		vec3 L = normalize(lightVector);
+		vec3 N = normalize(v_Normal);
+		float nDotL = max(dot(N,L), 0.0);
 
-      vec3 diffuse = vec3(gl_FragColor) * nDotL * 0.9;
-      vec3 ambient = vec3(gl_FragColor) * 0.3;
-      if(u_lightOn){
-            gl_FragColor = vec4(specular+diffuse+ambient, 1.0);
-      }
-    }`;
+		// Reflection
+		vec3 R = reflect(-L,N);
+
+		// eye
+		vec3 E = normalize(u_cameraPos-vec3(v_VertPos));
+
+		// Specular
+		float specular = pow(max(dot(E,R), 0.0), 10.0)* 0.7;
+
+		vec3 diffuse = vec3(gl_FragColor) * nDotL * 0.9;
+		vec3 ambient = vec3(gl_FragColor) * 0.3;
+		vec3 finalColor = ambient;
+
+		if(u_lightOn){
+			finalColor += diffuse + specular;
+		}
+
+	// Spotlight Calculation
+	if (u_spotlightOn) {
+        vec3 spotDir = normalize(-u_spotDirection);
+        vec3 spotVector = normalize(u_spotPosition - vec3(v_VertPos));
+        float spotCosine = dot(spotDir, spotVector);
+
+        if (spotCosine > cos(radians(u_spotCutoff))) {
+            float spotFactor = pow(spotCosine, u_spotExponent);
+            vec3 spotEffect = u_spotColor * spotFactor; // Spotlight color influence
+            finalColor += spotEffect;
+        }
+    }
+	gl_FragColor = vec4(finalColor, 1.0);
+
+    }
+`;
 
 // Global Variables ===============================================
 var gl;
@@ -102,6 +129,11 @@ var u_cameraPos;
 var g_camera;
 
 // Camera Movement
+var u_spotPosition;
+var u_spotDirection;
+var u_spotCutoff;
+var u_spotExponent;
+var g_spotlightOn;
 
 // UI
 var gAnimalGlobalRotation = 0; // Camera
@@ -164,6 +196,14 @@ function addActionsForHtmlUI() {
 	};
 	document.getElementById("light_off").onclick = function () {
 		g_lightOn = false;
+	};
+	document.getElementById("spotlight_on").onclick = function () {
+		g_spotlightOn = true;
+		renderScene();
+	};
+	document.getElementById("spotlight_off").onclick = function () {
+		g_spotlightOn = false;
+		renderScene();
 	};
 }
 
@@ -290,6 +330,27 @@ function connectVariablesToGLSL() {
 
 	var identityM = new Matrix4();
 	gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
+
+	// Existing light uniforms
+	u_lightOn = gl.getUniformLocation(gl.program, "u_lightOn");
+
+	// Spotlight uniforms
+	u_spotPosition = gl.getUniformLocation(gl.program, "u_spotPosition");
+	u_spotDirection = gl.getUniformLocation(gl.program, "u_spotDirection");
+	u_spotCutoff = gl.getUniformLocation(gl.program, "u_spotCutoff");
+	u_spotExponent = gl.getUniformLocation(gl.program, "u_spotExponent");
+	u_spotlightOn = gl.getUniformLocation(gl.program, "u_spotlightOn");
+	u_spotColor = gl.getUniformLocation(gl.program, "u_spotColor");
+	if (
+		!u_spotPosition ||
+		!u_spotDirection ||
+		!u_spotCutoff ||
+		!u_spotExponent ||
+		!u_spotlightOn
+	) {
+		console.log("Failed to get spotlight uniforms.");
+		return;
+	}
 }
 
 // Texture Stuff ==================================================
@@ -340,9 +401,6 @@ function main() {
 	addActionsForHtmlUI();
 
 	document.onkeydown = keydown;
-	// canvas.onmousemove = function(ev){
-	//    mouseCam(ev);
-	// }
 
 	initTextures();
 
@@ -432,7 +490,17 @@ function renderScene() {
 	var globalRotMat = new Matrix4().rotate(gAnimalGlobalRotation, 0, 1, 0);
 	gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
-	// Clear <canvas>
+	gl.uniform1i(u_lightOn, g_lightOn);
+	gl.uniform1i(u_spotlightOn, g_spotlightOn);
+
+	// Set spotlight properties
+	gl.uniform3fv(u_spotPosition, new Float32Array([0.5, 1.0, -2.5]));
+	gl.uniform3fv(u_spotDirection, new Float32Array([0.0, -1.0, 0.0]));
+	gl.uniform1f(u_spotCutoff, 30.0); // Cutoff angle in degrees
+	gl.uniform1f(u_spotExponent, 10.0); // Spot intensity falloff
+	const spotColor = [0.3, 0.3, 0.9]; // Warm yellow spotlight
+	gl.uniform3fv(u_spotColor, new Float32Array(spotColor));
+
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 	gl.clear(gl.COLOR_BUFFER_BIT);
