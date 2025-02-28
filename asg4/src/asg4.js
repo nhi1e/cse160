@@ -26,6 +26,7 @@ precision mediump float;
 	varying vec3 v_Normal;
 	uniform vec4 u_FragColor;
 	uniform sampler2D u_Sampler0;
+	uniform sampler2D u_Sampler1;
 	uniform int u_whichTexture;
 	uniform vec3 u_lightPos;
 	uniform vec3 u_cameraPos;
@@ -38,9 +39,7 @@ precision mediump float;
 	uniform float u_spotCutoff;
 	uniform float u_spotExponent;
 	uniform bool u_spotlightOn;
-	uniform vec3 u_spotColor; // Added: Spotlight color
-
-
+	uniform vec3 u_spotColor; 
 
 	void main() {
 		if(u_whichTexture == -3){
@@ -51,8 +50,10 @@ precision mediump float;
 			gl_FragColor = vec4(v_UV, 1.0, 1.0);         // Use UV debug color
 		} else if(u_whichTexture == 0){
 			gl_FragColor = texture2D(u_Sampler0, v_UV);  // Use texture0
+		} else if(u_whichTexture == 1){
+		 	gl_FragColor = texture2D(u_Sampler1, v_UV);  // Use texture1
 		} else {
-			gl_FragColor = vec4(1,.2,.2,1);              // Error, Red
+			gl_FragColor = vec4(1,.2,.2,1);              
 		}
 
 		vec3 lightVector = u_lightPos-vec3(v_VertPos);
@@ -65,7 +66,7 @@ precision mediump float;
 		//    gl_FragColor = vec4(0,1,0,1);
 		// }
 
-		// Light Falloff Visualization 1/r^2
+		// Light Falloff Visualization 
 		// gl_FragColor = vec4(vec3(gl_FragColor)/(r*r),1);
 
 		// N dot L
@@ -114,7 +115,6 @@ var a_Position;
 var a_UV;
 var a_Normal;
 var u_FragColor;
-var u_Size;
 var u_ModelMatrix;
 var u_NormalMatrix;
 var u_ProjectionMatrix;
@@ -126,20 +126,19 @@ var u_whichTexture;
 var u_lightPos;
 var u_cameraPos;
 
+// Camera
 var g_camera;
 
-// Camera Movement
+// Spotlight
 var u_spotPosition;
 var u_spotDirection;
 var u_spotCutoff;
 var u_spotExponent;
 var g_spotlightOn;
+var g_spotColor = [0.3, 0.3, 0.9];
 
 // UI
 var gAnimalGlobalRotation = 0; // Camera
-var g_jointAngle = 0; // Joint 1
-var head_animation = 0;
-var g_jointAngle2 = 0; // Joint 2
 var g_Animation = false; // Joint 2
 var g_normalOn = false;
 var g_lightOn = true;
@@ -230,6 +229,27 @@ function addActionsForHtmlUI() {
 				renderScene();
 			}
 		});
+	// Spotlight color sliders
+	document
+		.getElementById("spotlight_red")
+		.addEventListener("input", function () {
+			g_spotColor[0] = this.value / 255;
+			renderScene();
+		});
+
+	document
+		.getElementById("spotlight_green")
+		.addEventListener("input", function () {
+			g_spotColor[1] = this.value / 255;
+			renderScene();
+		});
+
+	document
+		.getElementById("spotlight_blue")
+		.addEventListener("input", function () {
+			g_spotColor[2] = this.value / 255;
+			renderScene();
+		});
 }
 
 // Get Canvas and GL Context ======================================
@@ -278,35 +298,30 @@ function connectVariablesToGLSL() {
 		return;
 	}
 
-	// Get the storage location of attribute variable ==============
 	u_whichTexture = gl.getUniformLocation(gl.program, "u_whichTexture");
 	if (!u_whichTexture) {
 		console.log("Failed to get u_whichTexture");
 		return;
 	}
 
-	// Get the storage location of attribute variable ==============
 	u_lightOn = gl.getUniformLocation(gl.program, "u_lightOn");
 	if (!u_lightOn) {
 		console.log("Failed to get u_lightOn");
 		return;
 	}
 
-	// Get the storage location of attribute variable ==============
 	u_FragColor = gl.getUniformLocation(gl.program, "u_FragColor");
 	if (!u_FragColor) {
 		console.log("Failed to get u_FragColor");
 		return;
 	}
 
-	// Get the storage location of attribute variable ==============
 	u_lightPos = gl.getUniformLocation(gl.program, "u_lightPos");
 	if (!u_lightPos) {
 		console.log("Failed to get u_lightPos");
 		return;
 	}
 
-	// Get the storage location of attribute variable ==============
 	u_cameraPos = gl.getUniformLocation(gl.program, "u_cameraPos");
 	if (!u_cameraPos) {
 		console.log("Failed to get u_cameraPos");
@@ -346,17 +361,21 @@ function connectVariablesToGLSL() {
 		return;
 	}
 
-	// Get the storage location of u_Sampler0
 	u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
 	if (!u_Sampler0) {
 		console.log("Failed to get the storage location of u_Sampler0");
 		return false;
 	}
 
+	u_Sampler1 = gl.getUniformLocation(gl.program, "u_Sampler1");
+	if (!u_Sampler1) {
+		console.log("Failed to get the storage location of u_Sampler1");
+		return false;
+	}
+
 	var identityM = new Matrix4();
 	gl.uniformMatrix4fv(u_ModelMatrix, false, identityM.elements);
 
-	// Existing light uniforms
 	u_lightOn = gl.getUniformLocation(gl.program, "u_lightOn");
 
 	// Spotlight uniforms
@@ -386,6 +405,13 @@ function initTextures() {
 		sendTextureToTEXTURE0(image);
 	};
 	image.src = "sphere.png";
+
+	var image2 = new Image(); // Create the image object
+	// Register the event handler to be called on loading an image
+	image2.onload = function () {
+		sendTextureToTEXTURE1(image2);
+	};
+	image2.src = "floor.jpg";
 	return true;
 }
 
@@ -417,6 +443,30 @@ function sendTextureToTEXTURE0(image) {
 	gl.uniform1i(u_Sampler0, 0);
 }
 
+function sendTextureToTEXTURE1(image) {
+	var texture = gl.createTexture();
+	if (!texture) {
+		console.log("Failed to create the texture object");
+		return false;
+	}
+
+	gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1); // Flip the image's y axis
+	gl.activeTexture(gl.TEXTURE1);
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+	if (isPowerOf2(image.width) && isPowerOf2(image.height)) {
+		gl.generateMipmap(gl.TEXTURE_2D);
+	} else {
+		// Set the texture parameters
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+		gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+	}
+
+	gl.uniform1i(u_Sampler1, 1);
+}
+
 // Main ===========================================================
 function main() {
 	g_camera = new Camera();
@@ -429,19 +479,17 @@ function main() {
 
 	initTextures();
 
-	// Specify the color for clearing <canvas>
 	gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
 	requestAnimationFrame(tick);
-} // end of main
+}
 
 // Movement =======================================================
 function convertCoordinatesEventToGL(ev) {
-	var x = ev.clientX; // x coordinate of a mouse pointer
-	var y = ev.clientY; // y coordinate of a mouse pointer
+	var x = ev.clientX;
+	var y = ev.clientY;
 	var rect = ev.target.getBoundingClientRect();
 
-	// set coordinates based on origin
 	x = (x - rect.left - canvas.width / 2) / (canvas.width / 2);
 	y = (canvas.height / 2 - (y - rect.top)) / (canvas.height / 2);
 
@@ -523,8 +571,7 @@ function renderScene() {
 	gl.uniform3fv(u_spotDirection, new Float32Array([0.0, -1.0, 0.0]));
 	gl.uniform1f(u_spotCutoff, 30.0); // Cutoff angle in degrees
 	gl.uniform1f(u_spotExponent, 10.0); // Spot intensity falloff
-	const spotColor = [0.3, 0.3, 0.9]; // Warm yellow spotlight
-	gl.uniform3fv(u_spotColor, new Float32Array(spotColor));
+	gl.uniform3fv(u_spotColor, new Float32Array(g_spotColor));
 
 	// Clear <canvas>
 	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);

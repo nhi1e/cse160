@@ -14,8 +14,8 @@ function renderAllShapes() {
 	sphere.color = [0.9, 0.6, 0.95, 1];
 	sphere.textureNum = 0;
 	if (g_normalOn) sphere.textureNum = -3;
-	sphere.matrix.scale(3, 3, 3);
-	sphere.matrix.translate(0, -1, -1.3);
+	sphere.matrix.scale(2.2, 2.2, 2.2);
+	sphere.matrix.translate(0, -1, -0.8);
 	sphere.render();
 
 	// Point Light ==================================
@@ -27,21 +27,32 @@ function renderAllShapes() {
 	light.matrix.translate(-0.5, -1, -0.5);
 	light.render();
 
+	// Spot Light ==================================
+	var spot = new Cube();
+	spot.color = [0, 0, 2, 1];
+	spot.matrix.translate(
+		g_spotlightPos[0],
+		g_spotlightPos[1],
+		g_spotlightPos[2]
+	);
+	spot.matrix.scale(-0.1, -0.1, -0.1);
+	spot.render();
+
 	// Sky =====================================
-	var sky = new Cube();
-	sky.color = [0.5, 0.5, 0.5, 1];
-	// sky.textureNum = 1;
-	if (g_normalOn) sky.textureNum = -3;
-	sky.matrix.scale(-10, -10, -10);
-	sky.matrix.translate(-0.5, -0.5, -0.5);
-	sky.render();
+	var room = new Cube();
+	room.color = [0.5, 0.5, 0.5, 1];
+	if (g_normalOn) room.textureNum = -3;
+	room.matrix.scale(-10, -10, -10);
+	room.matrix.translate(-0.5, -0.5, -0.5);
+	room.render();
 
 	// Floor ===================================
-	// var floor = new Cube();
-	// floor.color = [0.2, 0.9, 0.4, 1];
-	// floor.textureNum = 1;
-	// floor.matrix.translate(0, -0.25, 0);
-	// floor.matrix.scale(10, 0, 10);
-	// floor.matrix.translate(-0.5, 0, -0.5);
-	// floor.render();
+	var floor = new Cube();
+	floor.color = [0.2, 0.9, 0.4, 1];
+	floor.textureNum = 1;
+	if (g_normalOn) floor.textureNum = -3;
+	floor.matrix.translate(0, -4.8, 0);
+	floor.matrix.scale(10, 0, 10);
+	floor.matrix.translate(-0.5, 0, -0.5);
+	floor.render();
 }

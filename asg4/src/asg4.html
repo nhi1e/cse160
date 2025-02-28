@@ -60,6 +60,7 @@
 		<label for="spotlight_on">Spotlight: </label>
 		<button id="spotlight_on">ON</button>
 		<button id="spotlight_off">OFF</button>
+		<br />
 		<label for="lightx">Spotlight X</label>
 		<input
 			type="range"
@@ -89,10 +90,45 @@
 			value="100"
 			class="slider"
 		/><br />
+		<br />
+		<label for="spotlight_red">Spotlight Color: R</label>
+		<input
+			type="range"
+			id="spotlight_red"
+			name="spotlight_red"
+			min="0"
+			max="255"
+			value="76"
+			class="slider"
+		/>
+		<label for="spotlight_green">G</label>
+		<input
+			type="range"
+			id="spotlight_green"
+			name="spotlight_green"
+			min="0"
+			max="255"
+			value="76"
+			class="slider"
+		/>
+		<label for="spotlight_blue">B</label>
+		<input
+			type="range"
+			id="spotlight_blue"
+			name="spotlight_blue"
+			min="0"
+			max="255"
+			value="230"
+			class="slider"
+		/>
+		<br />
+
 
 		<p>
 			WASD / Arrow Keys to move. <br />
 			Q/E to rotate right.<br />
+			Yellow cube indicates phong lighting.<br />
+			Blue cube indicates spotlight.<br />
 		</p>
 
 		<script src="../lib/webgl-utils.js"></script>
