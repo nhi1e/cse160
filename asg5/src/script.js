@@ -88,14 +88,16 @@ const portalLightMaterial = new THREE.ShaderMaterial({
 	vertexShader: portalVertexShader,
 	fragmentShader: portalFragmentShader,
 });
-const poleLightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
+
+// ✅ Debug object
+debugObject.showLightHelpers = true;
+
+// ✅ Declare variables for pole light helpers globally
+let poleLightAHelper, poleLightBHelper;
 /*
  * Load model
  */
 gltfLoader.load("portal2.glb", (gltf) => {
-	gltf.scene.traverse((child) => {
-		child.material = bakedMaterial;
-	});
 	scene.add(gltf.scene);
 
 	const bakedMesh = gltf.scene.children.find((child) => child.name === "baked");
@@ -109,13 +111,67 @@ gltfLoader.load("portal2.glb", (gltf) => {
 		(child) => child.name === "portalLight"
 	);
 
-	// apply materials
 	bakedMesh.material = bakedMaterial;
+	portalLightMesh.material = portalLightMaterial;
+
+	const poleLightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
 	poleLightAMesh.material = poleLightMaterial;
 	poleLightBMesh.material = poleLightMaterial;
-	portalLightMesh.material = portalLightMaterial;
+
+	const poleLightA = new THREE.PointLight(0xffeeaa, 3, 5); // Warm, soft light
+	const poleLightB = new THREE.PointLight(0xffeeaa, 3, 5);
+
+	// Position the lights at the pole lights' positions
+	poleLightA.position.copy(poleLightAMesh.position);
+	poleLightB.position.copy(poleLightBMesh.position);
+
+	// Attach the lights to the scene
+	scene.add(poleLightA);
+	scene.add(poleLightB);
+
+	poleLightAHelper = new THREE.PointLightHelper(poleLightA, 0.5);
+	poleLightBHelper = new THREE.PointLightHelper(poleLightB, 0.5);
+	scene.add(poleLightAHelper);
+	scene.add(poleLightBHelper);
+
+	poleLightAHelper.visible = debugObject.showLightHelpers;
+	poleLightBHelper.visible = debugObject.showLightHelpers;
 });
 
+/**
+ * Lights
+ */
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(5, 5, 5);
+scene.add(directionalLight);
+
+const pointLight = new THREE.PointLight(0xffaa00, 2, 20);
+pointLight.position.set(0, 3, 3);
+scene.add(pointLight);
+
+const dirLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
+const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.5);
+
+scene.add(dirLightHelper);
+scene.add(pointLightHelper);
+
+gui
+	.add(debugObject, "showLightHelpers")
+	.name("Show Light Helpers")
+	.onChange((value) => {
+		dirLightHelper.visible = value;
+		pointLightHelper.visible = value;
+
+		if (poleLightAHelper) poleLightAHelper.visible = value;
+		if (poleLightBHelper) poleLightBHelper.visible = value;
+	});
+
+dirLightHelper.visible = debugObject.showLightHelpers;
+pointLightHelper.visible = debugObject.showLightHelpers;
 /**
  * fireflies
  */
@@ -164,51 +220,6 @@ gui
 //points
 const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial);
 scene.add(fireflies);
-
-/**
- * Lights
- */
-
-// Ambient Light (soft overall illumination)
-const ambientLight = new THREE.AmbientLight(0xffffff, 2);
-scene.add(ambientLight);
-
-// Directional Light (mimics sunlight)
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(5, 5, 5);
-scene.add(directionalLight);
-
-// Point Light (localized glow)
-const pointLight = new THREE.PointLight(0xffaa00, 2, 20);
-pointLight.position.set(0, 3, 3);
-scene.add(pointLight);
-
-// Light Helpers (for debugging)
-const dirLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
-scene.add(dirLightHelper);
-
-const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.5);
-scene.add(pointLightHelper);
-
-// GUI Controls for Lights
-gui
-	.add(ambientLight, "intensity")
-	.min(0)
-	.max(2)
-	.step(0.1)
-	.name("Ambient Light Intensity");
-gui
-	.add(directionalLight, "intensity")
-	.min(0)
-	.max(2)
-	.step(0.1)
-	.name("Directional Light Intensity");
-gui
-	.add(pointLight, "intensity")
-	.min(0)
-	.max(5)
-	.step(0.1)
-	.name("Point Light Intensity");
 
 /**
  * Sizes
@@ -267,11 +278,6 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-debugObject.clearColor = "#201919";
-renderer.setClearColor(debugObject.clearColor);
-gui.addColor(debugObject, "clearColor").onChange(() => {
-	renderer.setClearColor(debugObject.clearColor);
-});
 /**
  * Animate
  */
