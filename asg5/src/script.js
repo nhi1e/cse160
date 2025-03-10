@@ -5,7 +5,11 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import firefliesVertexShader from "./shaders/fireflies/vertex.glsl";
 import firefliesFragmentShader from "./shaders/fireflies/fragment.glsl";
+import portalVertexShader from "./shaders/portal/vertex.glsl";
+import portalFragmentShader from "./shaders/portal/fragment.glsl";
 
+console.log(portalVertexShader);
+console.log(portalFragmentShader);
 /**
  * Base
  */
@@ -49,9 +53,9 @@ bakedTexture.encoding = THREE.sRGBEncoding;
  * Materials
  */
 const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture });
-const portalLightMaterial = new THREE.MeshBasicMaterial({
-	color: 0xffffff,
-	side: THREE.DoubleSide,
+const portalLightMaterial = new THREE.ShaderMaterial({
+	vertexShader: portalVertexShader,
+	fragmentShader: portalFragmentShader,
 });
 const poleLightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
 /*
@@ -112,7 +116,7 @@ const firefliesMaterial = new THREE.ShaderMaterial({
 	uniforms: {
 		uTime: { value: 0 },
 		uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
-		uSize: { value: 150 },
+		uSize: { value: 250 },
 	},
 	transparent: true,
 	vertexShader: firefliesVertexShader,
@@ -123,7 +127,7 @@ const firefliesMaterial = new THREE.ShaderMaterial({
 gui
 	.add(firefliesMaterial.uniforms.uSize, "value")
 	.min(50)
-	.max(200)
+	.max(300)
 	.step(1)
 	.name("firefliesSize");
 //points
@@ -187,7 +191,7 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-debugObject.clearColor = "#01053c";
+debugObject.clearColor = "#100029";
 renderer.setClearColor(debugObject.clearColor);
 gui.addColor(debugObject, "clearColor").onChange(() => {
 	renderer.setClearColor(debugObject.clearColor);
