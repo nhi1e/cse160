@@ -3,6 +3,8 @@ import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import firefliesVertexShader from "./shaders/fireflies/vertex.glsl";
+import firefliesFragmentShader from "./shaders/fireflies/fragment.glsl";
 
 /**
  * Base
@@ -102,9 +104,9 @@ firefliesGeometry.setAttribute(
 	new THREE.BufferAttribute(positionArray, 3)
 );
 //material
-const firefliesMaterial = new THREE.PointsMaterial({
-	size: 0.1,
-	sizeAttenuation: true,
+const firefliesMaterial = new THREE.ShaderMaterial({
+	vertexShader: firefliesVertexShader,
+	fragmentShader: firefliesFragmentShader,
 });
 
 //points
