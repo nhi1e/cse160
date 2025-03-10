@@ -8,6 +8,7 @@ import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
  * Base
  */
 // Debug
+const debugObject = {};
 const gui = new GUI({
 	width: 400,
 });
@@ -46,7 +47,10 @@ bakedTexture.encoding = THREE.sRGBEncoding;
  * Materials
  */
 const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture });
-const portalLightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+const portalLightMaterial = new THREE.MeshBasicMaterial({
+	color: 0xffffff,
+	side: THREE.DoubleSide,
+});
 const poleLightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
 /*
  * Load model
@@ -57,9 +61,7 @@ gltfLoader.load("portal2.glb", (gltf) => {
 	});
 	scene.add(gltf.scene);
 
-	const bakedMesh = gltf.scene.children.find(
-		(child) => child.name === "baked"
-	);
+	const bakedMesh = gltf.scene.children.find((child) => child.name === "baked");
 	const poleLightAMesh = gltf.scene.children.find(
 		(child) => child.name === "poleLightA"
 	);
@@ -81,6 +83,33 @@ gltfLoader.load("portal2.glb", (gltf) => {
 	poleLightBMesh.material = poleLightMaterial;
 	portalLightMesh.material = portalLightMaterial;
 });
+
+/**
+ * fireflies
+ */
+
+const firefliesGeometry = new THREE.BufferGeometry();
+const firefliesCount = 30;
+const positionArray = new Float32Array(firefliesCount * 3);
+
+for (let i = 0; i < firefliesCount; i++) {
+	positionArray[i * 3 + 0] = (Math.random() - 0.5) * 4;
+	positionArray[i * 3 + 1] = Math.random() * 2;
+	positionArray[i * 3 + 2] = (Math.random() - 0.5) * 4;
+}
+firefliesGeometry.setAttribute(
+	"position",
+	new THREE.BufferAttribute(positionArray, 3)
+);
+//material
+const firefliesMaterial = new THREE.PointsMaterial({
+	size: 0.1,
+	sizeAttenuation: true,
+});
+
+//points
+const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial);
+scene.add(fireflies);
 
 /**
  * Sizes
@@ -133,6 +162,11 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
+debugObject.clearColor = "#01053c";
+renderer.setClearColor(debugObject.clearColor);
+gui.addColor(debugObject, "clearColor").onChange(() => {
+	renderer.setClearColor(debugObject.clearColor);
+});
 /**
  * Animate
  */
