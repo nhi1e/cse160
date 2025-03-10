@@ -74,11 +74,6 @@ gltfLoader.load("portal2.glb", (gltf) => {
 		(child) => child.name === "portalLight"
 	);
 
-	console.log(bakedMesh);
-	console.log(poleLightAMesh);
-	console.log(poleLightBMesh);
-	console.log(portalLightMesh);
-
 	// apply materials
 	bakedMesh.material = bakedMaterial;
 	poleLightAMesh.material = poleLightMaterial;
@@ -93,22 +88,44 @@ gltfLoader.load("portal2.glb", (gltf) => {
 const firefliesGeometry = new THREE.BufferGeometry();
 const firefliesCount = 30;
 const positionArray = new Float32Array(firefliesCount * 3);
+const scaleArray = new Float32Array(firefliesCount);
 
 for (let i = 0; i < firefliesCount; i++) {
 	positionArray[i * 3 + 0] = (Math.random() - 0.5) * 4;
 	positionArray[i * 3 + 1] = Math.random() * 2;
 	positionArray[i * 3 + 2] = (Math.random() - 0.5) * 4;
+
+	scaleArray[i] = Math.random();
 }
+
 firefliesGeometry.setAttribute(
 	"position",
 	new THREE.BufferAttribute(positionArray, 3)
 );
+firefliesGeometry.setAttribute(
+	"aScale",
+	new THREE.BufferAttribute(scaleArray, 1)
+);
+
 //material
 const firefliesMaterial = new THREE.ShaderMaterial({
+	uniforms: {
+		uTime: { value: 0 },
+		uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+		uSize: { value: 150 },
+	},
+	transparent: true,
 	vertexShader: firefliesVertexShader,
 	fragmentShader: firefliesFragmentShader,
+	blending: THREE.AdditiveBlending,
+	depthWrite: false,
 });
-
+gui
+	.add(firefliesMaterial.uniforms.uSize, "value")
+	.min(50)
+	.max(200)
+	.step(1)
+	.name("firefliesSize");
 //points
 const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial);
 scene.add(fireflies);
@@ -133,6 +150,12 @@ window.addEventListener("resize", () => {
 	// Update renderer
 	renderer.setSize(sizes.width, sizes.height);
 	renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+	// Update fireflies
+	firefliesMaterial.uniforms.uPixelRatio.value = Math.min(
+		window.devicePixelRatio,
+		2
+	);
 });
 
 /**
@@ -176,6 +199,9 @@ const clock = new THREE.Clock();
 
 const tick = () => {
 	const elapsedTime = clock.getElapsedTime();
+
+	// Update fireflies
+	firefliesMaterial.uniforms.uTime.value = elapsedTime;
 
 	// Update controls
 	controls.update();
