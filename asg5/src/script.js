@@ -53,7 +53,23 @@ bakedTexture.encoding = THREE.sRGBEncoding;
  * Materials
  */
 const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture });
+
+debugObject.portalColorStart = "#000000";
+debugObject.portalColorEnd = "#00fffb";
+gui.addColor(debugObject, "portalColorStart").onChange(() => {
+	portalLightMaterial.uniforms.uColorStart.value.set(
+		debugObject.portalColorStart
+	);
+});
+gui.addColor(debugObject, "portalColorEnd").onChange(() => {
+	portalLightMaterial.uniforms.uColorEnd.value.set(debugObject.portalColorEnd);
+});
 const portalLightMaterial = new THREE.ShaderMaterial({
+	uniforms: {
+		uTime: { value: 0 },
+		uColorStart: { value: new THREE.Color("#000000") },
+		uColorEnd: { value: new THREE.Color("#00fffb") },
+	},
 	vertexShader: portalVertexShader,
 	fragmentShader: portalFragmentShader,
 });
@@ -191,7 +207,7 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-debugObject.clearColor = "#100029";
+debugObject.clearColor = "#201919";
 renderer.setClearColor(debugObject.clearColor);
 gui.addColor(debugObject, "clearColor").onChange(() => {
 	renderer.setClearColor(debugObject.clearColor);
@@ -206,6 +222,8 @@ const tick = () => {
 
 	// Update fireflies
 	firefliesMaterial.uniforms.uTime.value = elapsedTime;
+
+	portalLightMaterial.uniforms.uTime.value = elapsedTime;
 
 	// Update controls
 	controls.update();
