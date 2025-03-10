@@ -8,8 +8,8 @@ import firefliesFragmentShader from "./shaders/fireflies/fragment.glsl";
 import portalVertexShader from "./shaders/portal/vertex.glsl";
 import portalFragmentShader from "./shaders/portal/fragment.glsl";
 
-console.log(portalVertexShader);
-console.log(portalFragmentShader);
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+
 /**
  * Base
  */
@@ -39,6 +39,16 @@ dracoLoader.setDecoderPath("draco/");
 const gltfLoader = new GLTFLoader();
 gltfLoader.setDRACOLoader(dracoLoader);
 
+// Load HDR Skybox
+const rgbeLoader = new RGBELoader();
+rgbeLoader.load("skybox.hdr", (texture) => {
+	texture.mapping = THREE.EquirectangularReflectionMapping;
+
+	// Apply the texture as the scene background and environment
+	scene.background = texture;
+	scene.environment = texture;
+});
+
 /**
  * Object
  */
@@ -52,7 +62,12 @@ bakedTexture.encoding = THREE.sRGBEncoding;
 /**
  * Materials
  */
-const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture });
+// const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture });
+const bakedMaterial = new THREE.MeshStandardMaterial({
+	map: bakedTexture, // Keeps your baked texture
+	roughness: 0.8, // Controls surface roughness
+	metalness: 0.2, // Adds slight reflectivity
+});
 
 debugObject.portalColorStart = "#000000";
 debugObject.portalColorEnd = "#00fffb";
@@ -149,6 +164,51 @@ gui
 //points
 const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial);
 scene.add(fireflies);
+
+/**
+ * Lights
+ */
+
+// Ambient Light (soft overall illumination)
+const ambientLight = new THREE.AmbientLight(0xffffff, 2);
+scene.add(ambientLight);
+
+// Directional Light (mimics sunlight)
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(5, 5, 5);
+scene.add(directionalLight);
+
+// Point Light (localized glow)
+const pointLight = new THREE.PointLight(0xffaa00, 2, 20);
+pointLight.position.set(0, 3, 3);
+scene.add(pointLight);
+
+// Light Helpers (for debugging)
+const dirLightHelper = new THREE.DirectionalLightHelper(directionalLight, 1);
+scene.add(dirLightHelper);
+
+const pointLightHelper = new THREE.PointLightHelper(pointLight, 0.5);
+scene.add(pointLightHelper);
+
+// GUI Controls for Lights
+gui
+	.add(ambientLight, "intensity")
+	.min(0)
+	.max(2)
+	.step(0.1)
+	.name("Ambient Light Intensity");
+gui
+	.add(directionalLight, "intensity")
+	.min(0)
+	.max(2)
+	.step(0.1)
+	.name("Directional Light Intensity");
+gui
+	.add(pointLight, "intensity")
+	.min(0)
+	.max(5)
+	.step(0.1)
+	.name("Point Light Intensity");
 
 /**
  * Sizes
