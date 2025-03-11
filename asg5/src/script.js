@@ -407,6 +407,14 @@ instructions
 		"first_person_cam"
 	)
 	.disable();
+instructions
+	.add(
+		{
+			portal_shader: "created with perlin noise ",
+		},
+		"portal_shader"
+	)
+	.disable();
 
 
 
