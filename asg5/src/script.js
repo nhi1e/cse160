@@ -7,7 +7,6 @@ import firefliesVertexShader from "./shaders/fireflies/vertex.glsl";
 import firefliesFragmentShader from "./shaders/fireflies/fragment.glsl";
 import portalVertexShader from "./shaders/portal/vertex.glsl";
 import portalFragmentShader from "./shaders/portal/fragment.glsl";
-
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 
 /**
@@ -18,6 +17,7 @@ const debugObject = {};
 const gui = new GUI({
 	width: 400,
 });
+const tickFunctions = [];
 
 // Canvas
 const canvas = document.querySelector("canvas.webgl");
@@ -56,7 +56,7 @@ rgbeLoader.load("skybox.hdr", (texture) => {
 /**
  * Textures
  */
-const bakedTexture = textureLoader.load("baked2.jpg");
+const bakedTexture = textureLoader.load("baked.jpg");
 bakedTexture.flipY = false;
 bakedTexture.encoding = THREE.sRGBEncoding;
 /**
@@ -89,14 +89,13 @@ const portalLightMaterial = new THREE.ShaderMaterial({
 	vertexShader: portalVertexShader,
 	fragmentShader: portalFragmentShader,
 });
-
 debugObject.showLightHelpers = true;
-
 let poleLightAHelper, poleLightBHelper;
+
 /*
  * Load model
  */
-gltfLoader.load("portal2.glb", (gltf) => {
+gltfLoader.load("portal.glb", (gltf) => {
 	scene.add(gltf.scene);
 
 	const bakedMesh = gltf.scene.children.find((child) => child.name === "baked");
@@ -118,20 +117,17 @@ gltfLoader.load("portal2.glb", (gltf) => {
 		);
 
 		scene.add(portalLabel);
-
 		// Ensure the label always faces the camera in the animation loop
 		tickFunctions.push(() => {
-			portalLabel.quaternion.copy(camera.quaternion);
+			portalLabel.quaternion.copy(activeCamera.quaternion);
 		});
 	}
 
 	bakedMesh.material = bakedMaterial;
 	portalLightMesh.material = portalLightMaterial;
-
 	const poleLightMaterial = new THREE.MeshBasicMaterial({ color: 0xffffe5 });
 	poleLightAMesh.material = poleLightMaterial;
 	poleLightBMesh.material = poleLightMaterial;
-
 	const poleLightA = new THREE.PointLight(0xffeeaa, 3, 5); // Warm, soft light
 	const poleLightB = new THREE.PointLight(0xffeeaa, 3, 5);
 
@@ -231,6 +227,7 @@ gui
 	.max(300)
 	.step(1)
 	.name("firefliesSize");
+
 //points
 const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial);
 scene.add(fireflies);
@@ -292,20 +289,6 @@ function createPortalLabel() {
 	return sprite;
 }
 
-// Misc.
-const instructions = gui.addFolder("📌 Notes");
-instructions
-	.add({ lights: "Use GUI to see lights location" }, "lights")
-	.disable();
-instructions.add({ feature1: "Portal shader" }, "feature1").disable();
-instructions.add({ feature2: "Fireflies shader" }, "feature2").disable();
-instructions
-	.add(
-		{ camera_control: "Click and drag to move the camera." },
-		"camera_control"
-	)
-	.disable();
-
 /**
  * Sizes
  */
@@ -314,14 +297,128 @@ const sizes = {
 	height: window.innerHeight,
 };
 
+/**
+ * Cameras
+ */
+// Perspective Camera (Default)
+const perspectiveCamera = new THREE.PerspectiveCamera(
+	45,
+	sizes.width / sizes.height,
+	0.1,
+	50
+);
+perspectiveCamera.position.set(4, 2, 4);
+
+// Orthographic Camera (Alternative)
+const aspect = sizes.width / sizes.height;
+const orthoSize = 4;
+const orthographicCamera = new THREE.OrthographicCamera(
+	-orthoSize * aspect,
+	orthoSize * aspect,
+	orthoSize,
+	-orthoSize,
+	0.1,
+	50
+);
+orthographicCamera.position.set(4, 2, 4);
+
+scene.add(perspectiveCamera);
+scene.add(orthographicCamera);
+
+// First-Person Camera
+const firstPersonCamera = new THREE.PerspectiveCamera(
+    75,
+    sizes.width / sizes.height,
+    0.1,
+    100
+);
+firstPersonCamera.position.set(0, 2, 5);
+
+const movementSpeed = 0.1;
+const keys = {};
+
+// Listen for keypress events
+window.addEventListener("keydown", (event) => (keys[event.code] = true));
+window.addEventListener("keyup", (event) => (keys[event.code] = false));
+
+const updateFirstPersonCamera = () => {
+    if (activeCamera === firstPersonCamera) {
+        if (keys["KeyW"]) firstPersonCamera.position.z -= movementSpeed;
+        if (keys["KeyS"]) firstPersonCamera.position.z += movementSpeed;
+        if (keys["KeyA"]) firstPersonCamera.position.x -= movementSpeed;
+        if (keys["KeyD"]) firstPersonCamera.position.x += movementSpeed;
+    }
+};
+
+// Add to animation loop
+tickFunctions.push(updateFirstPersonCamera);
+
+const cameras = {
+	"Perspective Camera": perspectiveCamera,
+	"Orthographic Camera": orthographicCamera,
+	"First-Person Camera": firstPersonCamera,
+};
+
+let activeCamera = perspectiveCamera; // Default camera
+
+const cameraOptions = Object.keys(cameras);
+debugObject.activeCamera = cameraOptions[0]; // Default to Perspective Camera
+
+const switchCamera = (cameraName) => {
+	activeCamera = cameras[cameraName];
+
+	// Recreate controls for the new camera
+	controls.dispose();
+	controls = new OrbitControls(activeCamera, canvas);
+	controls.enableDamping = true;
+};
+
+// GUI Dropdown for Camera Selection
+gui
+	.add(debugObject, "activeCamera", cameraOptions)
+	.name("Camera Type")
+	.onChange(switchCamera);
+
+
+// Misc.
+const instructions = gui.addFolder("📌 Notes");
+instructions
+	.add({ lights: "Use GUI to see lights location" }, "lights")
+	.disable();
+instructions
+	.add(
+		{ camera_control: "Click and drag to move the camera." },
+		"camera_control"
+	)
+	.disable();
+instructions
+	.add(
+		{
+			camera_type: "Switch between cameras.",
+		},
+		"camera_type"
+	)
+	.disable();
+instructions
+	.add(
+		{
+			first_person_cam: "move with WASD",
+		},
+		"first_person_cam"
+	)
+	.disable();
+
+
+
+
 window.addEventListener("resize", () => {
 	// Update sizes
 	sizes.width = window.innerWidth;
 	sizes.height = window.innerHeight;
 
 	// Update camera
-	camera.aspect = sizes.width / sizes.height;
-	camera.updateProjectionMatrix();
+	activeCamera.aspect = sizes.width / sizes.height;
+	activeCamera.updateProjectionMatrix();
 
 	// Update renderer
 	renderer.setSize(sizes.width, sizes.height);
@@ -334,25 +431,9 @@ window.addEventListener("resize", () => {
 	);
 });
 
-/**
- * Camera
- */
-// Base camera
-const camera = new THREE.PerspectiveCamera(
-	45,
-	sizes.width / sizes.height,
-	0.1,
-	50
-);
-camera.position.x = 4;
-camera.position.y = 2;
-camera.position.z = 4;
-scene.add(camera);
-
 // Controls
-const controls = new OrbitControls(camera, canvas);
+const controls = new OrbitControls(activeCamera, canvas);
 controls.enableDamping = true;
-
 /**
  * Renderer
  */
@@ -367,7 +448,6 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
  * Animate
  */
 const clock = new THREE.Clock();
-const tickFunctions = [];
 
 const tick = () => {
 	const elapsedTime = clock.getElapsedTime();
@@ -383,7 +463,7 @@ const tick = () => {
 	controls.update();
 
 	// Render
-	renderer.render(scene, camera);
+	renderer.render(scene, activeCamera);
 
 	// Call tick again on the next frame
 	window.requestAnimationFrame(tick);
