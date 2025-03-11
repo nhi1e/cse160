@@ -1,6 +1,7 @@
 /**
- * I followed blender tutorial by Bruno Simon to create the portal scene
- * Perlin noise algorithm taken from Stefan Gustavson https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
+ * Portal scene created using Blender tutorial by Bruno Simon
+ * Perlin noise algorithm in portal shader taken from Stefan Gustavson https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
+ * Skybox HDR image taken from https://polyhaven.com/a/satara_night_no_lamps
 */
 
 import GUI from "lil-gui";
