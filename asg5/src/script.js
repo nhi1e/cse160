@@ -1,3 +1,8 @@
+/**
+ * I followed blender tutorial by Bruno Simon to create the portal scene
+ * Perlin noise algorithm taken from Stefan Gustavson https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83
+*/
+
 import GUI from "lil-gui";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
@@ -327,10 +332,10 @@ scene.add(orthographicCamera);
 
 // First-Person Camera
 const firstPersonCamera = new THREE.PerspectiveCamera(
-    75,
-    sizes.width / sizes.height,
-    0.1,
-    100
+	75,
+	sizes.width / sizes.height,
+	0.1,
+	100
 );
 firstPersonCamera.position.set(0, 2, 5);
 
@@ -342,12 +347,12 @@ window.addEventListener("keydown", (event) => (keys[event.code] = true));
 window.addEventListener("keyup", (event) => (keys[event.code] = false));
 
 const updateFirstPersonCamera = () => {
-    if (activeCamera === firstPersonCamera) {
-        if (keys["KeyW"]) firstPersonCamera.position.z -= movementSpeed;
-        if (keys["KeyS"]) firstPersonCamera.position.z += movementSpeed;
-        if (keys["KeyA"]) firstPersonCamera.position.x -= movementSpeed;
-        if (keys["KeyD"]) firstPersonCamera.position.x += movementSpeed;
-    }
+	if (activeCamera === firstPersonCamera) {
+		if (keys["KeyW"]) firstPersonCamera.position.z -= movementSpeed;
+		if (keys["KeyS"]) firstPersonCamera.position.z += movementSpeed;
+		if (keys["KeyA"]) firstPersonCamera.position.x -= movementSpeed;
+		if (keys["KeyD"]) firstPersonCamera.position.x += movementSpeed;
+	}
 };
 
 // Add to animation loop
@@ -378,7 +383,6 @@ gui
 	.add(debugObject, "activeCamera", cameraOptions)
 	.name("Camera Type")
 	.onChange(switchCamera);
-
 
 // Misc.
 const instructions = gui.addFolder("📌 Notes");
@@ -415,9 +419,6 @@ instructions
 		"portal_shader"
 	)
 	.disable();
-
-
-
 
 window.addEventListener("resize", () => {
 	// Update sizes
