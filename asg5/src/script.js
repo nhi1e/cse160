@@ -65,8 +65,9 @@ bakedTexture.encoding = THREE.sRGBEncoding;
 // const bakedMaterial = new THREE.MeshBasicMaterial({ map: bakedTexture });
 const bakedMaterial = new THREE.MeshStandardMaterial({
 	map: bakedTexture, // Keeps your baked texture
-	roughness: 0.8, // Controls surface roughness
-	metalness: 0.2, // Adds slight reflectivity
+	roughness: 1.0, // Controls surface roughness
+	metalness: 0.0, // Adds slight reflectivity
+	fog: true,
 });
 
 debugObject.portalColorStart = "#000000";
@@ -89,10 +90,8 @@ const portalLightMaterial = new THREE.ShaderMaterial({
 	fragmentShader: portalFragmentShader,
 });
 
-// ✅ Debug object
 debugObject.showLightHelpers = true;
 
-// ✅ Declare variables for pole light helpers globally
 let poleLightAHelper, poleLightBHelper;
 /*
  * Load model
@@ -110,6 +109,21 @@ gltfLoader.load("portal2.glb", (gltf) => {
 	const portalLightMesh = gltf.scene.children.find(
 		(child) => child.name === "portalLight"
 	);
+	if (portalLightMesh) {
+		const portalLabel = createPortalLabel();
+		portalLabel.position.set(
+			portalLightMesh.position.x,
+			portalLightMesh.position.y + 1.2, // Position slightly above the portal
+			portalLightMesh.position.z
+		);
+
+		scene.add(portalLabel);
+
+		// Ensure the label always faces the camera in the animation loop
+		tickFunctions.push(() => {
+			portalLabel.quaternion.copy(camera.quaternion);
+		});
+	}
 
 	bakedMesh.material = bakedMaterial;
 	portalLightMesh.material = portalLightMaterial;
@@ -222,6 +236,77 @@ const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial);
 scene.add(fireflies);
 
 /**
+ * Fog
+ */
+// scene.fog = new THREE.FogExp2("#ff0000", 0.1); // Adjust density as needed
+// console.log(scene.fog);
+function createPortalLabel() {
+	const text = "Where does this take me?";
+
+	// Create a temporary canvas context to measure text width
+	const tempCanvas = document.createElement("canvas");
+	const tempCtx = tempCanvas.getContext("2d");
+	tempCtx.font = "28px Times"; // Set font size before measuring
+	const textWidth = tempCtx.measureText(text).width;
+
+	// Set canvas width dynamically based on text length (fixed height)
+	const padding = 40; // Extra padding for margins
+	const canvasWidth = Math.ceil(textWidth) + padding;
+	const canvasHeight = 128; // Keep height fixed
+
+	// Create actual canvas with calculated width
+	const textCanvas = document.createElement("canvas");
+	textCanvas.width = canvasWidth;
+	textCanvas.height = canvasHeight;
+	const ctx = textCanvas.getContext("2d");
+
+	// Clear the canvas
+	ctx.clearRect(0, 0, textCanvas.width, textCanvas.height);
+
+	// Optional background for readability
+	ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+	ctx.fillRect(0, 0, textCanvas.width, textCanvas.height);
+
+	// Set font and style
+	ctx.fillStyle = "black"; // Text color
+	ctx.font = "28px Times"; // Maintain readable size
+	ctx.textAlign = "center";
+	ctx.textBaseline = "middle";
+	ctx.fillText(text, textCanvas.width / 2, textCanvas.height / 2);
+
+	// Create texture
+	const texture = new THREE.CanvasTexture(textCanvas);
+	texture.needsUpdate = true;
+
+	// Create sprite material
+	const material = new THREE.SpriteMaterial({
+		map: texture,
+		transparent: true,
+	});
+
+	// Adjust sprite scale based on new width while keeping height constant
+	const scaleX = (canvasWidth / 512) * 0.75; // Adjust scale proportionally
+	const sprite = new THREE.Sprite(material);
+	sprite.scale.set(scaleX, 0.35, 1);
+
+	return sprite;
+}
+
+// Misc.
+const instructions = gui.addFolder("📌 Notes");
+instructions
+	.add({ lights: "Use GUI to see lights location" }, "lights")
+	.disable();
+instructions.add({ feature1: "Portal shader" }, "feature1").disable();
+instructions.add({ feature2: "Fireflies shader" }, "feature2").disable();
+instructions
+	.add(
+		{ camera_control: "Click and drag to move the camera." },
+		"camera_control"
+	)
+	.disable();
+
+/**
  * Sizes
  */
 const sizes = {
@@ -257,7 +342,7 @@ const camera = new THREE.PerspectiveCamera(
 	45,
 	sizes.width / sizes.height,
 	0.1,
-	100
+	50
 );
 camera.position.x = 4;
 camera.position.y = 2;
@@ -282,14 +367,17 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
  * Animate
  */
 const clock = new THREE.Clock();
+const tickFunctions = [];
 
 const tick = () => {
 	const elapsedTime = clock.getElapsedTime();
 
 	// Update fireflies
 	firefliesMaterial.uniforms.uTime.value = elapsedTime;
-
 	portalLightMaterial.uniforms.uTime.value = elapsedTime;
+
+	// Make sure the label always faces the camera
+	tickFunctions.forEach((fn) => fn());
 
 	// Update controls
 	controls.update();
