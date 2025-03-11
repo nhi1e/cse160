@@ -4,7 +4,7 @@
  * Skybox HDR image taken from https://polyhaven.com/a/satara_night_no_lamps
 */
 
-import GUI from "lil-gui";
+import GUI from "./node_modules/lil-gui/dist/lil-gui.esm.js";
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
